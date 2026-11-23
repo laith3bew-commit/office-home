@@ -21,5 +21,13 @@ contextBridge.exposeInMainWorld('officeHome', {
   memStatus: (root) => ipcRenderer.invoke('oh:memStatus', root),
   memSearch: (root, ws, query) => ipcRenderer.invoke('oh:memSearch', root, ws, query),
   memNote: (root, ws, note) => ipcRenderer.invoke('oh:memNote', root, ws, note),
-  memTask: (root, task) => ipcRenderer.invoke('oh:memTask', root, task)
+  memTask: (root, task) => ipcRenderer.invoke('oh:memTask', root, task),
+  // Claude-Anbindung (MCP): Server an/aus, Einrichtung, Werkzeugaufrufe aus Claude beantworten
+  mcpEnable: (on) => ipcRenderer.invoke('oh:mcpEnable', !!on),
+  mcpInfo: () => ipcRenderer.invoke('oh:mcpInfo'),
+  mcpInstallDesktop: () => ipcRenderer.invoke('oh:mcpInstallDesktop'),
+  onMcpCall: (cb) => ipcRenderer.on('oh:mcpCall', async (e, m) => {
+    let r; try { r = await cb(m.tool, m.args); } catch (err) { r = { ok: false, error: String(err && err.message || err) }; }
+    ipcRenderer.send('oh:mcpReply', m.id, r);
+  })
 });

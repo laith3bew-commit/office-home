@@ -225,6 +225,90 @@ ipcMain.handle('oh:memTask', async (e, root, t) => {
   } catch (err) { return { ok: false, message: err.message }; }
 });
 
+// ---------- Claude-Anbindung (MCP) ----------
+// Lokaler HTTP-Kanal nur auf 127.0.0.1 mit Zufalls-Schlüssel. Die Brücke mcp-bridge.js (von Claude gestartet)
+// liest Port und Schlüssel aus userData/mcp.json und schickt Werkzeugaufrufe hierher; ausgeführt werden sie
+// in der Oberfläche (dort liegen die Daten). Ist die Verbindung aus, gibt es weder Server noch mcp.json.
+const http = require('http');
+const crypto = require('crypto');
+const MCP_FILE = () => path.join(app.getPath('userData'), 'mcp.json');
+let mcpServer = null, mcpToken = '', mcpSeq = 0;
+const mcpPending = new Map();
+
+function mcpForward(tool, args) {
+  return new Promise(resolve => {
+    if (!win || win.isDestroyed()) return resolve({ ok: false, error: 'Office Home-Fenster ist nicht geöffnet.' });
+    const id = ++mcpSeq;
+    const timer = setTimeout(() => { mcpPending.delete(id); resolve({ ok: false, error: 'Office Home hat nicht rechtzeitig geantwortet.' }); }, 15000);
+    mcpPending.set(id, r => { clearTimeout(timer); resolve(r); });
+    win.webContents.send('oh:mcpCall', { id, tool, args });
+  });
+}
+ipcMain.on('oh:mcpReply', (e, id, result) => { const f = mcpPending.get(id); if (f) { mcpPending.delete(id); f(result || { ok: false, error: 'Keine Antwort' }); } });
+
+function mcpStop() {
+  if (mcpServer) { mcpServer.close(); mcpServer = null; }
+  try { fs.unlinkSync(MCP_FILE()); } catch (e) {}
+}
+function mcpStart() {
+  if (mcpServer) return Promise.resolve(true);
+  mcpToken = crypto.randomBytes(24).toString('hex');
+  const srv = http.createServer((req, res) => {
+    const end = (code, obj) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); };
+    if (req.method !== 'POST' || req.url !== '/call') return end(404, { ok: false, error: 'not found' });
+    const tok = String(req.headers['x-oh-token'] || '');
+    if (tok.length !== mcpToken.length || !crypto.timingSafeEqual(Buffer.from(tok), Buffer.from(mcpToken))) return end(403, { ok: false, error: 'Zugang verweigert' });
+    let body = '';
+    req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+    req.on('end', async () => {
+      let m; try { m = JSON.parse(body); } catch (e) { return end(400, { ok: false, error: 'Ungültige Anfrage' }); }
+      end(200, await mcpForward(String(m.tool || ''), m.args && typeof m.args === 'object' ? m.args : {}));
+    });
+  });
+  return new Promise(resolve => {
+    const listen = port => {
+      srv.once('error', err => { if (port) listen(0); else resolve(false); });
+      srv.listen(port, '127.0.0.1', () => {
+        mcpServer = srv;
+        fs.writeFileSync(MCP_FILE(), JSON.stringify({ port: srv.address().port, token: mcpToken, pid: process.pid }), { encoding: 'utf8', mode: 0o600 });
+        resolve(true);
+      });
+    };
+    listen(47821);
+  });
+}
+// Eintrag, mit dem Claude die Brücke startet (Office Home.exe als Node-Laufzeit).
+function mcpEntry() {
+  const bridge = app.isPackaged ? path.join(process.resourcesPath, 'mcp-bridge.js') : path.join(__dirname, 'mcp-bridge.js');
+  return { command: process.execPath, args: [bridge], env: { ELECTRON_RUN_AS_NODE: '1', OH_MCP_FILE: MCP_FILE() } };
+}
+const claudeDesktopConfig = () => path.join(process.env.APPDATA || app.getPath('appData'), 'Claude', 'claude_desktop_config.json');
+ipcMain.handle('oh:mcpEnable', async (e, on) => { if (on) return { ok: await mcpStart() }; mcpStop(); return { ok: true }; });
+ipcMain.handle('oh:mcpInfo', () => {
+  const en = mcpEntry(), file = claudeDesktopConfig();
+  let installed = false;
+  try { const c = JSON.parse(fs.readFileSync(file, 'utf8')); const x = c.mcpServers && c.mcpServers['office-home']; installed = !!x && x.command === en.command && JSON.stringify(x.args) === JSON.stringify(en.args); } catch (err) {}
+  const q = v => '"' + String(v).replace(/"/g, '\\"') + '"';
+  return { running: !!mcpServer, desktopConfig: file, desktopFound: fs.existsSync(path.dirname(file)), installed, entry: en,
+    claudeCode: `claude mcp add office-home --scope user -e ELECTRON_RUN_AS_NODE=1 -e OH_MCP_FILE=${q(en.env.OH_MCP_FILE)} -- ${q(en.command)} ${en.args.map(q).join(' ')}` };
+});
+// Trägt Office Home in die Konfiguration von Claude Desktop ein (vorher Sicherungskopie, andere Einträge bleiben erhalten).
+ipcMain.handle('oh:mcpInstallDesktop', async () => {
+  try {
+    const file = claudeDesktopConfig(); fs.mkdirSync(path.dirname(file), { recursive: true });
+    let cfg = {};
+    if (fs.existsSync(file)) {
+      const raw = fs.readFileSync(file, 'utf8');
+      try { cfg = raw.trim() ? JSON.parse(raw) : {}; } catch (err) { return { ok: false, message: 'Die Datei claude_desktop_config.json ist kein gültiges JSON – bitte von Hand prüfen.' }; }
+      fs.copyFileSync(file, file + '.office-home-backup');
+    }
+    cfg.mcpServers = Object.assign({}, cfg.mcpServers, { 'office-home': mcpEntry() });
+    writeAtomic(file, JSON.stringify(cfg, null, 2));
+    return { ok: true, file };
+  } catch (err) { return { ok: false, message: err.message }; }
+});
+app.on('will-quit', mcpStop);
+
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);

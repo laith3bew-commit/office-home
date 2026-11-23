@@ -1740,6 +1740,7 @@ VIEWS.settings = () => {
     <div class="card"><h3>Erinnerungen</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       <div class="fld"><label>Vertragskündigungen anzeigen (Tage vorher)</label><input type="number" data-set="contractDays" value="${s.contractDays}"></div><div></div>
     </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.</p></div>
+    ${DESKTOP ? `<div class="card" id="mcpCard" style="grid-column:1/-1">${mcpCardHTML()}</div>` : ''}
     ${DESKTOP ? `<div class="card" id="updCard" style="grid-column:1/-1">${updCardHTML()}</div>` : ''}
     ${DESKTOP && window.officeHome.memStatus ? `<div class="card" id="memCard" style="grid-column:1/-1">${memCardHTML()}</div>` : ''}
     <div class="card" style="grid-column:1/-1"><h3>${icon('save')}Datensicherung</h3>
@@ -1749,6 +1750,7 @@ VIEWS.settings = () => {
   </div>`;
 };
 AFTER.settings = async () => {
+  mcpRefresh();
   $$('[data-set]').forEach(el => el.addEventListener('change', () => {
     const path = el.dataset.set.split('.'); let o = S.settings; for (let i = 0; i < path.length - 1; i++) o = o[path[i]];
     let v = el.value; if (v === 'true') v = true; else if (v === 'false') v = false; else if (el.type === 'number' || path[1] === 'size') v = Number(v);
@@ -2191,13 +2193,151 @@ function buildDemoState(){
   return st;
 }
 
+// ---------- Claude-Anbindung (MCP): Werkzeuge ----------
+// Die Brücke mcp-bridge.js ruft über den Hauptprozess MCP_TOOLS[name](args) auf. Alles liest/schreibt S
+// (je nach Modus Live- oder Demo-Daten). Schreiben nur, wenn in den Einstellungen erlaubt.
+const mcpCfg = () => Object.assign({enabled:false, write:false}, S.settings.mcp || {});
+function mcpPerson(q){
+  if (!q) return null; const x = String(q).trim().toLowerCase();
+  return S.persons.find(p => p.id.toLowerCase() === x || (p.role || '').toLowerCase() === x || personName(p).toLowerCase() === x)
+    || S.persons.find(p => personName(p).toLowerCase().includes(x) || (p.role || '').toLowerCase().includes(x)) || null;
+}
+function mcpFilter(list, q){ if (!q) return list; const p = mcpPerson(q); if (!p) throw new Error('Person „' + q + '“ nicht gefunden. Bekannt: ' + S.persons.map(x => x.role).join(', ')); return list.filter(x => !x.personId || x.personId === p.id); }
+const mcpPN = id => { const p = getPerson(id); return p ? p.role : 'Allgemein'; };
+const mcpHead = () => MODE === 'demo' ? '(Hinweis: Office Home ist im DEMO-MODUS – das sind Beispieldaten, nicht die echten Daten.)\n\n' : '';
+const mcpDate = d => d ? fmtDate(d) : '—';
+function mcpNeedWrite(){ if (!mcpCfg().write) throw new Error('Schreiben ist in Office Home nicht erlaubt (Einstellungen → Claude-Anbindung → „Claude darf eintragen“).'); }
+function mcpDeadlines(days, who){
+  const items = deadlineItems().filter(i => daysUntil(i.date) <= days);
+  return (who ? mcpFilter(items, who) : items).sort((a, b) => a.date.localeCompare(b.date));
+}
+const MCP_TOOLS = {
+  uebersicht: a => {
+    const t = today(), ym = t.slice(0, 7), dl = mcpDeadlines(30, a.person), over = dl.filter(i => daysUntil(i.date) < 0);
+    const cases = mcpFilter(S.cases, a.person).filter(c => c.status !== 'erledigt');
+    const bk = mcpFilter(bookingsIn(monFirst(ym), monLast(ym), true), a.person);
+    const acc = (a.person ? mcpFilter(S.assets, a.person) : S.assets).filter(x => x.type === 'Bankkonto');
+    return `Stand ${fmtDate(t)}${a.person ? ' · Person: ' + a.person : ''}\n` +
+      `Überfällig: ${over.length} · Fristen in 30 Tagen: ${dl.length - over.length} · offene Vorgänge: ${cases.length} (${cases.filter(c => c.status === 'wartet auf Antwort').length} warten auf Antwort)\n` +
+      `Geldfluss ${monthLabel(ym)}: Einnahmen ${eur(sumBk(bk, 'ein'))}, Ausgaben ${eur(sumBk(bk, 'aus'))}` + (acc.length ? `\nKontostand: ${eur(acc.reduce((s, x) => s + accountBalance(x, t), 0))}` : '') +
+      (over.length ? '\n\nÜberfällig:\n' + over.map(i => `- ${mcpDate(i.date)} ${i.title} (${mcpPN(i.personId)})${i.taskId ? ' [Aufgabe ' + i.taskId + ']' : ''}`).join('\n') : '') +
+      '\n\nNächste Fristen:\n' + (dl.filter(i => daysUntil(i.date) >= 0).slice(0, 10).map(i => `- ${mcpDate(i.date)} ${i.title} (${mcpPN(i.personId)})`).join('\n') || '- keine');
+  },
+  fristen: a => { const L = mcpDeadlines(Number(a.tage) || 30, a.person);
+    return L.length ? L.map(i => `- ${mcpDate(i.date)}${daysUntil(i.date) < 0 ? ' ÜBERFÄLLIG' : ''} · ${i.title} · ${mcpPN(i.personId)}${i.taskId ? ' · Aufgabe-ID ' + i.taskId : ' · Vertrag'}`).join('\n') : 'Keine offenen Fristen im Zeitraum.'; },
+  vorgaenge: a => { let L = mcpFilter(S.cases, a.person); const st = (a.status || '').toLowerCase();
+    L = st === 'alle' ? L : st ? L.filter(c => (c.status || 'offen').toLowerCase() === st) : L.filter(c => c.status !== 'erledigt');
+    return L.length ? L.map(c => `- [${c.id}] ${c.title} · ${mcpPN(c.personId)} · ${c.status || 'offen'}${c.contactId ? ' · ' + (getContact(c.contactId)?.name || '') : ''}${c.ref ? ' · Az. ' + c.ref : ''}${c.start ? ' · seit ' + fmtDate(c.start) : ''}`).join('\n') : 'Keine Vorgänge gefunden.'; },
+  vorgang: a => {
+    const c = a.id ? getCase(a.id) : S.cases.find(x => x.title.toLowerCase().includes(String(a.suche || '').toLowerCase()) && a.suche);
+    if (!c) throw new Error('Vorgang nicht gefunden.');
+    const tasks = S.tasks.filter(t => t.caseId === c.id), docs = S.documents.filter(d => d.caseId === c.id), lets = S.letters.filter(l => l.caseId === c.id);
+    const k = getContact(c.contactId);
+    return `Vorgang [${c.id}]: ${c.title}\nPerson: ${mcpPN(c.personId)} · Status: ${c.status || 'offen'} · Priorität: ${c.priority || 'normal'} · begonnen ${mcpDate(c.start)}\n` +
+      (k ? `Stelle: ${k.name}${k.department ? ', ' + k.department : ''} · ${addrOneLine(k)}${k.phone ? ' · Tel. ' + k.phone : ''} [Kontakt-ID ${k.id}]\n` : '') + (c.ref ? `Aktenzeichen: ${c.ref}\n` : '') + (c.description ? `Beschreibung: ${c.description}\n` : '') +
+      `\nSchritte:\n${(c.steps || []).map(s => `- [${s.done ? 'x' : ' '}] ${s.text}`).join('\n') || '- keine'}` +
+      `\n\nVerlauf:\n${(c.log || []).map(l => `- ${mcpDate(l.date)}: ${l.text}`).join('\n') || '- leer'}` +
+      `\n\nAufgaben:\n${tasks.map(t => `- [${t.done ? 'x' : ' '}] ${t.title}${t.due ? ' · fällig ' + fmtDate(t.due) : ''} [${t.id}]`).join('\n') || '- keine'}` +
+      `\n\nDokumente:\n${docs.map(d => `- ${mcpDate(d.date)} ${d.title}${d.sender ? ' (von ' + d.sender + ')' : ''}${d.deadline ? ' · Frist ' + fmtDate(d.deadline) : ''}`).join('\n') || '- keine'}` +
+      `\n\nBriefe:\n${lets.map(l => `- ${mcpDate(l.date)} ${letterSubject(l)}`).join('\n') || '- keine'}`;
+  },
+  suchen: a => {
+    const q = String(a.text || '').toLowerCase().trim(); if (!q) throw new Error('Suchbegriff fehlt.');
+    const hit = (...v) => v.join(' ').toLowerCase().includes(q), out = [];
+    S.cases.filter(c => hit(c.title, c.ref, c.description, (c.log || []).map(l => l.text).join(' '))).forEach(c => out.push(`Vorgang [${c.id}] ${c.title} (${c.status || 'offen'}, ${mcpPN(c.personId)})`));
+    S.tasks.filter(t => hit(t.title, t.notes)).slice(0, 15).forEach(t => out.push(`Aufgabe [${t.id}] ${t.title}${t.done ? ' (erledigt)' : t.due ? ' · fällig ' + fmtDate(t.due) : ''}`));
+    S.documents.filter(d => hit(d.title, d.sender, d.tags, d.notes)).slice(0, 15).forEach(d => out.push(`Dokument ${mcpDate(d.date)} ${d.title}${d.sender ? ' von ' + d.sender : ''}`));
+    S.letters.filter(l => hit(letterSubject(l), l.recipient, l.body)).slice(0, 15).forEach(l => out.push(`Brief ${mcpDate(l.date)} ${letterSubject(l)}`));
+    S.contacts.filter(c => hit(c.name, c.department, c.contactPerson, c.city, c.notes)).forEach(c => out.push(`Kontakt [${c.id}] ${c.name}${c.phone ? ' · ' + c.phone : ''}`));
+    S.notes.filter(n => hit(n.title, n.content)).forEach(n => out.push(`Notiz „${n.title}“: ${String(n.content || '').slice(0, 300)}`));
+    S.contracts.filter(c => hit(c.provider, c.category, c.customerNo)).forEach(c => out.push(`Vertrag ${c.provider} · ${eur(c.amount)} ${c.interval || ''}${c.ended ? ' (beendet)' : ''}`));
+    return out.length ? out.join('\n') : 'Nichts gefunden.';
+  },
+  finanzen: a => {
+    const ym = /^\d{4}-\d{2}$/.test(a.monat || '') ? a.monat : today().slice(0, 7);
+    const bk = mcpFilter(bookingsIn(monFirst(ym), monLast(ym), true), a.person);
+    const cat = type => { const o = {}; bk.filter(b => b.type === type).forEach(b => o[b.category || 'Sonstiges'] = (o[b.category || 'Sonstiges'] || 0) + Number(b.amount || 0)); return Object.entries(o).sort((x, y) => y[1] - x[1]).map(([k, v]) => `- ${k}: ${eur(v)}`).join('\n') || '- keine'; };
+    const per = S.persons.map(p => { const X = bk.filter(b => b.personId === p.id); return `- ${p.role}: +${eur(sumBk(X, 'ein'))} / −${eur(sumBk(X, 'aus'))}`; }).join('\n');
+    let fc = ''; if (ym === today().slice(0, 7) && !a.person && S.assets.some(x => x.type === 'Bankkonto')) { const f = forecastMonthEnd(); fc = `\nKontostand heute ${eur(f.now)} · Prognose Monatsende ${eur(f.end)} (noch ${eur(f.restSum)} Fixkosten, Ø ${eur(f.perDay)} Alltag/Tag)`; }
+    return `${monthLabel(ym)}: Einnahmen ${eur(sumBk(bk, 'ein'))}, Ausgaben ${eur(sumBk(bk, 'aus'))}, Saldo ${eur(sumBk(bk, 'ein') - sumBk(bk, 'aus'))}${fc}\n\nEinnahmen nach Kategorie:\n${cat('ein')}\n\nAusgaben nach Kategorie:\n${cat('aus')}\n\nNach Person:\n${per}\n\n(Verträge zählen automatisch als Ausgabe, wenn keine Bankbuchung dazu vorliegt.)`;
+  },
+  buchungen: a => {
+    const von = a.von || monFirst(today().slice(0, 7)), bis = a.bis || today();
+    let L = mcpFilter(bookingsIn(von, bis, true), a.person);
+    if (a.art) L = L.filter(b => b.type === a.art); if (a.kategorie) L = L.filter(b => (b.category || '').toLowerCase() === String(a.kategorie).toLowerCase());
+    L.sort((x, y) => x.date.localeCompare(y.date));
+    return L.length ? L.slice(0, 300).map(b => `- ${fmtDate(b.date)} ${b.type === 'ein' ? '+' : '−'}${eur(b.amount)} · ${b.category} · ${b.counterparty || b.text || ''} · ${mcpPN(b.personId)}${b.virtual ? ' (Vertrag, automatisch)' : ''}`).join('\n') + (L.length > 300 ? `\n… und ${L.length - 300} weitere` : '') : 'Keine Buchungen im Zeitraum.';
+  },
+  vertraege: a => { const L = mcpFilter(S.contracts, a.person).filter(c => !c.ended);
+    return L.length ? L.map(c => { const i = contractInfo(c); return `- ${c.provider} · ${c.category || ''} · ${eur(c.amount)} ${c.interval || ''} (= ${eur(monthly(c))}/Monat) · ${mcpPN(c.personId)}${i.cancelBy ? ' · kündigen bis ' + fmtDate(i.cancelBy) : ''}${c.customerNo ? ' · Nr. ' + c.customerNo : ''}`; }).join('\n') + `\n\nSumme: ${eur(L.reduce((s, c) => s + monthly(c), 0))} pro Monat` : 'Keine laufenden Verträge.'; },
+  kontakte: a => { const q = String(a.suche || '').toLowerCase();
+    const L = S.contacts.filter(c => !q || [c.name, c.department, c.contactPerson, c.city, c.notes].join(' ').toLowerCase().includes(q));
+    return L.length ? L.slice(0, 50).map(c => `- [${c.id}] ${c.name}${c.department ? ', ' + c.department : ''} (${c.kind || 'Behörde / Firma'}) · ${addrOneLine(c)}${c.phone ? ' · Tel. ' + c.phone : ''}${c.email ? ' · ' + c.email : ''}`).join('\n') : 'Keine Kontakte gefunden.'; },
+  personen: () => S.persons.map(p => `- [${p.id}] ${p.role}: ${anredeName(p)}${p.birth ? ', geb. ' + fmtDate(p.birth) : ''} · ${addrOneLine(p)}${p.healthInsurance ? ' · KK: ' + p.healthInsurance : ''}${p.poaDate ? ' · Vollmacht seit ' + fmtDate(p.poaDate) + (p.poaScope ? ' (' + p.poaScope + ')' : '') : ''}`).join('\n') + `\n\nBevollmächtigter: ${S.settings.me.name || '(nicht eingetragen)'}`,
+  aufgabe_anlegen: a => { mcpNeedWrite(); const p = mcpPerson(a.person);
+    const t = {id:uid(), title:String(a.titel).trim(), due:/^\d{4}-\d{2}-\d{2}$/.test(a.faellig || '') ? a.faellig : '', personId:p ? p.id : '', caseId:a.vorgang_id && getCase(a.vorgang_id) ? a.vorgang_id : '', priority:['hoch', 'niedrig'].includes(a.prioritaet) ? a.prioritaet : 'normal', notes:(a.notiz || '') + '\n(angelegt von Claude)', done:false, created:today(), repeat:''};
+    S.tasks.push(t); return `Aufgabe angelegt [${t.id}]: ${t.title}${t.due ? ', fällig ' + fmtDate(t.due) : ''}`; },
+  aufgabe_erledigen: a => { mcpNeedWrite(); const t = S.tasks.find(x => x.id === a.id); if (!t) throw new Error('Aufgabe nicht gefunden.');
+    if (t.done) return `Schon erledigt: ${t.title}`; toggleTask(t); return `Erledigt: ${t.title}`; },
+  notiz_anlegen: a => { mcpNeedWrite(); const p = mcpPerson(a.person);
+    const n = {id:uid(), title:String(a.titel).trim(), content:String(a.inhalt || ''), personId:p ? p.id : '', pinned:false, updated:today()}; S.notes.push(n); return `Notiz gespeichert: ${n.title}`; },
+  verlauf_eintragen: a => { mcpNeedWrite(); const c = getCase(a.vorgang_id); if (!c) throw new Error('Vorgang nicht gefunden.');
+    (c.log = c.log || []).push({id:uid(), date:/^\d{4}-\d{2}-\d{2}$/.test(a.datum || '') ? a.datum : today(), text:String(a.text).trim() + ' (Claude)'}); return `Verlauf ergänzt: ${c.title}`; },
+  brief_entwurf: a => { mcpNeedWrite(); const p = mcpPerson(a.person), k = a.kontakt_id ? getContact(a.kontakt_id) : null, c = a.vorgang_id ? getCase(a.vorgang_id) : null;
+    const L = newLetter(new URLSearchParams()); Object.assign(L, {personId:p ? p.id : (c ? c.personId : L.personId), contactId:k ? k.id : '', recipient:k ? contactAddress(k) : String(a.empfaenger || '').replace(/\\n/g, '\n'),
+      subject:String(a.betreff).trim(), body:String(a.text).trim(), salutation:a.anrede || L.salutation, caseId:c ? c.id : '', ref:c && c.ref ? c.ref : '', updated:new Date().toISOString()});
+    delete L.isNew; S.letters.push(L); return `Briefentwurf gespeichert: „${L.subject}“. Er steht in Office Home unter „Brief schreiben → Gespeicherte Briefe“ zum Prüfen, Unterschreiben und Drucken.`; },
+  buchung_anlegen: a => { mcpNeedWrite(); const p = mcpPerson(a.person), amt = Math.abs(Number(a.betrag) || 0); if (!amt) throw new Error('Betrag fehlt.');
+    const type = a.art === 'ein' ? 'ein' : 'aus';
+    const b = {id:uid(), date:/^\d{4}-\d{2}-\d{2}$/.test(a.datum || '') ? a.datum : today(), type, amount:amt, category:BK_ALL.includes(a.kategorie) ? a.kategorie : autoCategory(a.empfaenger || '', a.beschreibung || '', type),
+      personId:p ? p.id : '', accountId:'', counterparty:a.empfaenger || '', text:(a.beschreibung || '') + ' (Claude)', source:'manuell', contractId:'', catManual:BK_ALL.includes(a.kategorie)};
+    S.bookings.push(b); return `Buchung erfasst: ${fmtDate(b.date)} ${type === 'ein' ? '+' : '−'}${eur(amt)} · ${b.category}`; }
+};
+const MCP_WRITE = ['aufgabe_anlegen', 'aufgabe_erledigen', 'notiz_anlegen', 'verlauf_eintragen', 'brief_entwurf', 'buchung_anlegen'];
+async function mcpHandle(tool, args){
+  if (!mcpCfg().enabled) return {ok:false, error:'Die Claude-Anbindung ist in Office Home ausgeschaltet.'};
+  const f = MCP_TOOLS[tool]; if (!f) return {ok:false, error:'Unbekanntes Werkzeug: ' + tool};
+  try {
+    const text = f(args || {});
+    if (MCP_WRITE.includes(tool)) { save(); render(); toast('Claude: ' + String(text).split('\n')[0].slice(0, 80)); }
+    return {ok:true, text: mcpHead() + text};
+  } catch (e) { return {ok:false, error:e.message}; }
+}
+// Einstellungen-Karte
+let MCPI = null;
+function mcpCardHTML(){
+  const c = mcpCfg(), i = MCPI;
+  return `<h3>${icon('users')}Claude-Anbindung (MCP)</h3>
+    <p style="margin-top:0">Claude Desktop oder Claude Code können Office Home lesen – mit deinem normalen Claude-Abo, ohne API-Schlüssel. Die Daten bleiben hier; Claude bekommt nur, was du in einer Unterhaltung abfragst.</p>
+    <div class="fld cb"><input type="checkbox" id="mcpOn" data-act="mcpToggle" ${c.enabled ? 'checked' : ''}><label for="mcpOn"><b>Verbindung einschalten</b> ${i ? (i.running ? '<span class="badge green">läuft</span>' : '<span class="badge">aus</span>') : ''}</label></div>
+    <div class="fld cb"><input type="checkbox" id="mcpWr" data-act="mcpWrite" ${c.write ? 'checked' : ''} ${c.enabled ? '' : 'disabled'}><label for="mcpWr">Claude darf eintragen (Aufgaben, Notizen, Verlauf, Briefentwürfe, Buchungen)</label></div>
+    ${c.enabled && i ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+        <button class="btn pri" data-act="mcpInstall">${i.installed ? 'In Claude Desktop erneut eintragen' : 'In Claude Desktop eintragen'}</button>
+        <button class="btn" data-act="mcpCopyCode">Befehl für Claude Code kopieren</button></div>
+      <p class="small muted" style="margin:0">${i.installed ? '✓ In Claude Desktop eingetragen. ' : ''}Danach Claude Desktop einmal ganz beenden (auch im Infobereich) und neu starten. Office Home muss geöffnet sein, wenn Claude zugreift.<br>Beispielfragen: „Welche Fristen sind bei Mutter überfällig?“ · „Was habe ich im Oktober für Lebensmittel ausgegeben?“ · „Schreib einen Widerspruch für den Vorgang Rollator als Entwurf.“</p>` : ''}`;
+}
+async function mcpRefresh(){ if (!DESKTOP || !window.officeHome.mcpInfo) return; MCPI = await window.officeHome.mcpInfo(); const el = $('#mcpCard'); if (el) el.innerHTML = mcpCardHTML(); }
+async function initMcp(){
+  if (!DESKTOP || !window.officeHome.onMcpCall) return;
+  window.officeHome.onMcpCall((tool, args) => mcpHandle(tool, args));
+  if (mcpCfg().enabled) await window.officeHome.mcpEnable(true);
+  await mcpRefresh();
+}
+Object.assign(ACT, {
+  mcpToggle: async () => { const on = !mcpCfg().enabled; S.settings.mcp = Object.assign(mcpCfg(), {enabled:on}); save(); const r = await window.officeHome.mcpEnable(on);
+    if (on && !r.ok) toast('Verbindung konnte nicht gestartet werden'); else toast(on ? 'Claude-Anbindung eingeschaltet' : 'Claude-Anbindung ausgeschaltet'); await mcpRefresh(); },
+  mcpWrite: async () => { S.settings.mcp = Object.assign(mcpCfg(), {write:!mcpCfg().write}); save(); toast(mcpCfg().write ? 'Claude darf eintragen' : 'Claude darf nur lesen'); await mcpRefresh(); },
+  mcpInstall: async () => { const r = await window.officeHome.mcpInstallDesktop(); if (r.ok) { toast('In Claude Desktop eingetragen – bitte Claude Desktop neu starten'); } else alert('Eintragen fehlgeschlagen: ' + r.message); await mcpRefresh(); },
+  mcpCopyCode: async () => { await navigator.clipboard.writeText(MCPI.claudeCode); toast('Befehl kopiert – in einem Terminal einfügen'); }
+});
+
 // ---------- Start ----------
 (async () => {
   try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   document.body.classList.toggle('is-demo', MODE === 'demo');
-  render(); initUpdates();
+  render(); initUpdates(); initMcp();
   if (memCfg().root) { await memLoadStatus(); render(); }
 })();
 </script>

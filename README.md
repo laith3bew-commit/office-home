@@ -6,6 +6,11 @@ Offline-Familienbüro für Windows: Vorgänge, Fristen, Dokumente, Verträge und
 - Installieren: unter „Releases“ die neueste `OfficeHome-Setup-<version>.exe` herunterladen.
 - Updates: Das installierte Programm sucht beim Start selbst nach neuen Versionen. Manuell geht es über „Einstellungen“ → „Programm-Update“.
 
+## Claude-Anbindung (MCP)
+Office Home kann von Claude Desktop oder Claude Code gelesen (und auf Wunsch beschrieben) werden – mit dem normalen Claude-Abo, ohne API-Schlüssel.
+Einschalten unter „Einstellungen“ → „Claude-Anbindung (MCP)“, dann „In Claude Desktop eintragen“ und Claude Desktop neu starten.
+Die Verbindung läuft nur lokal (127.0.0.1, mit Zugangsschlüssel); Office Home muss geöffnet sein.
+
 ## Entwickeln
 ```
 npm install
