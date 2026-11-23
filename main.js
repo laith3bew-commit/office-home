@@ -1,6 +1,6 @@
 // Office Home – Desktop-Programm (Electron-Hauptprozess)
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, nativeTheme, Tray, nativeImage, safeStorage, Notification } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -13,10 +13,44 @@ app.commandLine.appendSwitch('lang', 'de-DE');
 if (!app.requestSingleInstanceLock()) { app.quit(); }
 
 let win = null;
+let quitting = false, tray = null;
+const startHidden = process.argv.includes('--hidden');
+
+// ---------- Hintergrund: Symbol neben der Uhr, Autostart (für Erinnerungen bei geschlossenem Fenster) ----------
+const PREFS = () => path.join(app.getPath('userData'), 'oh-prefs.json');
+const prefsRead = () => { try { return JSON.parse(fs.readFileSync(PREFS(), 'utf8')); } catch (e) { return {}; } };
+const prefsWrite = p => fs.writeFileSync(PREFS(), JSON.stringify(p), 'utf8');
+const bgPrefs = () => Object.assign({ tray: true, autostart: true }, prefsRead());
+function showWin() { if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
+function applyAutostart() {
+  if (!app.isPackaged) return;
+  const p = bgPrefs();
+  app.setLoginItemSettings({ openAtLogin: !!(p.tray && p.autostart), args: ['--hidden'] });
+}
+function makeTray() {
+  if (tray) return;
+  const img = nativeImage.createFromPath(path.join(__dirname, 'build', 'icon.png')).resize({ width: 16, height: 16 });
+  tray = new Tray(img);
+  tray.setToolTip('Office Home – Erinnerungen aktiv');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Office Home öffnen', click: showWin },
+    { label: 'Kalender', click: () => { showWin(); win.webContents.send('oh:openCal', ''); } },
+    { type: 'separator' },
+    { label: 'Beenden (keine Erinnerungen mehr)', click: () => { quitting = true; app.quit(); } }
+  ]));
+  tray.on('click', showWin);
+}
+ipcMain.handle('oh:bgGet', () => Object.assign(bgPrefs(), { packaged: app.isPackaged }));
+ipcMain.handle('oh:bgSet', (e, v) => {
+  const p = prefsRead(); if (typeof v.tray === 'boolean') p.tray = v.tray; if (typeof v.autostart === 'boolean') p.autostart = v.autostart;
+  prefsWrite(p); applyAutostart(); return Object.assign(bgPrefs(), { packaged: app.isPackaged });
+});
+app.on('before-quit', () => { quitting = true; });
 
 function createWindow() {
   win = new BrowserWindow({
     width: 1400, height: 900, minWidth: 900, minHeight: 600,
+    show: !startHidden,
     title: 'Office Home',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
     autoHideMenuBar: true,
@@ -30,6 +64,17 @@ function createWindow() {
   });
   win.webContents.session.setSpellCheckerLanguages(['de-DE']);
   win.loadFile(path.join(__dirname, 'OfficeHome.html'));
+
+  // Schließen = im Hintergrund weiterlaufen (Erinnerungen), solange nicht „Beenden“ gewählt wurde.
+  win.on('close', e => {
+    if (quitting || !bgPrefs().tray) return;
+    e.preventDefault(); win.hide();
+    const p = prefsRead();
+    if (!p.trayHintShown && Notification.isSupported()) {
+      new Notification({ title: 'Office Home läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
+      p.trayHintShown = true; prefsWrite(p);
+    }
+  });
 
   // Links nach außen (http/https/mailto) im Standardbrowser öffnen, keine neuen Fenster in der App.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -108,7 +153,7 @@ ipcMain.handle('oh:updateDownload', async () => {
   try { await getUpdater().downloadUpdate(); return { ok: true }; }
   catch (e) { return { ok: false, message: String(e && e.message || e).split('\n')[0] }; }
 });
-ipcMain.handle('oh:updateInstall', () => { setImmediate(() => getUpdater().quitAndInstall(true, true)); return { ok: true }; });
+ipcMain.handle('oh:updateInstall', () => { quitting = true; setImmediate(() => getUpdater().quitAndInstall(true, true)); return { ok: true }; });
 
 // ---------- Gedächtnis (Memory-Engine) ----------
 // Lesen über den offiziellen Befehl „mem search“ (die Wände der Engine gelten über --cwd),
@@ -318,11 +363,18 @@ app.on('will-quit', mcpStop);
 // ---------- Scanner (Drucker, Handy, Ordner, PDF) ----------
 require('./scan-main.js')({ app, ipcMain, dialog, BrowserWindow, getWin: () => win });
 
-app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
+// ---------- Kalender: Gemini, Google Kalender, Erinnerungen ----------
+require('./kalender-main.js')({ app, ipcMain, shell, safeStorage, Notification, getWin: () => win, showWin });
+
+app.on('second-instance', () => showWin());
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
+  app.setAppUserModelId('de.leon.officehome');
   createWindow();
+  if (bgPrefs().tray) makeTray();
+  applyAutostart();
   // Beim Start still nach Updates suchen; die Oberfläche zeigt dann einen Hinweis.
   if (app.isPackaged) win.webContents.once('did-finish-load', () => setTimeout(() => getUpdater().checkForUpdates().catch(() => {}), 4000));
 });
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => { if (quitting || !bgPrefs().tray) app.quit(); });
+ipcMain.handle('oh:trayEnsure', () => { if (bgPrefs().tray) makeTray(); else if (tray) { tray.destroy(); tray = null; } return true; });

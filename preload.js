@@ -37,6 +37,22 @@ contextBridge.exposeInMainWorld('officeHome', {
   onScanIncoming: (cb) => ipcRenderer.on('oh:scanIncoming', (e, d) => cb(d)),
   onPhoneDone: (cb) => ipcRenderer.on('oh:phoneDone', (e, d) => cb(d)),
   onPhoneState: (cb) => ipcRenderer.on('oh:phoneState', (e, d) => cb(d)),
+  // Kalender: KI (Gemini), Google Kalender, Erinnerungen, Hintergrund
+  kiStatus: () => ipcRenderer.invoke('oh:kiStatus'),
+  kiSetKey: (key, model) => ipcRenderer.invoke('oh:kiSetKey', key, model),
+  kiAnalyze: (doc) => ipcRenderer.invoke('oh:kiAnalyze', doc),
+  gStatus: () => ipcRenderer.invoke('oh:gStatus'),
+  gSetClient: (id, secret) => ipcRenderer.invoke('oh:gSetClient', id, secret),
+  gConnect: () => ipcRenderer.invoke('oh:gConnect'),
+  gDisconnect: () => ipcRenderer.invoke('oh:gDisconnect'),
+  gList: (from, to) => ipcRenderer.invoke('oh:gList', from, to),
+  gUpsert: (ev, id) => ipcRenderer.invoke('oh:gUpsert', ev, id),
+  gDelete: (id) => ipcRenderer.invoke('oh:gDelete', id),
+  remindSet: (list) => ipcRenderer.invoke('oh:remindSet', list),
+  bgGet: () => ipcRenderer.invoke('oh:bgGet'),
+  bgSet: (v) => ipcRenderer.invoke('oh:bgSet', v),
+  trayEnsure: () => ipcRenderer.invoke('oh:trayEnsure'),
+  onOpenCal: (cb) => ipcRenderer.on('oh:openCal', (e, ref) => cb(ref)),
   onMcpCall: (cb) => ipcRenderer.on('oh:mcpCall', async (e, m) => {
     let r; try { r = await cb(m.tool, m.args); } catch (err) { r = { ok: false, error: String(err && err.message || err) }; }
     ipcRenderer.send('oh:mcpReply', m.id, r);

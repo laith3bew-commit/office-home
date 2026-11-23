@@ -329,6 +329,47 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 @media (max-width:1100px){.brief{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
 .vbox,.card.vbox{max-width:620px}
 @media (max-width:800px){.app{grid-template-columns:1fr}.side{display:none}.g2,.g3{grid-template-columns:1fr}}
+
+/* Kalender (2.12) */
+.calhead{display:flex;align-items:center;gap:8px;margin:-6px 0 16px;flex-wrap:wrap} .calhead b.t{font-size:18px;font-weight:700;margin:0 6px}
+.calwrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+@media (max-width:1100px){.calwrap{grid-template-columns:1fr}}
+.gchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;font:inherit;font-size:12px}
+.gchip i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block} .gchip svg.i{width:14px;height:14px}
+.kgrp{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px} .kgrp:first-child{margin-top:0} .kgrp.red{color:var(--danger)}
+.kcard{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:14px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c-1);border-radius:16px;padding:12px 16px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow)}
+.kcard:hover{border-color:var(--focus)} .kcard.k-frist{border-left-color:var(--warn)} .kcard.k-vertrag{border-left-color:var(--accent2)}
+.kcard .kd{font-weight:700} .kcard .kt{font-weight:700;font-size:14px} .kcard .kn{font-size:13px;line-height:1.45}
+.kcard .kr{display:flex;flex-direction:column;align-items:flex-end;gap:8px} .kcard a svg.i{width:14px;height:14px;vertical-align:-2px;margin-right:3px}
+.kibadge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;border-radius:99px;padding:2px 9px;background:var(--ink);color:var(--bg)} .kibadge svg.i{width:13px;height:13px;--icon-dot:var(--focus)}
+.kpays{background:var(--panel2);border:1px dashed var(--line);border-radius:14px;padding:4px 0;margin-bottom:8px}
+.kpay{display:flex;gap:10px;align-items:center;padding:6px 14px;font-size:12.5px;color:var(--muted);cursor:pointer} .kpay .grow{flex:1;color:var(--ink)} .kpay svg.i{width:15px;height:15px}
+.kev{display:flex;gap:4px;align-items:center;font-size:11px;line-height:1.3;border-radius:7px;padding:2px 6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border:1px solid transparent}
+.kev .dot{width:6px;height:6px;flex:none}
+.kev.k-termin{background:var(--ink);color:var(--bg)} .kev.k-frist{background:var(--warn-soft);color:var(--warn)} .kev.k-vertrag{background:var(--accent-soft);color:var(--ink)}
+.kev.k-zahlung{border:1px dashed var(--line);color:var(--muted);background:transparent} .kev.ki{box-shadow:inset 3px 0 0 var(--focus)} .kev.done,.wev.done{opacity:.45;text-decoration:line-through}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))} .mgrid .wd{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 8px 6px}
+.mgrid .day{min-height:108px;border-top:1px solid var(--line2);border-left:1px solid var(--line2);padding:5px 5px 4px;cursor:pointer;overflow:hidden;min-width:0}
+.mgrid .day:nth-child(7n+1){border-left:none} .mgrid .day.we{background:var(--panel2)} .mgrid .day.out{opacity:.45} .mgrid .day:hover{background:var(--hover)}
+.mgrid .day .n{font-weight:700;font-size:12px;padding:0 3px;display:inline-block;border-radius:99px} .mgrid .day.today .n{background:var(--ink);color:var(--bg);padding:0 7px}
+.wgrid{display:grid;grid-template-columns:52px repeat(7,minmax(0,1fr))} .wgrid .wh{height:52px;padding:6px 8px;border-bottom:1px solid var(--line2);cursor:pointer}
+.wgrid .wh span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)} .wgrid .wh b{font-size:19px}
+.wgrid .wcol{border-left:1px solid var(--line2);min-width:0} .wgrid .wcol.today .wh b{background:var(--ink);color:var(--bg);border-radius:99px;padding:0 8px}
+.wgrid .wall{height:58px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;padding:2px 4px;border-bottom:1px solid var(--line2);font-size:10.5px;color:var(--muted)}
+.wgrid .whours .wall{text-align:right;padding-top:8px;overflow:hidden} .wgrid .whours > div:last-child > div{font-size:10.5px;color:var(--muted);text-align:right;padding-right:6px;border-top:1px solid var(--line2);box-sizing:border-box}
+.wgrid .wbody{position:relative;cursor:pointer;background-image:linear-gradient(var(--line2) 1px,transparent 1px);background-size:100% var(--px)}
+.wev{position:absolute;left:3px;right:3px;border-radius:9px;padding:4px 7px;font-size:11px;overflow:hidden;background:var(--ink);color:var(--bg);cursor:pointer}
+.wev b{display:block;font-weight:600} .wev span{display:block;opacity:.8} .wev.k-frist{background:var(--warn-soft);color:var(--warn)} .wev.ki{box-shadow:inset 3px 0 0 var(--focus)}
+.mini{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center} .mini i{font-style:normal;font-size:10px;font-weight:700;color:var(--muted)}
+.mini button{border:0;background:none;color:var(--ink);font:inherit;font-size:12px;padding:4px 0;border-radius:8px;cursor:pointer;position:relative}
+.mini button:hover{background:var(--hover)} .mini button.out{opacity:.4} .mini button.sel{background:var(--accent-soft);font-weight:700} .mini button.today{background:var(--ink);color:var(--bg);font-weight:700}
+.mini button s{position:absolute;left:50%;bottom:1px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent2)}
+.kpi-v{font-size:28px;font-weight:600} .klegend{display:flex;flex-direction:column;gap:7px;font-size:12.5px} .klegend span{display:flex;gap:8px;align-items:center} .klegend .kev{width:14px;height:12px;margin:0;padding:0}
+#notices{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:10px;z-index:95;width:min(400px,calc(100vw - 44px))}
+.notice{background:var(--brand);color:var(--brand-ink);border-radius:16px;padding:13px 16px;box-shadow:0 14px 36px rgba(11,18,32,.3)} .notice svg.i{--icon-dot:#A9B8CA}
+.notice .nh{display:flex;gap:9px;align-items:center} .notice .nh b{flex:1} .notice .nx{border:0;background:none;color:inherit;cursor:pointer;opacity:.7;padding:2px}
+.notice ul{margin:8px 0 0;padding-left:30px;font-size:12.5px;line-height:1.5;color:#C9D3DE} .notice .na{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.notice .na .btn{background:transparent;color:var(--brand-ink);border-color:rgba(169,184,202,.45)}
 </style>
 </head>
 <body>
@@ -496,16 +537,17 @@ function defaultState(){
       me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
       letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79'},
       signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true, scan:{mode:'dok', watchDir:''},
-      memory: {root:'', map:{}, defaultWs:'', remindDays:14}
+      memory: {root:'', map:{}, defaultWs:'', remindDays:14},
+      cal: {ki:true, gLastSync:''}
     },
     persons: [p('p_vater', 'Vater', 'Herr', '#4F6785'), p('p_mutter', 'Mutter', 'Frau', '#A9B8CA')],
-    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[]
+    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[], events:[], gDeleted:[]
   };
 }
 let S = defaultState();
 const UI = {person:'all', contactKind:'', contactQ:'', statRange:'monat', statYear:new Date().getFullYear(), finMonth: today().slice(0, 7), finYear:new Date().getFullYear(), finType:'', taskTab:'open', caseTab:'open', docCat:'', docQ:'', reportMonth: today().slice(0, 7)};
 let saveTimer = null;
-function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.db && DB.put('kv', stateKey(), S).catch(e => alert('Speichern fehlgeschlagen: ' + e)), 250); }
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.db && DB.put('kv', stateKey(), S).catch(e => alert('Speichern fehlgeschlagen: ' + e)), 250); if (typeof remSoon === 'function') remSoon(); }
 function migrate(st){
   const d = defaultState();
   for (const k in d) if (st[k] === undefined) st[k] = d[k];
@@ -752,6 +794,7 @@ function editDoc(d, preset = {}, presetFile = null, after = null){
         S.tasks.push({id:uid(), title:'Frist: ' + o.title, due:o.deadline, personId:o.personId, caseId:o.caseId, docId:o.id, priority:'hoch', done:false, created:today()});
       if (o.caseId) { const c = getCase(o.caseId); if (c && !d) c.log.push({id:uid(), date:today(), text:'Dokument hinzugefügt: ' + o.title}); }
       upsert('documents', o); render(); if (after) await after(o);
+      if (file) kiAutoDoc(o); // neues Dokument: Termine, Fristen und Kontakte per KI erkennen
     },
     onDelete: d ? async () => { if (d.fileId) await fileDel(d.fileId); remove('documents', d.id); render(); } : null});
 }
@@ -852,7 +895,7 @@ const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenze
 
 // ---------- Navigation ----------
 const NAV = [
-  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'dashboard'}, {r:'stats', l:'Statistik', i:'statistik'}, {r:'finance', l:'Finanzen', i:'finanzen'},
+  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'dashboard'}, {r:'calendar', l:'Kalender', i:'kalender', cnt:() => { const T = today(); return byPerson(S.events || []).filter(e => !e.done && e.date === T).length; }}, {r:'stats', l:'Statistik', i:'statistik'}, {r:'finance', l:'Finanzen', i:'finanzen'},
   {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'vorgaenge'}, {r:'tasks', l:'Fristen & Aufgaben', i:'fristen', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
   {r:'letters', l:'Brief schreiben', i:'brief'}, {r:'documents', l:'Dokumente', i:'dokumente'}, {r:'scan', l:'Scanner', i:'scanner', cnt:() => (S.scans || []).length},
   {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'vertraege'}, {r:'assets', l:'Konten & Vermögen', i:'konten'}, {r:'notes', l:'Notizen', i:'notizen'}, {r:'report', l:'Monatsbericht', i:'bericht'},
@@ -1453,7 +1496,7 @@ VIEWS.documents = () => {
   <div class="card" style="padding:6px 8px">${list.length ? `<table class="t"><tr><th>Datum</th><th>Titel</th><th>Kategorie</th><th>Person</th><th>Absender</th><th>Vorgang</th><th>Frist</th><th></th></tr>
   ${list.map(d => `<tr><td class="small">${fmtDate(d.date)}</td><td><a href="#" data-act="openDoc" data-id="${d.id}"><b>${esc(d.title)}</b></a>${d.tags ? `<div class="small muted">${esc(d.tags)}</div>` : ''}${!d.fileId ? ' <span class="badge">ohne Datei</span>' : ''}</td><td>${esc(d.category || '')}</td><td>${personChip(d.personId)}</td><td>${esc(d.sender || '')}</td>
     <td class="small">${d.caseId && getCase(d.caseId) ? `<a href="#/case/${d.caseId}">${esc(getCase(d.caseId).title)}</a>` : ''}</td><td>${d.deadline ? dueBadge(d.deadline) : ''}</td>
-    <td class="act"><button class="btn sm" data-act="dlDoc" data-id="${d.id}" title="Herunterladen">${icon('herunterladen')}</button> <button class="btn sm" data-act="editDoc" data-id="${d.id}" title="Bearbeiten">${icon('bearbeiten')}</button></td></tr>`).join('')}</table>`
+    <td class="act">${DESKTOP && d.fileId ? `<button class="btn sm" data-act="kiDoc" data-id="${d.id}" title="Mit KI lesen: Termine, Fristen und Kontakte übernehmen">${icon('ki')}</button>` : ''}<button class="btn sm" data-act="dlDoc" data-id="${d.id}" title="Herunterladen">${icon('herunterladen')}</button> <button class="btn sm" data-act="editDoc" data-id="${d.id}" title="Bearbeiten">${icon('bearbeiten')}</button></td></tr>`).join('')}</table>`
   : '<div class="empty">Keine Dokumente gefunden.</div>'}</div>`;
 };
 AFTER.documents = () => {
@@ -1887,6 +1930,7 @@ VIEWS.settings = () => {
     <div class="card"><h3>Erinnerungen</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       <div class="fld"><label>Vertragskündigungen anzeigen (Tage vorher)</label><input type="number" data-set="contractDays" value="${s.contractDays}"></div><div></div>
     </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.</p></div>
+    ${DESKTOP ? `<div class="card" id="calCard" style="grid-column:1/-1">${calCardHTML()}</div>` : ''}
     ${DESKTOP ? `<div class="card" id="mcpCard" style="grid-column:1/-1">${mcpCardHTML()}</div>` : ''}
     ${DESKTOP ? `<div class="card" id="updCard" style="grid-column:1/-1">${updCardHTML()}</div>` : ''}
     ${DESKTOP && window.officeHome.memStatus ? `<div class="card" id="memCard" style="grid-column:1/-1">${memCardHTML()}</div>` : ''}
@@ -2345,6 +2389,18 @@ function buildDemoState(){
     {id:id('n'), title:'Passwörter / Zugänge (nur Hinweise)', personId:'', pinned:false, content:'Online-Banking Karl: Zugang über Sparkassen-App (Laura weiß Bescheid)\nELSTER: Zertifikat liegt im Ordner „Steuer“', updated:D(-120)},
     {id:id('n'), title:'Ideen für Weihnachten', personId:'', pinned:false, content:'Vater: neues Radio\nMutter: warme Hausschuhe, Fotobuch', updated:D(-3)},
     {id:id('n'), title:'Absprache mit Laura', personId:'', pinned:false, content:'Laura übernimmt Arzttermine dienstags, ich die Behördenpost.', updated:D(-60)}
+  ];
+  // Kalender: Termine, teils aus Dokumenten erkannt (Demo)
+  const dV = st.documents.find(x => x.personId === V) || st.documents[0] || {}, dM = st.documents.find(x => x.personId === M) || st.documents[1] || {};
+  const E = o => Object.assign({id:id('ev'), source:'manual', kind:'termin', time:'', duration:60, personId:'', note:'', place:'', docId:'', caseId:'', remind:[10080, 1440], created:T}, o);
+  st.events = [
+    E({title:'Jobcenter – persönliches Gespräch', date:D(2), time:'09:30', personId:V, place:'Jobcenter Berlin Mitte, Raum 2.14', note:'Kontoauszüge der letzten 3 Monate und Personalausweis mitbringen. Ansprechpartnerin: Frau Weber.', source:'ki', docId:dV.id || '', remind:[10080, 1440, 60]}),
+    E({title:'Widerspruch gegen Pflegegrad-Bescheid', kind:'frist', date:D(5), personId:M, note:'Widerspruch mit Begründung schicken, Arztbericht von Dr. Hoffmann beilegen.', source:'ki', docId:dM.id || ''}),
+    E({title:'Kardiologie Dr. Hoffmann', date:D(9), time:'14:00', personId:V, place:'Praxis Dr. Hoffmann', note:'Überweisung und Medikamentenliste mitnehmen.', remind:[1440, 60]}),
+    E({title:'Hausarzt Blutabnahme', date:D(12), time:'08:15', duration:30, personId:M, note:'Nüchtern kommen.', remind:[1440, 60]}),
+    E({title:'Pflegegutachten (Medizinischer Dienst)', date:D(16), time:'11:00', duration:90, personId:M, place:'zu Hause, Birkenallee 22', note:'Pflegetagebuch und Medikamentenplan bereitlegen. Laura ist dabei.', source:'ki', docId:dM.id || '', remind:[10080, 1440, 60]}),
+    E({title:'Geburtstag Tante Rosa – anrufen', date:D(20), remind:[1440]}),
+    E({title:'Erneuern: Bewilligung Bürgergeld', kind:'frist', date:D(29), personId:V, note:'Weiterbewilligungsantrag mit aktuellen Kontoauszügen stellen.\nGültig bis ' + fmtDate(D(60)) + '.', source:'ki', docId:dV.id || ''})
   ];
   return st;
 }
@@ -2876,13 +2932,402 @@ Object.assign(ACT, {
     catch (e) { alert('PDF fehlgeschlagen: ' + e.message); } }
 });
 
+// ---------- Kalender (Version 2.12) ----------
+// Termine (eigene, aus Dokumenten per KI, aus Google), dazu Fristen & Aufgaben, Kündigungsfristen und feste Zahlungen.
+// Ansichten: Liste („Was ist zu tun“, Standard), Monat, Woche. Erinnerungen als Windows-Benachrichtigung (Hauptprozess),
+// Abgleich mit Google Kalender in beide Richtungen, jedes neue Dokument liest Gemini (Termine, Fristen, Gültigkeit, Kontakte).
+const CAL_REM = [{v:10080, l:'1 Woche'}, {v:1440, l:'1 Tag'}, {v:60, l:'1 Stunde'}];
+const WT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const KIND_L = {termin:'Termin', frist:'Frist', vertrag:'Kündigungsfrist', zahlung:'Zahlung'};
+const calCfg = () => S.settings.cal || (S.settings.cal = {ki:true, gLastSync:''});
+const getEvent = id => (S.events || []).find(e => e.id === id);
+const hhmm = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+const wdIdx = iso => (new Date(iso + 'T12:00').getDay() + 6) % 7;
+const weekStart = iso => dshift(iso, -wdIdx(iso));
+const remText = r => (r || []).length ? [...r].sort((a, b) => b - a).map(m => (CAL_REM.find(x => x.v === m) || {l:m + ' Min.'}).l).join(' + ') + ' vorher' : 'ohne Erinnerung';
+if (!UI.calView) { UI.calView = 'liste'; UI.calDate = today(); }
+
+function calItems(from, to, all){
+  const pf = list => all ? list : byPerson(list), out = [];
+  for (const e of pf(S.events || [])) if (e.date >= from && e.date <= to)
+    out.push({kind:e.kind === 'frist' ? 'frist' : 'termin', ref:'e:' + e.id, date:e.date, time:e.time || '', dur:e.duration || 60, title:e.title, personId:e.personId, note:e.note, place:e.place,
+      ki:e.source === 'ki', google:e.source === 'google', docId:e.docId, done:!!e.done, remind:e.remind || []});
+  for (const t of pf(S.tasks)) if (t.due && t.due >= from && t.due <= to)
+    out.push({kind:'frist', ref:'t:' + t.id, date:t.due, time:'', title:t.title, personId:t.personId, note:t.notes, done:!!t.done, docId:t.docId, ki:!!t.ki, remind:[10080, 1440]});
+  for (const c of pf(S.contracts)) { const i = contractInfo(c); if (i.cancelBy && i.cancelBy >= from && i.cancelBy <= to)
+    out.push({kind:'vertrag', ref:'c:' + c.id, date:i.cancelBy, time:'', title:'Kündigungsfrist ' + c.provider, personId:c.personId, note:'Letzter Tag zum Kündigen – das Vertragsende wäre am ' + fmtDate(i.end) + '.', remind:[10080]}); }
+  for (const b of contractVirtual(from, to)) if (all || UI.person === 'all' || !b.personId || b.personId === UI.person)
+    out.push({kind:'zahlung', ref:'c:' + b.contractId, date:b.date, time:'', title:b.counterparty + ' ' + eur(b.amount), personId:b.personId, note:'Feste Zahlung' + (b.category ? ' · ' + b.category : '')});
+  return out.sort((a, b) => (a.date + (a.time || '99:99')).localeCompare(b.date + (b.time || '99:99')));
+}
+
+// ---------- Termin anlegen / bearbeiten ----------
+function editEvent(ev, preset = {}){
+  const docOpts = [{v:'', l:'—'}, ...[...S.documents].sort((a, b) => (b.added || '').localeCompare(a.added || '')).slice(0, 400).map(d => ({v:d.id, l:d.title}))];
+  const data = ev ? Object.assign({}, ev, Object.fromEntries(CAL_REM.map(r => ['r' + r.v, (ev.remind || []).includes(r.v)]))) :
+    Object.assign({date:today(), personId:prefillPerson(), duration:60, r10080:true, r1440:true}, preset);
+  openForm({title: ev ? 'Termin bearbeiten' : 'Neuer Termin', data, saveLabel: ev ? 'Speichern' : 'Termin anlegen',
+    fields:[{k:'title', l:'Titel', req:1, full:1}, {k:'date', l:'Datum', t:'date', req:1}, {k:'time', l:'Uhrzeit (leer = ganztägig)', t:'time'},
+      {k:'personId', l:'Für wen', t:'person'}, {k:'kind', l:'Art', t:'select', o:[{v:'termin', l:'Termin'}, {v:'frist', l:'Frist / Abgabe'}]},
+      {k:'note', l:'Was ist zu tun / Notiz', t:'textarea', full:1, rows:4, hint:'z. B. was mitbringen, einreichen oder vorbereiten'},
+      {k:'place', l:'Ort / Raum'}, {k:'duration', l:'Dauer', t:'select', o:[{v:30, l:'30 Minuten'}, {v:60, l:'1 Stunde'}, {v:90, l:'1,5 Stunden'}, {v:120, l:'2 Stunden'}, {v:240, l:'4 Stunden'}]},
+      {k:'contactId', l:'Stelle / Kontakt', t:'contact'}, {k:'caseId', l:'Vorgang', t:'case'}, {k:'docId', l:'Dokument', t:'select', o:docOpts, full:1},
+      ...CAL_REM.map(r => ({k:'r' + r.v, l:'Erinnerung ' + r.l + ' vorher', t:'checkbox'})), {k:'done', l:'Erledigt', t:'checkbox'}],
+    onSave: v => {
+      const remind = CAL_REM.map(r => r.v).filter(m => v['r' + m]); CAL_REM.forEach(r => delete v['r' + r.v]);
+      const o = Object.assign(ev || {id:uid(), source:'manual', created:today()}, v, {remind, duration:Number(v.duration) || 60, updated:new Date().toISOString(), gDirty:true});
+      S.events = S.events || []; upsert('events', o); calAfterChange(); render();
+    },
+    onDelete: ev ? () => { if (ev.googleId) (S.gDeleted = S.gDeleted || []).push(ev.googleId); remove('events', ev.id); calAfterChange(); render(); } : null});
+}
+function calOpen(ref){
+  const [k, id] = String(ref).split(':');
+  if (k === 'e') return editEvent(getEvent(id));
+  if (k === 't') return editTask(S.tasks.find(t => t.id === id));
+  if (k === 'c') return editContract(S.contracts.find(c => c.id === id));
+}
+
+// ---------- Ansicht ----------
+function calHeadHTML(){
+  const v = UI.calView, a = UI.calDate;
+  const titel = v === 'monat' ? monthLabel(a.slice(0, 7)) : v === 'woche' ? (() => { const s = weekStart(a), e = dshift(s, 6); return `${Number(s.slice(8))}.${s.slice(5, 7) !== e.slice(5, 7) ? s.slice(5, 7) + '.' : ''} – ${fmtDateLong(e)}`; })() : 'Ab heute · ' + fmtDateLong(today());
+  const seg = (k, l) => `<button class="seg ${v === k ? 'on' : ''}" data-act="calView" data-id="${k}">${l}</button>`;
+  return `<div class="head"><div class="grow"><h1>${icon('kalender')}Kalender</h1><p class="sub" style="margin:0">Termine, Fristen, Kündigungen und Zahlungen${UI.person !== 'all' ? ' · ' + esc(getPerson(UI.person)?.role) : ' – für alle Personen'}</p></div>
+    ${gChipHTML()}<button class="btn pri" data-act="calNew">${icon('plus')}Termin</button></div>
+    <div class="calhead">${v !== 'liste' ? `<button class="btn sm" data-act="calNav" data-id="-1" title="zurück">${icon('pfeil-links')}</button><button class="btn sm" data-act="calNav" data-id="1" title="weiter">${icon('pfeil-rechts')}</button>` : ''}
+      <b class="t">${esc(titel)}</b>${v !== 'liste' ? '<button class="btn sm" data-act="calToday">Heute</button>' : ''}<span style="flex:1"></span>
+      <span class="segs">${seg('liste', 'Liste')}${seg('monat', 'Monat')}${seg('woche', 'Woche')}</span></div>`;
+}
+function kevHTML(it){
+  return `<div class="kev k-${it.kind}${it.ki ? ' ki' : ''}${it.done ? ' done' : ''}" data-act="calOpen" data-id="${it.ref}" title="${esc(KIND_L[it.kind] + ': ' + it.title + (it.note ? '\n' + it.note : ''))}">${it.personId && getPerson(it.personId) ? `<span class="dot" style="background:${esc(getPerson(it.personId).color)}"></span>` : ''}${it.time ? '<b>' + it.time + '</b> ' : ''}${esc(it.title)}</div>`;
+}
+function kcardHTML(it){
+  const p = getPerson(it.personId), doc = it.docId && S.documents.find(d => d.id === it.docId);
+  const over = !it.done && it.date < today();
+  return `<div class="kcard k-${it.kind}" data-act="calOpen" data-id="${it.ref}">
+    <div><div class="kd">${WT[wdIdx(it.date)]} ${fmtDate(it.date).slice(0, 6)}</div><div class="small muted">${it.time || 'ganztags'}</div>${over ? '<span class="badge red" style="margin-top:6px">überfällig</span>' : ''}</div>
+    <div style="min-width:0"><div class="kt">${esc(it.title)}</div>
+      <div class="small muted" style="display:flex;gap:10px;flex-wrap:wrap;margin:3px 0 6px">${p ? `<span class="chip"><span class="dot" style="background:${esc(p.color)}"></span>für ${esc(p.role)}</span>` : '<span>für alle</span>'}<span>${KIND_L[it.kind]}</span>${it.place ? `<span>${esc(it.place)}</span>` : ''}</div>
+      ${it.note ? `<div class="kn"><b>Was ist zu tun:</b> ${esc(it.note).replace(/\n/g, '<br>')}</div>` : ''}
+      <div style="display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:wrap">${it.ki ? `<span class="kibadge">${icon('ki')}aus Dokument erkannt</span>` : ''}${it.google ? `<span class="badge">Google Kalender</span>` : ''}${doc ? `<a href="#" class="small" data-act="openDoc" data-id="${doc.id}" data-stop="1">${icon('dokumente')}${esc(doc.title)}</a>` : ''}</div></div>
+    <div class="kr"><span class="small muted" style="display:flex;gap:5px;align-items:center;white-space:nowrap">${icon('kalender')}${remText(it.remind)}</span>
+      ${['termin', 'frist'].includes(it.kind) ? `<button class="btn sm" data-act="calDone" data-id="${it.ref}" data-stop="1">${icon('erledigt')}Erledigt</button>` : ''}</div></div>`;
+}
+function calListeHTML(){
+  const T = today(), sunday = dshift(weekStart(T), 6), nextSun = dshift(sunday, 7);
+  const items = calItems(dshift(T, -60), dshift(T, 120)).filter(i => !i.done && (i.date >= T || ['termin', 'frist'].includes(i.kind)));
+  const groups = [['Überfällig', i => i.date < T, 'red'], ['Heute', i => i.date === T], ['Diese Woche', i => i.date > T && i.date <= sunday], ['Nächste Woche', i => i.date > sunday && i.date <= nextSun], ['Später', i => i.date > nextSun]];
+  let html = '';
+  for (const [name, f, cls] of groups) {
+    const g = items.filter(f); if (!g.length) continue;
+    const pays = g.filter(i => i.kind === 'zahlung'), rest = g.filter(i => i.kind !== 'zahlung');
+    html += `<div class="kgrp ${cls || ''}">${name} <span class="muted">· ${rest.length}</span></div>` + rest.map(kcardHTML).join('') +
+      (pays.length ? `<div class="kpays">${pays.map(i => `<div class="kpay" data-act="calOpen" data-id="${i.ref}">${icon('buchung')}<span>${WT[wdIdx(i.date)]} ${fmtDate(i.date).slice(0, 6)}</span><span class="grow">${esc(i.title)}</span><span class="small">${esc(i.note)}</span></div>`).join('')}</div>` : '');
+  }
+  return html || `<div class="card empty">Keine Termine und Fristen in den nächsten 4 Monaten.<br><button class="btn" style="margin-top:12px" data-act="calNew">${icon('plus')}Termin anlegen</button></div>`;
+}
+function calMonatHTML(){
+  const ym = UI.calDate.slice(0, 7), first = ym + '-01', start = weekStart(first), T = today();
+  const last = dshift(addMonths(first, 1), -1), end = dshift(weekStart(last), 6);
+  const items = calItems(start, end); const by = {}; items.forEach(i => (by[i.date] = by[i.date] || []).push(i));
+  let h = `<div class="mgrid">${WT.map(w => `<div class="wd">${w}</div>`).join('')}`;
+  for (let d = start; d <= end; d = dshift(d, 1)) {
+    const L = by[d] || [], wi = wdIdx(d);
+    h += `<div class="day${d.slice(0, 7) !== ym ? ' out' : ''}${wi >= 5 ? ' we' : ''}${d === T ? ' today' : ''}" data-act="calNew" data-id="${d}"><div class="n">${Number(d.slice(8))}</div>${L.slice(0, 4).map(kevHTML).join('')}${L.length > 4 ? `<div class="small muted" data-act="calDay" data-id="${d}">+ ${L.length - 4} weitere</div>` : ''}</div>`;
+  }
+  return `<div class="card" style="padding:12px 10px 8px">${h}</div></div>`;
+}
+function calWocheHTML(){
+  const s = weekStart(UI.calDate), T = today(), H0 = 7, H1 = 21, PX = 46;
+  const items = calItems(s, dshift(s, 6));
+  let cols = '';
+  for (let i = 0; i < 7; i++) {
+    const d = dshift(s, i), L = items.filter(x => x.date === d);
+    const timed = L.filter(x => x.time).map(x => { const [hh, mm] = x.time.split(':').map(Number); const top = Math.max(0, (hh - H0) * PX + mm / 60 * PX);
+      return `<div class="wev k-${x.kind}${x.ki ? ' ki' : ''}${x.done ? ' done' : ''}" style="top:${top}px;height:${Math.max(x.dur || 60, 45) / 60 * PX - 3}px" data-act="calOpen" data-id="${x.ref}"><b>${x.time} · ${esc(x.title)}</b>${x.personId && getPerson(x.personId) ? `<span>${esc(getPerson(x.personId).role)}</span>` : ''}${x.note ? `<span>${esc(x.note)}</span>` : ''}</div>`; }).join('');
+    cols += `<div class="wcol${d === T ? ' today' : ''}"><div class="wh" data-act="calNew" data-id="${d}"><span>${WT[i]}</span><b>${Number(d.slice(8))}</b></div>
+      <div class="wall">${L.filter(x => !x.time).map(kevHTML).join('')}</div><div class="wbody" style="height:${(H1 - H0) * PX}px" data-act="calNew" data-id="${d}">${timed}</div></div>`;
+  }
+  const hours = Array.from({length:H1 - H0}, (_, i) => `<div style="height:${PX}px">${H0 + i}:00</div>`).join('');
+  return `<div class="card" style="padding:0;overflow:hidden"><div class="wgrid" style="--px:${PX}px"><div class="whours"><div class="wh"></div><div class="wall">ganztags</div><div>${hours}</div></div>${cols}</div></div>`;
+}
+function miniMonthHTML(){
+  const ym = UI.calDate.slice(0, 7), first = ym + '-01', start = weekStart(first), T = today(), last = dshift(addMonths(first, 1), -1);
+  const has = new Set(calItems(start, dshift(weekStart(last), 6)).filter(i => i.kind !== 'zahlung').map(i => i.date));
+  const ws = weekStart(UI.calDate);
+  let h = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><b>${monthLabel(ym)}</b><span style="flex:1"></span><button class="btn sm" data-act="calMini" data-id="-1">${icon('pfeil-links')}</button><button class="btn sm" data-act="calMini" data-id="1">${icon('pfeil-rechts')}</button></div><div class="mini">${WT.map(w => `<i>${w[0]}</i>`).join('')}`;
+  for (let d = start; d <= dshift(weekStart(last), 6); d = dshift(d, 1))
+    h += `<button class="${d.slice(0, 7) !== ym ? 'out' : ''}${d === T ? ' today' : ''}${UI.calView === 'woche' && d >= ws && d <= dshift(ws, 6) ? ' sel' : ''}" data-act="calDay" data-id="${d}">${Number(d.slice(8))}${has.has(d) ? '<s></s>' : ''}</button>`;
+  return h + '</div>';
+}
+VIEWS.calendar = () => {
+  S.events = S.events || [];
+  const v = UI.calView;
+  const T = today(), open = calItems(T, dshift(T, 30)).filter(i => !i.done && ['termin', 'frist', 'vertrag'].includes(i.kind));
+  const side = `<div><div class="card">${miniMonthHTML()}</div>
+    <div class="card"><h3>${icon('achtung')}Offen in 30 Tagen</h3><div class="kpi-v">${open.length}</div><div class="small muted">${open.filter(i => i.ki).length} aus Dokumenten erkannt · ${open.filter(i => i.kind === 'termin').length} Termine</div></div>
+    <div class="card"><h3>${icon('info')}Farben</h3><div class="klegend"><span><i class="kev k-termin"></i>Termin</span><span><i class="kev k-frist"></i>Frist / Aufgabe</span><span><i class="kev k-vertrag"></i>Kündigungsfrist</span><span><i class="kev k-zahlung"></i>Zahlung</span><span><i class="kev ki" style="background:var(--panel2)"></i>aus Dokument (KI)</span></div></div></div>`;
+  const body = v === 'monat' ? calMonatHTML() : v === 'woche' ? calWocheHTML() : `<div>${calListeHTML()}</div>`;
+  return calHeadHTML() + `<div class="calwrap">${body}${side}</div>`;
+};
+AFTER.calendar = () => { if (gConnected() && (!calCfg().gLastSync || Date.now() - new Date(calCfg().gLastSync).getTime() > 120000)) gSync(false); };
+
+// ---------- Erinnerungen ----------
+let remTimer = null;
+function remSoon(){ clearTimeout(remTimer); remTimer = setTimeout(() => { schedReminders(); if (gConnected() && (S.events || []).some(e => e.gDirty)) gSyncSoon(); }, 2500); }
+function schedReminders(){
+  if (!DESKTOP || !window.officeHome.remindSet) return;
+  if (MODE === 'demo') return window.officeHome.remindSet([]);
+  const now = Date.now(), lim = now + 40 * 86400000, out = [];
+  for (const it of calItems(today(), dshift(today(), 40), true)) {
+    if (it.done || it.kind === 'zahlung') continue;
+    const base = new Date(it.date + 'T' + (it.time || '08:00')).getTime(), p = getPerson(it.personId);
+    for (const m of it.remind || []) {
+      if (m === 60 && !it.time) continue;
+      const at = base - m * 60000; if (at < now - 3600000 || at > lim) continue;
+      const when = (m === 60 ? 'In 1 Stunde' : m === 1440 ? 'Morgen' : 'In 1 Woche') + (it.time ? ' um ' + it.time : ' (' + fmtDate(it.date) + ')');
+      out.push({id:it.ref + '|' + it.date + '|' + (it.time || '') + '|' + m, at, ref:it.ref, title:KIND_L[it.kind] + ': ' + it.title + (p ? ' – ' + p.role : ''),
+        body:[when, it.note].filter(Boolean).join(' · ').slice(0, 240)});
+    }
+  }
+  window.officeHome.remindSet(out);
+}
+function calAfterChange(){ remSoon(); }
+
+// ---------- Google Kalender ----------
+const GS = {status:null, busy:false, msg:''};
+const gConnected = () => DESKTOP && MODE !== 'demo' && !!(GS.status && GS.status.connected);
+async function gRefreshStatus(){ if (DESKTOP && window.officeHome.gStatus) GS.status = await window.officeHome.gStatus(); }
+function gChipHTML(){
+  if (!DESKTOP) return '';
+  if (MODE === 'demo') return '<span class="gchip">Demo – kein Google-Abgleich</span>';
+  if (!gConnected()) return `<a class="gchip" href="#/settings">${icon('update')}Google Kalender verbinden</a>`;
+  const t = calCfg().gLastSync; return `<button class="gchip ok" data-act="gSyncNow" title="Jetzt abgleichen"><i></i>${GS.busy ? 'Gleiche ab …' : GS.msg ? 'Google: ' + esc(GS.msg) : 'Google Kalender · ' + (t ? 'abgeglichen ' + new Date(t).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}) : 'noch nicht abgeglichen')}</button>`;
+}
+function gEventBody(e){
+  const p = getPerson(e.personId);
+  const body = {summary:e.title + (p ? ' (' + p.role + ')' : ''), location:e.place || '',
+    description:[e.note, p ? 'Für: ' + p.role + (personName(p) !== p.role ? ' – ' + personName(p) : '') : ''].filter(Boolean).join('\n\n'),
+    extendedProperties:{private:{ohId:e.id, ohPerson:e.personId || ''}},
+    reminders:{useDefault:false, overrides:(e.remind || []).filter(m => m <= 40320).map(m => ({method:'popup', minutes:m}))}};
+  if (e.time) { const st = new Date(e.date + 'T' + e.time + ':00'), en = new Date(st.getTime() + (e.duration || 60) * 60000);
+    body.start = {dateTime:e.date + 'T' + e.time + ':00', timeZone:'Europe/Berlin'}; body.end = {dateTime:isoDate(en) + 'T' + hhmm(en) + ':00', timeZone:'Europe/Berlin'}; }
+  else { body.start = {date:e.date}; body.end = {date:dshift(e.date, 1)}; }
+  return body;
+}
+function gTimes(g){
+  if (g.start && g.start.date) return {date:g.start.date, time:'', duration:60};
+  const s = new Date(g.start.dateTime), en = new Date((g.end && g.end.dateTime) || g.start.dateTime);
+  return {date:isoDate(s), time:hhmm(s), duration:Math.max(15, Math.round((en - s) / 60000)) || 60};
+}
+let gTimer = null;
+function gSyncSoon(){ clearTimeout(gTimer); gTimer = setTimeout(() => gSync(false), 15000); }
+async function gSync(manual){
+  if (!gConnected() || GS.busy) return;
+  GS.busy = true; GS.msg = ''; calChipUpd();
+  try {
+    S.events = S.events || []; S.gDeleted = S.gDeleted || [];
+    for (const gid of [...S.gDeleted]) { const r = await window.officeHome.gDelete(gid); if (r.ok) S.gDeleted = S.gDeleted.filter(x => x !== gid); }
+    for (const e of S.events.filter(x => x.gDirty)) {
+      const r = await window.officeHome.gUpsert(gEventBody(e), e.googleId || null);
+      if (!r.ok) throw new Error(r.message);
+      e.googleId = r.id; e.gUpdated = r.updated; e.gDirty = false;
+    }
+    const from = dshift(today(), -60), to = dshift(today(), 400);
+    const r = await window.officeHome.gList(new Date(from + 'T00:00').toISOString(), new Date(to + 'T23:59').toISOString());
+    if (!r.ok) throw new Error(r.message);
+    const seen = new Set();
+    for (const g of r.items) {
+      if (g.status === 'cancelled' || !g.start) continue; seen.add(g.id);
+      const priv = (g.extendedProperties && g.extendedProperties.private) || {};
+      const e = S.events.find(x => x.googleId === g.id) || (priv.ohId && getEvent(priv.ohId));
+      const tm = gTimes(g);
+      if (e) {
+        if (e.gDirty || g.updated === e.gUpdated) continue;
+        const p = getPerson(e.personId), title = String(g.summary || '').replace(p ? new RegExp(' \\(' + p.role.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\)$') : /$^/, '');
+        Object.assign(e, tm, {title:title || e.title, googleId:g.id, gUpdated:g.updated}, e.source === 'google' ? {note:g.description || '', place:g.location || ''} : {});
+      } else S.events.push(Object.assign({id:uid(), source:'google', kind:'termin', created:today(), remind:[], personId:priv.ohPerson || '', title:g.summary || '(ohne Titel)', note:g.description || '', place:g.location || '', googleId:g.id, gUpdated:g.updated}, tm));
+    }
+    S.events = S.events.filter(e => !(e.googleId && !e.gDirty && e.date >= from && e.date <= to && !seen.has(e.googleId)));
+    calCfg().gLastSync = new Date().toISOString(); save();
+    if (manual) toast('Google Kalender abgeglichen');
+  } catch (err) { GS.msg = err.message; if (manual) alert('Abgleich mit Google fehlgeschlagen: ' + err.message); await gRefreshStatus(); }
+  finally { GS.busy = false; if (parseHash().route === 'calendar') render(); else calChipUpd(); }
+}
+function calChipUpd(){ const c = $('.gchip'); if (c) c.outerHTML = gChipHTML(); }
+
+// ---------- KI: Dokumente lesen (Gemini) ----------
+const KI = {status:null};
+const CF_L = {department:'Abteilung', street:'Straße', zip:'PLZ', city:'Ort', phone:'Telefon', fax:'Fax', email:'E-Mail', contactPerson:'Ansprechpartner/in'};
+async function kiRefresh(){ if (DESKTOP && window.officeHome.kiStatus) KI.status = await window.officeHome.kiStatus(); }
+const kiReady = () => DESKTOP && MODE !== 'demo' && !!(KI.status && KI.status.hasKey);
+function kiAutoDoc(d){ if (kiReady() && calCfg().ki !== false && d && d.fileId) kiDoc(d, false); }
+async function kiDoc(d, manual){
+  if (!d) return;
+  if (!DESKTOP) return manual && alert('Die KI gibt es nur im installierten Programm.');
+  if (MODE === 'demo') return manual && alert('Im Demo-Modus wird nichts an die KI geschickt – das sind nur Beispieldaten.');
+  if (!kiReady()) { if (manual && confirm('Es ist noch kein Gemini-Schlüssel eingetragen. Jetzt zu den Einstellungen?')) location.hash = '#/settings'; return; }
+  const f = d.fileId && await fileGet(d.fileId); if (!f) return manual && toast('Keine Datei hinterlegt');
+  const mime = f.type || (f.blob && f.blob.type) || '';
+  if (!/^(application\/pdf|image\/(jpeg|png|webp|heic|heif))$/.test(mime)) return manual && toast('Nur PDF und Bilder können gelesen werden.');
+  toast('KI liest „' + d.title + '“ …');
+  const r = await window.officeHome.kiAnalyze({mime, data:new Uint8Array(await f.blob.arrayBuffer()), ctx:{today:today(), persons:S.persons.map(p => ({label:p.role, name:personName(p)}))}});
+  if (!r.ok) { d.ki = {at:new Date().toISOString(), ok:false, message:r.message}; save(); return noticeCard('KI konnte „' + d.title + '“ nicht lesen', [r.message]); }
+  kiApply(d, r.result || {});
+}
+const normTxt = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').replace(/^(frau|herrn?|dr\.?|prof\.?)\s+/g, '').trim();
+function kiContact(k, diffs){
+  const org = String(k.organisation || '').trim(), nm = String(k.name || '').trim(); if (!org && !nm) return null;
+  if (S.persons.some(p => nm && normTxt(personName(p)) === normTxt(nm))) return null;
+  const fields = {department:k.abteilung, street:k.strasse, zip:k.plz, city:k.ort, phone:k.telefon, fax:k.fax, email:k.email};
+  let c = k.email ? S.contacts.find(x => x.email && x.email.toLowerCase() === String(k.email).toLowerCase()) : null;
+  if (!c && org) c = S.contacts.find(x => normTxt(x.name) === normTxt(org) && (!nm || !x.contactPerson || normTxt(x.contactPerson) === normTxt(nm)));
+  if (!c && !org) c = S.contacts.find(x => normTxt(x.name) === normTxt(nm) || normTxt(x.contactPerson) === normTxt(nm));
+  if (!c) {
+    c = {id:uid(), kind:org ? 'Behörde / Firma' : 'Privatperson', salutation:/^frau/i.test(nm) ? 'Frau' : /^herr/i.test(nm) ? 'Herr' : '—', name:org || nm.replace(/^(frau|herrn?)\s+/i, ''), contactPerson:org ? nm : '',
+      department:'', street:'', zip:'', city:'', phone:'', email:'', fax:'', notes:k.funktion ? 'Zuständig: ' + k.funktion : '', source:'ki', added:today()};
+    for (const [f, v] of Object.entries(fields)) if (String(v || '').trim()) c[f] = String(v).trim();
+    S.contacts.push(c);
+    return 'Neu im Adressbuch: ' + (nm ? nm + (org ? ' (' + org + ')' : '') : org) + (k.funktion ? ' – ' + k.funktion : '');
+  }
+  const added = [];
+  if (nm && org && !c.contactPerson) { c.contactPerson = nm; added.push(CF_L.contactPerson); }
+  for (const [f, v] of Object.entries(fields)) {
+    const val = String(v || '').trim(); if (!val) continue;
+    if (!c[f]) { c[f] = val; added.push(CF_L[f]); } else if (normTxt(c[f]).replace(/[\s\/-]/g, '') !== normTxt(val).replace(/[\s\/-]/g, '')) diffs.push({id:c.id, f, old:c[f], neu:val});
+  }
+  if (k.funktion && !(c.notes || '').includes(k.funktion)) c.notes = ((c.notes || '') + '\nZuständig: ' + k.funktion).trim();
+  return added.length ? 'Ergänzt bei ' + c.name + (c.contactPerson ? ' (' + c.contactPerson + ')' : '') + ': ' + added.join(', ') : null;
+}
+function kiApply(d, res){
+  const lines = [], isDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '');
+  const personId = (S.persons.find(p => p.role === res.person) || {}).id || d.personId || '';
+  if (!d.personId && personId) d.personId = personId;
+  if (res.zusammenfassung && !d.notes) d.notes = String(res.zusammenfassung);
+  if (res.absender && !d.sender) d.sender = String(res.absender);
+  const pr = getPerson(personId)?.role; S.events = S.events || [];
+  for (const t of Array.isArray(res.termine) ? res.termine : []) {
+    if (!isDate(t.datum) || S.events.some(e => e.docId === d.id && e.date === t.datum && e.title === t.titel)) continue;
+    const time = /^\d{1,2}:\d{2}$/.test(t.uhrzeit || '') ? String(t.uhrzeit).padStart(5, '0') : '', kind = t.art === 'frist' ? 'frist' : 'termin';
+    S.events.push({id:uid(), source:'ki', kind, title:String(t.titel || 'Termin'), date:t.datum, time, duration:60, personId, note:String(t.was_tun || ''), place:String(t.ort || ''),
+      docId:d.id, caseId:d.caseId || '', remind:time ? [10080, 1440, 60] : [10080, 1440], created:today(), gDirty:true});
+    lines.push(`${KIND_L[kind]} am ${fmtDate(t.datum)}${time ? ' um ' + time : ''}${pr ? ' für ' + pr : ''}: ${t.titel}`);
+  }
+  for (const g of Array.isArray(res.gueltigkeit) ? res.gueltigkeit : []) {
+    if (!isDate(g.gueltig_bis)) continue;
+    let at = addMonths(g.gueltig_bis, -1); if (at <= today()) at = g.gueltig_bis <= today() ? today() : dshift(today(), 1);
+    const title = 'Erneuern: ' + (g.was || 'Bescheid'); if (S.events.some(e => e.docId === d.id && e.title === title)) continue;
+    S.events.push({id:uid(), source:'ki', kind:'frist', title, date:at, time:'', duration:60, personId, note:(g.erneuern || 'Rechtzeitig Verlängerung beantragen.') + '\nGültig bis ' + fmtDate(g.gueltig_bis) + '.',
+      docId:d.id, caseId:d.caseId || '', remind:[10080, 1440], created:today(), gDirty:true});
+    lines.push(`Erinnerung am ${fmtDate(at)}: ${title} (gültig bis ${fmtDate(g.gueltig_bis)})`);
+  }
+  const diffs = [];
+  for (const k of Array.isArray(res.kontakte) ? res.kontakte : []) { const r = kiContact(k, diffs); if (r) lines.push(r); }
+  d.ki = {at:new Date().toISOString(), ok:true};
+  save(); render(); calAfterChange();
+  const acts = [];
+  if (lines.some(l => !/^(Neu im|Ergänzt)/.test(l))) acts.push({l:'Im Kalender ansehen', f:() => { location.hash = '#/calendar'; }});
+  if (diffs.length) acts.push({l:'Abweichungen prüfen (' + diffs.length + ')', f:() => kiDiffDialog(diffs)});
+  noticeCard('Dokument gelesen: ' + d.title, lines.length ? lines : ['Keine Termine, Fristen oder neuen Kontakte gefunden.' + (res.zusammenfassung ? ' Zusammenfassung steht in den Notizen.' : '')], acts);
+}
+function kiDiffDialog(diffs){
+  const fields = diffs.map((x, i) => { const c = getContact(x.id); return {k:'d' + i, t:'checkbox', full:1, l:`${c ? c.name + (c.contactPerson ? ' (' + c.contactPerson + ')' : '') : '?'} – ${CF_L[x.f]}: „${x.old}“ → „${x.neu}“`}; });
+  openForm({title:'Abweichende Kontaktdaten', fields, data:{}, saveLabel:'Markierte übernehmen',
+    onSave: v => { let n = 0; diffs.forEach((x, i) => { const c = getContact(x.id); if (v['d' + i] && c) { c[x.f] = x.neu; n++; } }); save(); render(); toast(n ? n + ' Angabe(n) übernommen' : 'Nichts geändert'); }});
+}
+function noticeCard(title, lines, acts = []){
+  let box = $('#notices'); if (!box) { box = document.createElement('div'); box.id = 'notices'; document.body.appendChild(box); }
+  const n = document.createElement('div'); n.className = 'notice';
+  n.innerHTML = `<div class="nh">${icon('ki')}<b>${esc(title)}</b><button class="nx" title="schließen">${icon('schliessen')}</button></div><ul>${lines.slice(0, 8).map(l => `<li>${esc(l)}</li>`).join('')}</ul>${acts.length ? `<div class="na">${acts.map((a, i) => `<button class="btn sm" data-i="${i}">${esc(a.l)}</button>`).join('')}</div>` : ''}`;
+  n.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.classList.contains('nx')) return n.remove(); const a = acts[Number(b.dataset.i)]; if (a) { a.f(); n.remove(); } });
+  box.appendChild(n); setTimeout(() => n.remove(), 60000);
+}
+
+// ---------- Einstellungen: Kalender & KI ----------
+let BG = null;
+function calCardHTML(){
+  const k = KI.status || {}, g = GS.status || {}, demo = MODE === 'demo';
+  const stepList = ['<a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> öffnen und ein neues Projekt „Office Home“ anlegen.',
+    '„APIs und Dienste“ → „Bibliothek“ → <b>Google Calendar API</b> aktivieren.',
+    '„OAuth-Zustimmungsbildschirm“: Nutzertyp <b>Extern</b>, App-Name „Office Home“, deine E-Mail. Danach den Status auf <b>In Produktion</b> setzen (sonst läuft die Anmeldung nach 7 Tagen ab). Die Warnung „App nicht überprüft“ beim Verbinden mit „Erweitert → Weiter“ bestätigen – es ist deine eigene App.',
+    '„Anmeldedaten“ → „Anmeldedaten erstellen“ → <b>OAuth-Client-ID</b>, Anwendungstyp <b>Desktop-App</b>.',
+    'Client-ID und Clientschlüssel unten einfügen und „Mit Google verbinden“ klicken.'];
+  return `<h3>${icon('kalender')}Kalender & KI</h3>
+  ${demo ? '<div class="banner blue">' + icon('info') + '<div>Im Demo-Modus wird nichts an Google oder die KI geschickt. Für echte Daten oben auf „Live“ umschalten.</div></div>' : ''}
+  <div class="grid g2">
+    <div><b>Dokumente lesen (Google Gemini)</b>
+      <p class="small muted" style="margin:4px 0 10px">Jedes neue Dokument (Upload, Scanner, Handy) wird an Gemini geschickt. Termine, Fristen und Gültigkeiten landen im Kalender, Ansprechpartner im Adressbuch.
+      Bitte die <b>kostenpflichtige Stufe</b> von Google AI Studio nutzen – in der kostenlosen darf Google die Inhalte verwenden.</p>
+      <p>${k.hasKey ? '<span class="badge green">Schlüssel gespeichert</span>' : '<span class="badge amber">kein Schlüssel</span>'} <span class="small muted">Modell: ${esc(k.model || 'gemini-2.5-flash')}</span></p>
+      <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+        <div class="fld full"><label>Gemini-API-Schlüssel (aus aistudio.google.com)</label><input type="password" id="kiKey" placeholder="${k.hasKey ? '•••••••• (neu eingeben zum Ändern)' : 'AIza…'}" autocomplete="off"></div>
+        <div class="fld"><label>Modell</label><input id="kiModel" value="${esc(k.model || 'gemini-2.5-flash')}"></div>
+        <div class="fld cb" style="align-self:end"><input type="checkbox" id="kiAuto" data-act="kiAuto" ${calCfg().ki !== false ? 'checked' : ''}><label for="kiAuto">jedes neue Dokument automatisch lesen</label></div>
+      </form></div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" data-act="kiSave">${icon('speichern')}Speichern</button>${k.hasKey ? `<button class="btn dan" data-act="kiDel">${icon('loeschen')}Schlüssel löschen</button>` : ''}</div></div>
+    <div><b>Google Kalender (beide Richtungen)</b>
+      <p class="small muted" style="margin:4px 0 10px">Termine aus Office Home erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.</p>
+      ${g.connected ? `<p><span class="badge green">verbunden</span> ${esc(g.email || '')}<br><span class="small muted">Letzter Abgleich: ${calCfg().gLastSync ? new Date(calCfg().gLastSync).toLocaleString('de-DE') : 'noch nie'}${GS.msg ? ' · Fehler: ' + esc(GS.msg) : ''}</span></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="gSyncNow">${icon('update')}Jetzt abgleichen</button><button class="btn dan" data-act="gDisconnect">${icon('schliessen')}Trennen</button></div>`
+      : `${g.hasClient ? '<p><span class="badge">Zugang eingetragen</span></p>' : `<ol class="small" style="padding-left:18px;margin:0 0 10px">${stepList.map(s => `<li style="margin-bottom:4px">${s}</li>`).join('')}</ol>`}
+        <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+          <div class="fld full"><label>Client-ID</label><input id="gId" placeholder="${g.hasClient ? '(gespeichert – neu eingeben zum Ändern)' : '…apps.googleusercontent.com'}" autocomplete="off"></div>
+          <div class="fld full"><label>Clientschlüssel</label><input type="password" id="gSecret" placeholder="${g.hasClient ? '••••••••' : 'GOCSPX-…'}" autocomplete="off"></div></form></div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" data-act="gSaveClient">${icon('speichern')}Zugang speichern</button>${g.hasClient ? `<button class="btn pri" data-act="gConnect" ${demo ? 'disabled' : ''}>${icon('kalender')}Mit Google verbinden</button>` : ''}</div>`}
+    </div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)"><b>Erinnerungen</b>
+    <p class="small muted" style="margin:4px 0 8px">Windows meldet sich 1 Woche und 1 Tag vorher (bei Terminen mit Uhrzeit auch 1 Stunde vorher). Damit das auch bei geschlossenem Fenster klappt, läuft Office Home mit einem Symbol neben der Uhr weiter.</p>
+    <div style="display:flex;gap:18px;flex-wrap:wrap"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="bgSet" data-id="tray" ${!BG || BG.tray ? 'checked' : ''}>Beim Schließen im Hintergrund weiterlaufen</label>
+    <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="bgSet" data-id="autostart" ${!BG || (BG.tray && BG.autostart) ? 'checked' : ''} ${BG && !BG.tray ? 'disabled' : ''}>Mit Windows starten (unsichtbar)</label></div></div>`;
+}
+function calCardUpd(){ const c = $('#calCard'); if (c) c.innerHTML = calCardHTML(); }
+
+Object.assign(ACT, {
+  calView: d => { UI.calView = d.id; render(); },
+  calNav: d => { const n = Number(d.id); UI.calDate = UI.calView === 'monat' ? addMonths(UI.calDate.slice(0, 7) + '-01', n) : dshift(UI.calDate, 7 * n); render(); },
+  calMini: d => { UI.calDate = addMonths(UI.calDate.slice(0, 7) + '-01', Number(d.id)); render(); },
+  calToday: () => { UI.calDate = today(); render(); },
+  calDay: (d, el, e) => { if (e) e.stopPropagation(); UI.calDate = d.id; if (UI.calView === 'liste') UI.calView = 'woche'; render(); },
+  calNew: (d, el, e) => { if (e && e.target.closest('.kev,.wev')) return; editEvent(null, /^\d{4}-\d{2}-\d{2}$/.test(d.id || '') ? {date:d.id} : {}); },
+  calOpen: (d, el, e) => { if (e) e.stopPropagation(); calOpen(d.id); },
+  calDone: (d, el, e) => { if (e) e.stopPropagation(); const [k, id] = d.id.split(':');
+    if (k === 'e') { const ev = getEvent(id); if (ev) { ev.done = true; ev.gDirty = true; save(); calAfterChange(); render(); toast('Erledigt'); } }
+    if (k === 't') { const t = S.tasks.find(x => x.id === id); if (t && !t.done) toggleTask(t); } },
+  kiDoc: d => kiDoc(S.documents.find(x => x.id === d.id), true),
+  kiAuto: () => { calCfg().ki = !(calCfg().ki !== false); save(); setTimeout(calCardUpd, 0); toast(calCfg().ki ? 'Neue Dokumente werden automatisch gelesen' : 'Automatisches Lesen aus'); },
+  kiSave: async () => { const key = $('#kiKey').value.trim(), model = $('#kiModel').value.trim();
+    const r = await window.officeHome.kiSetKey(key || null, model); if (!r.ok) return alert(r.message); await kiRefresh(); calCardUpd(); toast('Gespeichert'); },
+  kiDel: async () => { if (!confirm('Gemini-Schlüssel löschen?')) return; await window.officeHome.kiSetKey('', null); await kiRefresh(); calCardUpd(); },
+  gSaveClient: async () => { const id = $('#gId').value.trim(), sec = $('#gSecret').value.trim(); if (!id || !sec) return alert('Bitte Client-ID und Clientschlüssel eintragen.');
+    const r = await window.officeHome.gSetClient(id, sec); if (!r.ok) return alert(r.message); await gRefreshStatus(); calCardUpd(); toast('Zugang gespeichert'); },
+  gConnect: async () => { toast('Google-Anmeldung öffnet sich im Browser …'); const r = await window.officeHome.gConnect(); await gRefreshStatus();
+    if (!r.ok) { calCardUpd(); return alert('Verbinden fehlgeschlagen: ' + r.message); }
+    (S.events || []).forEach(e => { if (e.source !== 'google') e.gDirty = true; }); save(); calCardUpd(); toast('Google Kalender verbunden'); gSync(true); },
+  gDisconnect: async () => { if (!confirm('Verbindung zu Google Kalender trennen? Die Termine bleiben in beiden Kalendern erhalten.')) return; await window.officeHome.gDisconnect(); await gRefreshStatus(); calCardUpd(); },
+  gSyncNow: () => gSync(true),
+  bgSet: async (d, el) => { if (!window.officeHome.bgSet) return; const v = {}; v[d.id] = !(BG ? BG[d.id] : true); if (d.id === 'tray' && !v.tray) v.autostart = false;
+    BG = await window.officeHome.bgSet(v); await window.officeHome.trayEnsure(); calCardUpd(); toast('Gespeichert'); }
+});
+
+async function initKalender(){
+  S.events = S.events || [];
+  if (!DESKTOP || !window.officeHome.remindSet) return;
+  await Promise.all([kiRefresh(), gRefreshStatus()]);
+  try { BG = await window.officeHome.bgGet(); } catch (e) {}
+  window.officeHome.onOpenCal(() => { location.hash = '#/calendar'; });
+  schedReminders(); setInterval(schedReminders, 30 * 60 * 1000);
+  setTimeout(() => gSync(false), 8000); setInterval(() => gSync(false), 10 * 60 * 1000);
+  if (parseHash().route === 'calendar' || parseHash().route === 'settings') render();
+}
+
 // ---------- Start ----------
 (async () => {
   try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   document.body.classList.toggle('is-demo', MODE === 'demo');
-  themeSet(themeGet()); render(); initUpdates(); initMcp(); initScan();
+  themeSet(themeGet()); render(); initUpdates(); initMcp(); initScan(); initKalender();
   if (memCfg().root) { await memLoadStatus(); render(); }
 })();
 </script>
