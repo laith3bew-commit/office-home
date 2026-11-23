@@ -219,6 +219,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#
 .modesw.demo button.on{background:#f59e0b;color:#1f2937}
 .demotag{font-size:12px;font-weight:700;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;padding:4px 6px 4px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
 body.is-demo .mainwrap{box-shadow:inset 0 4px 0 #f59e0b}
+.vbox{max-width:620px} .reckey{font:600 22px/1.4 Consolas,monospace;letter-spacing:2px;text-align:center;padding:16px;border:2px dashed var(--accent);border-radius:10px;background:var(--accent-soft);margin:10px 0;user-select:all}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px} .ventry h3{flex-wrap:wrap}
+.vf{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)} .vf .vl{width:86px;font-size:12px;color:var(--muted)} .vf .vv{flex:1;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .updchip{display:block;margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#f59e0b;color:#1f2937;font-size:12.5px;font-weight:600;text-decoration:none;text-align:center}
 .dsgrid{display:flex;flex-wrap:wrap;gap:14px}
 .dstile{border:2px solid var(--line,#d9dee7);border-radius:10px;padding:8px;background:transparent;cursor:pointer;text-align:center;font:inherit;color:inherit}
@@ -340,6 +343,7 @@ const ICONS = {
   plus:'<path d="M12 5v14M5 12h14"/>',
   print:'<path d="M6 9V2h12v7"/><path d="M6 18H4v-7h16v7h-2"/><path d="M6 14h12v8H6z"/>',
   save:'<path d="M5 3h11l5 5v13H5z"/><path d="M8 3v5h8M8 21v-7h8v7"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
   chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-8"/>',
   trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
@@ -739,7 +743,7 @@ const NAV = [
   {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'folder'}, {r:'tasks', l:'Fristen & Aufgaben', i:'clock', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
   {r:'letters', l:'Brief schreiben', i:'pen'}, {r:'documents', l:'Dokumente', i:'file'},
   {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'receipt'}, {r:'assets', l:'Konten & Vermögen', i:'wallet'}, {r:'notes', l:'Notizen', i:'note'}, {r:'report', l:'Monatsbericht', i:'print'},
-  {grp:'Stammdaten'}, {r:'persons', l:'Personen & Vollmachten', i:'users'}, {r:'contacts', l:'Adressbuch', i:'book'}, {r:'settings', l:'Einstellungen', i:'sliders'}
+  {grp:'Stammdaten'}, {r:'persons', l:'Personen & Vollmachten', i:'users'}, {r:'contacts', l:'Adressbuch', i:'book'}, {r:'vault', l:'Tresor', i:'lock'}, {r:'settings', l:'Einstellungen', i:'sliders'}
 ];
 const ROUTE_NAV = {case:'cases', brief:'letters', search:''};
 function parseHash(){
@@ -1783,7 +1787,8 @@ async function backup(){
   const files = {};
   for (const d of S.documents) if (d.fileId) { const f = await fileGet(d.fileId); if (f) files[d.fileId] = {name:f.name, type:f.type, data: await blobToDataURL(f.blob)}; }
   S.settings.lastBackup = today(); save();
-  const data = {app:'OfficeHome', version:1, exported:new Date().toISOString(), state:S, files};
+  const vault = DB.db ? await DB.get('kv', 'vault') : null; // Tresor nur verschlüsselt
+  const data = {app:'OfficeHome', version:1, exported:new Date().toISOString(), state:S, files, vault: vault || null};
   download(`OfficeHome-Sicherung-${today()}.json`, new Blob([JSON.stringify(data)], {type:'application/json'}));
   toast('Sicherung erstellt'); render();
 }
@@ -1795,13 +1800,14 @@ async function restore(){
   if (!confirm('Achtung: Alle aktuellen Daten werden durch die Sicherung vom ' + fmtDate((data.exported || '').slice(0, 10)) + ' ersetzt. Fortfahren?')) return;
   if (DB.db) await DB.clear('files');
   for (const [id, x] of Object.entries(data.files || {})) await filePut(id, {name:x.name, type:x.type, blob: await dataURLtoBlob(x.data)});
+  if (data.vault && DB.db) await DB.put('kv', 'vault', data.vault); vaultLock(true); VT.blob = null; VT._loaded = false;
   S = migrate(data.state); save(); toast('Sicherung wiederhergestellt'); location.hash = '#/dashboard'; render();
 }
 async function wipe(){
   if (MODE === 'demo') return ACT.demoReset();
   if (!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.')) return;
   if (prompt('Zur Bestätigung bitte LÖSCHEN eingeben:') !== 'LÖSCHEN') return;
-  if (DB.db) await DB.clear('files'); S = defaultState(); save(); location.hash = '#/dashboard'; render();
+  if (DB.db) { await DB.clear('files'); await DB.del('kv', 'vault'); } vaultLock(true); VT.blob = null; VT._loaded = false; S = defaultState(); save(); location.hash = '#/dashboard'; render();
 }
 function exportICS(){
   const ev = [];
@@ -2048,7 +2054,7 @@ function modeSwitchHTML(){
 }
 async function setMode(m){
   if (m === MODE) return;
-  await flushSave(); MODE = m;
+  await flushSave(); vaultLock(true); VT.blob = null; VT._loaded = false; MODE = m;
   if (DB.db) await DB.put('kv', 'mode', m);
   const st = DB.db ? await DB.get('kv', stateKey()) : null;
   S = st ? migrate(st) : (m === 'demo' ? buildDemoState() : defaultState());
@@ -2347,6 +2353,160 @@ Object.assign(ACT, {
   mcpWrite: async () => { S.settings.mcp = Object.assign(mcpCfg(), {write:!mcpCfg().write}); save(); toast(mcpCfg().write ? 'Claude darf eintragen' : 'Claude darf nur lesen'); await mcpRefresh(); },
   mcpInstall: async () => { const r = await window.officeHome.mcpInstallDesktop(); if (r.ok) { toast('In Claude Desktop eingetragen – bitte Claude Desktop neu starten'); } else alert('Eintragen fehlgeschlagen: ' + r.message); await mcpRefresh(); },
   mcpCopyCode: async () => { await navigator.clipboard.writeText(MCPI.claudeCode); toast('Befehl kopiert – in einem Terminal einfügen'); }
+});
+
+// ---------- Tresor (verschlüsselte Zugangsdaten) ----------
+// Liegt NICHT in S, sondern verschlüsselt unter kv 'vault' (Demo: 'demoVault'). Dadurch erscheint der Inhalt
+// nie in Suche, Berichten, Statistik, Gedächtnis oder bei Claude (MCP).
+// Aufbau: zufälliger Datenschlüssel (AES-256-GCM) verschlüsselt den Inhalt; der Datenschlüssel ist zweimal
+// verschlüsselt abgelegt – mit dem Hauptpasswort und mit dem Wiederherstellungsschlüssel (beide über PBKDF2-SHA-256).
+const VAULT_ITER = 600000;
+const VAULT_CATS = ['Bank', 'Behörde / Amt', 'Versicherung / Krankenkasse', 'Website / Konto', 'Karte / PIN', 'Telefon / Handy', 'Sonstiges'];
+const VAULT_LOCK_MS = 60000;
+const VT = {blob:null, key:null, data:null, last:0, fails:0, until:0, recShown:'', person:'', cat:'', q:'', show:{}};
+const vaultKey = () => MODE === 'demo' ? 'demoVault' : 'vault';
+const vB64 = u8 => btoa(String.fromCharCode(...new Uint8Array(u8)));
+const vUnb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const vRnd = n => crypto.getRandomValues(new Uint8Array(n));
+async function vKek(secret, salt, iter){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret.normalize('NFC')), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', hash:'SHA-256', salt, iterations:iter}, base, {name:'AES-GCM', length:256}, false, ['encrypt', 'decrypt']);
+}
+async function vEnc(key, bytes){ const iv = vRnd(12); return {iv:vB64(iv), ct:vB64(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, bytes))}; }
+async function vDec(key, o){ return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM', iv:vUnb64(o.iv)}, key, vUnb64(o.ct))); }
+const vImportDek = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+// Wiederherstellungsschlüssel: 25 Zeichen aus einem eindeutigen Alphabet, 5er-Gruppen
+const REC_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const recNew = () => Array.from(vRnd(25), b => REC_ABC[b % 32]).join('').match(/.{5}/g).join('-');
+const recNorm = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+async function vaultLoad(){ VT.blob = DB.db ? await DB.get('kv', vaultKey()) : VT.blob; return VT.blob; }
+async function vaultPersist(){
+  const blob = Object.assign({}, VT.blob, {data: await vEnc(VT.key, new TextEncoder().encode(JSON.stringify(VT.data))), updated:new Date().toISOString()});
+  VT.blob = blob; if (DB.db) await DB.put('kv', vaultKey(), blob);
+}
+async function vaultCreate(pw){
+  const dekRaw = vRnd(32), salt = vRnd(16), rsalt = vRnd(16), rec = recNew();
+  const blob = {v:1, iter:VAULT_ITER, salt:vB64(salt), rsalt:vB64(rsalt),
+    byPw: await vEnc(await vKek(pw, salt, VAULT_ITER), dekRaw), byRec: await vEnc(await vKek(recNorm(rec), rsalt, VAULT_ITER), dekRaw), created:new Date().toISOString()};
+  VT.blob = blob; VT.key = await vImportDek(dekRaw); dekRaw.fill(0); VT.data = {entries:[]}; VT.last = Date.now();
+  await vaultPersist(); VT.recShown = rec;
+}
+async function vaultUnlock(secret, viaRec){
+  const b = VT.blob; const raw = await vDec(await vKek(viaRec ? recNorm(secret) : secret, vUnb64(viaRec ? b.rsalt : b.salt), b.iter || VAULT_ITER), viaRec ? b.byRec : b.byPw);
+  VT.key = await vImportDek(raw); raw.fill(0);
+  VT.data = b.data ? JSON.parse(new TextDecoder().decode(await vDec(VT.key, b.data))) : {entries:[]};
+  VT.last = Date.now(); VT.fails = 0;
+}
+async function vaultChangePw(pw){ // nur entsperrt: Datenschlüssel neu mit neuem Passwort verpacken
+  const b = VT.blob;
+  const dekRaw = await vaultExportDek(); const salt = vRnd(16);
+  VT.blob = Object.assign({}, b, {salt:vB64(salt), byPw: await vEnc(await vKek(pw, salt, VAULT_ITER), dekRaw)}); dekRaw.fill(0); await vaultPersist();
+}
+async function vaultNewRec(){
+  const dekRaw = await vaultExportDek(), rsalt = vRnd(16), rec = recNew();
+  VT.blob = Object.assign({}, VT.blob, {rsalt:vB64(rsalt), byRec: await vEnc(await vKek(recNorm(rec), rsalt, VAULT_ITER), dekRaw)}); dekRaw.fill(0); await vaultPersist(); VT.recShown = rec;
+}
+// Der Datenschlüssel ist nicht exportierbar; für Passwortwechsel wird er mit dem zuletzt eingegebenen Geheimnis neu entschlüsselt.
+async function vaultExportDek(){ if (!VT._secret) throw new Error('Bitte Tresor neu entsperren.'); const s = VT._secret; return vDec(await vKek(s.viaRec ? recNorm(s.v) : s.v, vUnb64(s.viaRec ? VT.blob.rsalt : VT.blob.salt), VT.blob.iter || VAULT_ITER), s.viaRec ? VT.blob.byRec : VT.blob.byPw); }
+function vaultLock(silent){ if (!VT.key && !VT.data) return; VT.key = null; VT.data = null; VT._secret = null; VT.show = {}; VT.recShown = ''; if (!silent && parseHash().route === 'vault') render(); }
+setInterval(() => { if (VT.key && Date.now() - VT.last > VAULT_LOCK_MS) { vaultLock(); toast('Tresor wurde automatisch gesperrt'); } }, 5000);
+['mousemove', 'keydown', 'click', 'scroll'].forEach(ev => document.addEventListener(ev, () => { if (VT.key) VT.last = Date.now(); }, {passive:true, capture:true}));
+window.addEventListener('hashchange', () => { if (VT.key && parseHash().route !== 'vault') vaultLock(true); });
+
+const pwScore = pw => { let s = 0; if (pw.length >= 10) s++; if (pw.length >= 14) s++; if (/[a-zäöü]/.test(pw) && /[A-ZÄÖÜ]/.test(pw)) s++; if (/\d/.test(pw)) s++; if (/[^\w\s]/.test(pw) || /\s/.test(pw)) s++; return s; };
+const vOwnerOpts = () => [{v:'me', l:'Ich'}, ...S.persons.map(p => ({v:p.id, l:p.role}))];
+const vOwnerName = id => id === 'me' ? 'Ich' : (getPerson(id)?.role || '—');
+function vField(e, k, label, secret){
+  const v = e[k]; if (!v) return '';
+  const id = e.id + ':' + k, shown = !secret || VT.show[id];
+  return `<div class="vf"><span class="vl">${label}</span><code class="vv">${shown ? esc(v) : '••••••••'}</code>
+    ${secret ? `<button class="btn ghost sm" data-act="vShow" data-id="${esc(id)}" title="anzeigen">${VT.show[id] ? 'verbergen' : 'anzeigen'}</button>` : ''}
+    <button class="btn ghost sm" data-act="vCopy" data-id="${esc(id)}">kopieren</button></div>`;
+}
+VIEWS.vault = () => {
+  const head = (sub, btns = '') => `<div class="head"><div class="grow"><h1>${icon('lock')}Tresor</h1><p class="sub" style="margin:0">${sub}</p></div>${btns}</div>`;
+  if (!VT.blob) return head('Zugangsdaten für Banken, Ämter und Websites – verschlüsselt mit deinem Hauptpasswort.') + `
+    <div class="card vbox"><h3>Tresor einrichten</h3>
+      <p>Wähle ein <b>Hauptpasswort</b> – am besten 3–4 Wörter, z. B. „Birne-Fahrrad-Wolke-7“. Ohne dieses Passwort (oder den Wiederherstellungsschlüssel) kann <b>niemand</b> den Tresor öffnen – auch nicht bei Diebstahl des Computers.</p>
+      <div class="fld"><label>Hauptpasswort (mind. 10 Zeichen)</label><input type="password" id="vPw1" autocomplete="new-password"></div>
+      <div class="fld"><label>Hauptpasswort wiederholen</label><input type="password" id="vPw2" autocomplete="new-password"></div>
+      <div class="small muted" id="vStrength" style="margin:4px 0 10px"></div>
+      <button class="btn pri" data-act="vCreate">Tresor anlegen</button> <span class="small" id="vErr" style="color:var(--danger)"></span></div>`;
+  if (VT.recShown) return head('Wiederherstellungsschlüssel') + `
+    <div class="card vbox"><h3>Wichtig: Wiederherstellungsschlüssel aufschreiben</h3>
+      <p>Mit diesem Schlüssel öffnest du den Tresor, falls du das Hauptpasswort vergisst. Er wird <b>nur jetzt einmal</b> angezeigt.</p>
+      <div class="reckey">${esc(VT.recShown)}</div>
+      <p class="small muted">Ausdrucken oder abschreiben und an einem sicheren Ort aufbewahren (z. B. bei den Vollmachten). Nicht als Foto im Handy speichern.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="vPrintRec">${icon('print')}Ausdrucken</button><button class="btn pri" data-act="vRecDone">Ich habe den Schlüssel sicher notiert</button></div></div>`;
+  if (!VT.key) { const wait = Math.max(0, Math.ceil((VT.until - Date.now()) / 1000));
+    return head('Gesperrt. Der Tresor sperrt sich nach 1 Minute ohne Benutzung und beim Verlassen der Seite.') + `
+    <div class="card vbox"><h3>${icon('lock')}Tresor entsperren</h3>
+      <div class="fld"><label>Hauptpasswort</label><input type="password" id="vPw" autocomplete="current-password" ${wait ? 'disabled' : ''}></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn pri" data-act="vUnlock" ${wait ? 'disabled' : ''}>Entsperren</button>
+        <span class="small" id="vErr" style="color:var(--danger)">${wait ? 'Zu viele Fehlversuche – bitte ' + wait + ' s warten.' : ''}</span></div>
+      <details style="margin-top:14px"><summary class="small">Passwort vergessen? Mit Wiederherstellungsschlüssel öffnen</summary>
+        <div class="fld" style="margin-top:8px"><label>Wiederherstellungsschlüssel</label><input id="vRec" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off" spellcheck="false"></div>
+        <button class="btn" data-act="vUnlockRec">Mit Schlüssel öffnen</button><div class="small muted" style="margin-top:6px">Danach bitte ein neues Hauptpasswort setzen.</div></details></div>`; }
+  const q = VT.q.toLowerCase();
+  const list = VT.data.entries.filter(e => (!VT.person || e.owner === VT.person) && (!VT.cat || e.cat === VT.cat) && (!q || [e.title, e.user, e.url, e.notes, e.cat].join(' ').toLowerCase().includes(q)))
+    .sort((a, b) => vOwnerName(a.owner).localeCompare(vOwnerName(b.owner)) || (a.cat || '').localeCompare(b.cat || '') || a.title.localeCompare(b.title));
+  const seg = (k, v, l, n) => `<button class="seg ${VT[k] === v ? 'on' : ''}" data-act="vFilter" data-id="${k}:${esc(v)}">${esc(l)}${n != null ? ' (' + n + ')' : ''}</button>`;
+  return head('Entsperrt – sperrt automatisch nach 1 Minute ohne Benutzung. Nicht für Claude, Gedächtnis, Suche oder Berichte sichtbar.',
+    `<button class="btn" data-act="vSettings">Hauptpasswort / Schlüssel</button><button class="btn" data-act="vLockNow">${icon('lock')}Jetzt sperren</button><button class="btn pri" data-act="vNew">${icon('plus')}Neuer Eintrag</button>`) + `
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+    <span class="segs">${seg('person', '', 'Alle', VT.data.entries.length)}${vOwnerOpts().map(o => seg('person', o.v, o.l, VT.data.entries.filter(e => e.owner === o.v).length)).join('')}</span>
+    <select id="vCat" style="width:auto"><option value="">Alle Kategorien</option>${optHTML(VAULT_CATS, VT.cat)}</select>
+    <input id="vQ" placeholder="Suchen …" value="${esc(VT.q)}" style="max-width:240px"></div>
+  ${list.length ? `<div class="vgrid">${list.map(e => `<div class="card ventry"><h3>${esc(e.title)} <span class="badge">${esc(e.cat || 'Sonstiges')}</span> <span class="r small muted">${esc(vOwnerName(e.owner))}</span></h3>
+      ${vField(e, 'user', 'Benutzer', false)}${vField(e, 'password', 'Passwort', true)}${vField(e, 'pin', 'PIN', true)}${vField(e, 'extra', 'Weitere Nr.', true)}
+      ${e.url ? `<div class="vf"><span class="vl">Adresse</span><a href="${/^https?:\/\//i.test(e.url) ? esc(e.url) : 'https://' + esc(e.url)}" target="_blank" rel="noopener" class="trunc">${esc(e.url)}</a></div>` : ''}
+      ${e.notes ? `<div class="small muted" style="white-space:pre-wrap;margin-top:6px">${esc(e.notes)}</div>` : ''}
+      <div style="margin-top:8px;text-align:right"><button class="btn ghost sm" data-act="vEdit" data-id="${e.id}">Bearbeiten</button></div></div>`).join('')}</div>`
+    : `<div class="empty">${VT.data.entries.length ? 'Keine Einträge für diese Auswahl.' : 'Noch keine Einträge. Lege z. B. das Online-Banking von Vater an.'}</div>`}`;
+};
+AFTER.vault = async () => {
+  if (!VT.blob && !VT._loaded) { VT._loaded = true; await vaultLoad(); if (VT.blob) return render(); }
+  const p1 = $('#vPw1'); if (p1) { const upd = () => { const s = pwScore(p1.value); $('#vStrength').textContent = p1.value ? 'Stärke: ' + ['sehr schwach', 'schwach', 'mittel', 'gut', 'stark', 'sehr stark'][s] : ''; }; p1.addEventListener('input', upd); p1.focus(); }
+  const pw = $('#vPw'); if (pw) { pw.focus(); pw.addEventListener('keydown', e => { if (e.key === 'Enter') ACT.vUnlock(); }); }
+  const vq = $('#vQ'); if (vq) vq.addEventListener('input', () => { VT.q = vq.value; clearTimeout(vq._t); vq._t = setTimeout(() => { render(); const n = $('#vQ'); if (n) { n.focus(); n.selectionStart = n.selectionEnd = n.value.length; } }, 250); });
+  const vc = $('#vCat'); if (vc) vc.addEventListener('change', () => { VT.cat = vc.value; render(); });
+  if (VT.until > Date.now()) setTimeout(() => parseHash().route === 'vault' && !VT.key && render(), 1000);
+};
+function vEditEntry(e){
+  const fields = [{k:'title', l:'Bezeichnung (z. B. „Sparkasse Online-Banking“)', req:1, full:1}, {k:'owner', l:'Gehört zu', t:'select', o:vOwnerOpts()}, {k:'cat', l:'Kategorie', t:'select', o:VAULT_CATS},
+    {k:'user', l:'Benutzername / Anmeldename / Kundennummer'}, {k:'password', l:'Passwort', t:'password'}, {k:'pin', l:'PIN', t:'password'}, {k:'extra', l:'Weitere Geheimnummer (z. B. PUK, TAN-Listen-Nr.)', t:'password'},
+    {k:'url', l:'Internetadresse'}, {k:'notes', l:'Notizen (z. B. Sicherheitsfragen, Ansprechpartner)', t:'textarea', full:1, rows:3}];
+  openForm({title: e ? 'Eintrag bearbeiten' : 'Neuer Tresor-Eintrag', fields, data: e || {owner: UI.person !== 'all' ? UI.person : 'me', cat:'Bank'},
+    onSave: async v => { if (!VT.key) { alert('Der Tresor wurde inzwischen gesperrt. Bitte neu entsperren.'); return; }
+      if (e) Object.assign(e, v, {updated:today()}); else VT.data.entries.push(Object.assign({id:uid(), created:today()}, v));
+      await vaultPersist(); render(); toast('Im Tresor gespeichert'); },
+    onDelete: e ? async () => { if (!confirm('Diesen Eintrag endgültig löschen?')) return false; VT.data.entries = VT.data.entries.filter(x => x.id !== e.id); await vaultPersist(); render(); } : null});
+  // Passwortfelder im Formular mit „anzeigen“-Schalter
+  $$('#mform input[type=password]').forEach(i => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost sm'; b.textContent = 'anzeigen'; b.style.marginTop = '4px';
+    b.onclick = () => { i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? 'anzeigen' : 'verbergen'; }; i.after(b); });
+}
+Object.assign(ACT, {
+  vCreate: async () => { const a = $('#vPw1').value, b = $('#vPw2').value, err = $('#vErr');
+    if (a.length < 10) return err.textContent = 'Mindestens 10 Zeichen.'; if (a !== b) return err.textContent = 'Die Passwörter stimmen nicht überein.';
+    err.textContent = 'Wird angelegt …'; await vaultCreate(a); VT._secret = {v:a, viaRec:false}; render(); },
+  vRecDone: () => { if (!confirm('Hast du den Wiederherstellungsschlüssel wirklich notiert? Er wird danach nicht mehr angezeigt.')) return; VT.recShown = ''; render(); },
+  vPrintRec: () => outputPrint(`<div style="font-family:Arial;padding:25mm"><h1 style="font-size:16pt">Office Home – Tresor: Wiederherstellungsschlüssel</h1><p>Erstellt am ${fmtDate(today())}. Sicher aufbewahren. Mit diesem Schlüssel lässt sich der Tresor öffnen, wenn das Hauptpasswort vergessen wurde.</p><p style="font:20pt monospace;letter-spacing:2px;border:1px solid #000;padding:6mm;text-align:center">${esc(VT.recShown)}</p></div>`, 'Tresor-Wiederherstellungsschluessel', false),
+  vUnlock: async () => { const i = $('#vPw'), err = $('#vErr'); if (!i || !i.value) return; if (VT.until > Date.now()) return;
+    err.textContent = 'Wird geprüft …'; const v = i.value;
+    try { await vaultUnlock(v, false); VT._secret = {v, viaRec:false}; render(); }
+    catch (e) { VT.fails++; if (VT.fails >= 3) VT.until = Date.now() + Math.min(300, 5 * 2 ** (VT.fails - 3)) * 1000; i.value = ''; render(); const e2 = $('#vErr'); if (e2 && !e2.textContent) e2.textContent = 'Falsches Passwort.'; } },
+  vUnlockRec: async () => { const r = $('#vRec').value; try { await vaultUnlock(r, true); VT._secret = {v:r, viaRec:true}; render(); setTimeout(() => ACT.vSettings(true), 50); } catch (e) { alert('Der Wiederherstellungsschlüssel ist falsch.'); } },
+  vLockNow: () => vaultLock(),
+  vNew: () => vEditEntry(null), vEdit: d => vEditEntry(VT.data.entries.find(e => e.id === d.id)),
+  vShow: d => { VT.show[d.id] = !VT.show[d.id]; render(); },
+  vCopy: async d => { const [eid, k] = d.id.split(':'); const e = VT.data.entries.find(x => x.id === eid); if (!e) return; await navigator.clipboard.writeText(e[k] || ''); toast('Kopiert'); },
+  vFilter: d => { const i = d.id.indexOf(':'); VT[d.id.slice(0, i)] = d.id.slice(i + 1); render(); },
+  vSettings: (forcePw) => openForm({title: forcePw === true ? 'Neues Hauptpasswort setzen' : 'Hauptpasswort / Wiederherstellung',
+    fields:[{k:'pw1', l:'Neues Hauptpasswort (mind. 10 Zeichen) – leer lassen, um es nicht zu ändern', t:'password', full:1}, {k:'pw2', l:'Neues Hauptpasswort wiederholen', t:'password', full:1},
+      {k:'newRec', l:'Neuen Wiederherstellungsschlüssel erzeugen (der alte wird ungültig)', t:'checkbox', full:1}], data:{},
+    onSave: async v => { if (!VT.key) { alert('Tresor ist gesperrt.'); return; }
+      if (v.pw1) { if (v.pw1.length < 10) { alert('Mindestens 10 Zeichen.'); return false; } if (v.pw1 !== v.pw2) { alert('Die Passwörter stimmen nicht überein.'); return false; } await vaultChangePw(v.pw1); VT._secret = {v:v.pw1, viaRec:false}; toast('Hauptpasswort geändert'); }
+      if (v.newRec) { await vaultNewRec(); } render(); }})
 });
 
 // ---------- Start ----------
