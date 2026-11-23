@@ -69,7 +69,8 @@ button{font:inherit}
 .nav a.on .cnt{margin-left:auto} .nav a.on:has(.cnt)::after{margin-left:6px}
 .side .foot{padding:14px 20px;font-size:11px;color:var(--brand-muted);border-top:1px solid rgba(169,184,202,.14)}
 .side .foot a{color:#A9B8CA}
-svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;--icon-dot:var(--accent2)}
+.side svg.i{--icon-dot:#A9B8CA} .btn.pri svg.i{--icon-dot:var(--focus)}
 /* Hauptbereich */
 .mainwrap{display:flex;flex-direction:column;min-width:0;height:100vh}
 .top{display:flex;align-items:center;gap:12px;padding:12px 28px;background:var(--bg);border-bottom:1px solid var(--line)}
@@ -393,32 +394,75 @@ async function imageToDataURL(file, maxW = 900){
   c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c.toDataURL('image/png');
 }
 
+// Linien-Icons nach Brand Kit (Icon-Briefing Teil A–D, 63 Stück) – Quelle: Leon Brandkit/OfficeHome-Icons/icons.json
 const ICONS = {
-  home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
-  folder:'<path d="M3 6h6l2 2h10v11H3z"/>',
-  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h7M9 17h7"/>',
-  receipt:'<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
-  wallet:'<path d="M3 7h18v13H3z"/><path d="M16 13h2"/><path d="M3 7l3-4h12l3 4"/>',
-  note:'<path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4"/>',
-  book:'<path d="M4 4h14a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M8 4v16"/>',
-  mail:'<path d="M3 5h18v14H3z"/><path d="M3 5l9 7 9-7"/>',
-  pen:'<path d="M4 20h4L20 8l-4-4L4 16z"/>',
-  users:'<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M17 3.5a4 4 0 0 1 0 7M22 21v-2a4 4 0 0 0-3-3.8"/>',
-  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',
-  print:'<path d="M6 9V2h12v7"/><path d="M6 18H4v-7h16v7h-2"/><path d="M6 14h12v8H6z"/>',
-  save:'<path d="M5 3h11l5 5v13H5z"/><path d="M8 3v5h8M8 21v-7h8v7"/>',
-  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
-  scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
-  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
-  cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
-  chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-8"/>',
-  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
-  upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>',
-  euro:'<path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h10M4 14h10"/>'
+ "dashboard": "<rect x=\"3.5\" y=\"3.5\" width=\"7.5\" height=\"9\" rx=\"2.2\"/><rect x=\"13\" y=\"3.5\" width=\"7.5\" height=\"5.5\" rx=\"2\"/><rect x=\"13\" y=\"11\" width=\"7.5\" height=\"9.5\" rx=\"2.2\"/><rect x=\"3.5\" y=\"14.5\" width=\"7.5\" height=\"6\" rx=\"2\"/><circle cx=\"16.75\" cy=\"6.25\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "statistik": "<path d=\"M4 4v14.5A1.5 1.5 0 0 0 5.5 20H20\"/><path d=\"M8.5 16.5v-3.5\"/><path d=\"M12.5 16.5v-6\"/><path d=\"M16.5 16.5v-8\"/><circle cx=\"16.5\" cy=\"5.4\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "finanzen": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M14.6 9.2a3.5 3.5 0 1 0 0 5.6\"/><path d=\"M8 11h4.4\"/><path d=\"M8 13h4.4\"/><circle cx=\"16.4\" cy=\"12\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "vorgaenge": "<path d=\"M3.5 7a2.5 2.5 0 0 1 2.5-2.5h3.2c.7 0 1.3.3 1.7.8l1 1.2c.4.5 1 .8 1.7.8H18a2.5 2.5 0 0 1 2.5 2.5v8.2a2.5 2.5 0 0 1-2.5 2.5H6a2.5 2.5 0 0 1-2.5-2.5Z\"/><path d=\"M3.5 10.3h17\"/><circle cx=\"7\" cy=\"7.6\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "fristen": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.2V12\"/><path d=\"M12 12l3.2 2\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "brief": "<path d=\"M16 4.6a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8l-4.1.7.7-4.1Z\"/><path d=\"M14.4 6.2l3.4 3.4\"/><path d=\"M12.5 20h5\"/><circle cx=\"20.1\" cy=\"20\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "dokumente": "<path d=\"M14 3.5H7.5A2.5 2.5 0 0 0 5 6v12a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18V8.5Z\"/><path d=\"M14 3.5V7a1.5 1.5 0 0 0 1.5 1.5H19\"/><path d=\"M8.6 13h6.8\"/><path d=\"M8.6 16.5h3.8\"/><circle cx=\"15\" cy=\"16.5\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "scanner": "<path d=\"M4 8.5v-2A2.5 2.5 0 0 1 6.5 4h2\"/><path d=\"M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2\"/><path d=\"M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2\"/><path d=\"M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2\"/><path d=\"M7 12h8.4\"/><circle cx=\"17.6\" cy=\"12\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "vertraege": "<path d=\"M11 20.5H7.5A2.5 2.5 0 0 1 5 18V6a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 6v4.5\"/><path d=\"M8.5 8h7\"/><path d=\"M8.5 11.5h3.5\"/><circle cx=\"16\" cy=\"16\" r=\"3.2\"/><path d=\"M14.4 19l-.6 2.2\"/><path d=\"M17.6 19l.6 2.2\"/><circle cx=\"16\" cy=\"16\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "konten": "<path d=\"M4 9.3 12 4.5l8 4.8Z\"/><path d=\"M6.5 12v5.5\"/><path d=\"M10.2 12v5.5\"/><path d=\"M13.8 12v5.5\"/><path d=\"M17.5 12v5.5\"/><path d=\"M4 20.5h16\"/><circle cx=\"12\" cy=\"7.4\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "notizen": "<path d=\"M13 20.5H7.5A2.5 2.5 0 0 1 5 18V6a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 6v8.5Z\"/><path d=\"M13 20.5V16a1.5 1.5 0 0 1 1.5-1.5H19\"/><path d=\"M8.6 8h4.2\"/><path d=\"M8.6 11.5h6.8\"/><circle cx=\"15.2\" cy=\"8\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "bericht": "<rect x=\"4.5\" y=\"3.5\" width=\"15\" height=\"17\" rx=\"4\"/><path d=\"M8.5 8h5\"/><path d=\"M8 16l2.6-2.8 2.3 1.6 2.4-3\"/><circle cx=\"16.2\" cy=\"10.8\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "personen": "<circle cx=\"9.5\" cy=\"8.5\" r=\"3.2\"/><path d=\"M3.8 20v-.8a4.8 4.8 0 0 1 4.8-4.8h1.8a4.8 4.8 0 0 1 4.8 4.8v.8\"/><path d=\"M15 5.6a3 3 0 0 1 0 5.8\"/><path d=\"M17.6 14.6a4.6 4.6 0 0 1 2.6 4.2v1.2\"/><circle cx=\"20.2\" cy=\"5\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "adressbuch": "<rect x=\"4.5\" y=\"3.5\" width=\"14\" height=\"17\" rx=\"3.5\"/><path d=\"M8 3.5v17\"/><path d=\"M18.5 8h1.8\"/><path d=\"M18.5 12h1.8\"/><path d=\"M18.5 16h1.8\"/><path d=\"M11.3 14.8h4.2\"/><circle cx=\"13.4\" cy=\"10.6\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "tresor": "<rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"15\" rx=\"4\"/><circle cx=\"12\" cy=\"11\" r=\"4\"/><path d=\"M7 18.5v2\"/><path d=\"M17 18.5v2\"/><circle cx=\"12\" cy=\"11\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "einstellungen": "<path d=\"M4 7h8.6\"/><path d=\"M17.4 7H20\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><path d=\"M4 12h2.6\"/><path d=\"M11.4 12H20\"/><circle cx=\"9\" cy=\"12\" r=\"2.2\"/><path d=\"M4 17h10.6\"/><path d=\"M19.4 17H20\"/><circle cx=\"17\" cy=\"17\" r=\"2.2\"/><circle cx=\"9\" cy=\"12\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "plus": "<path d=\"M12 5.5v13\"/><path d=\"M5.5 12h13\"/>",
+ "speichern": "<path d=\"M4.5 6.5A2.5 2.5 0 0 1 7 4h8.6c.66 0 1.3.26 1.77.73l1.4 1.4c.47.47.73 1.1.73 1.77V17.5A2.5 2.5 0 0 1 17 20H7a2.5 2.5 0 0 1-2.5-2.5Z\"/><path d=\"M8 4v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V4\"/><path d=\"M8 20v-4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v4\"/><circle cx=\"12\" cy=\"17.5\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "drucken": "<path d=\"M7 17H6a2.5 2.5 0 0 1-2.5-2.5v-4A2.5 2.5 0 0 1 6 8h12a2.5 2.5 0 0 1 2.5 2.5v4A2.5 2.5 0 0 1 18 17h-1\"/><path d=\"M7 8V5.5A1.5 1.5 0 0 1 8.5 4h7A1.5 1.5 0 0 1 17 5.5V8\"/><path d=\"M7 14h10v5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 19Z\"/><circle cx=\"17\" cy=\"11\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "pdf": "<path d=\"M14 3.5H7.5A2.5 2.5 0 0 0 5 6v12a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18V8.5Z\"/><path d=\"M14 3.5V7a1.5 1.5 0 0 0 1.5 1.5H19\"/><path d=\"M12 10.5v6\"/><path d=\"M9.5 14l2.5 2.5 2.5-2.5\"/>",
+ "hochladen": "<path d=\"M12 15.5V5\"/><path d=\"M7.5 9.5 12 5l4.5 4.5\"/><path d=\"M5 19.5h14\"/>",
+ "herunterladen": "<path d=\"M12 4.5V15\"/><path d=\"M7.5 10.5 12 15l4.5-4.5\"/><path d=\"M5 19.5h14\"/>",
+ "bearbeiten": "<path d=\"M16 4.6a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8l-4.1.7.7-4.1Z\"/><path d=\"M14.4 6.2l3.4 3.4\"/>",
+ "loeschen": "<path d=\"M4.5 7h15\"/><path d=\"M9.5 7V5.5A1.5 1.5 0 0 1 11 4h2a1.5 1.5 0 0 1 1.5 1.5V7\"/><path d=\"M6.5 7l.8 11.2a2.5 2.5 0 0 0 2.5 2.3h4.4a2.5 2.5 0 0 0 2.5-2.3L17.5 7\"/><path d=\"M10.3 11v5.5\"/><path d=\"M13.7 11v5.5\"/>",
+ "kopieren": "<rect x=\"8.5\" y=\"8.5\" width=\"12\" height=\"12\" rx=\"3\"/><path d=\"M15.5 8.5V6A2.5 2.5 0 0 0 13 3.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5\"/><circle cx=\"14.5\" cy=\"14.5\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "auge": "<path d=\"M2.8 12C4.8 8 8.2 5.8 12 5.8s7.2 2.2 9.2 6.2c-2 4-5.4 6.2-9.2 6.2S4.8 16 2.8 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "auge-zu": "<path d=\"M2.8 12C4.8 8 8.2 5.8 12 5.8s7.2 2.2 9.2 6.2c-2 4-5.4 6.2-9.2 6.2S4.8 16 2.8 12Z\"/><path d=\"M4.5 4.5l15 15\"/>",
+ "suche": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6\"/><path d=\"M15 15l5 5\"/>",
+ "schliessen": "<path d=\"M6.5 6.5l11 11\"/><path d=\"M17.5 6.5l-11 11\"/>",
+ "pfeil-links": "<path d=\"M14.5 6l-6 6 6 6\"/>",
+ "pfeil-rechts": "<path d=\"M9.5 6l6 6-6 6\"/>",
+ "drehen": "<path d=\"M19.5 12a7.5 7.5 0 1 1-7.5-7.5c2.1 0 4.1.83 5.6 2.3l1.9 1.8\"/><path d=\"M19.5 4.5v4.1h-4.1\"/><circle cx=\"12\" cy=\"12\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "zuschneiden": "<path d=\"M7 3.5V15a2 2 0 0 0 2 2h11.5\"/><path d=\"M3.5 7H15a2 2 0 0 1 2 2v11.5\"/>",
+ "schloss": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"10\" rx=\"3\"/><path d=\"M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3\"/><circle cx=\"12\" cy=\"15.5\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "schloss-offen": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"10\" rx=\"3\"/><path d=\"M8.5 10.5V7.5a3.5 3.5 0 0 1 6.8-1.2\"/><circle cx=\"12\" cy=\"15.5\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "update": "<path d=\"M4.5 12A7.5 7.5 0 0 1 12 4.5a8.1 8.1 0 0 1 5.6 2.3l1.9 1.9\"/><path d=\"M19.5 4.5v4.2h-4.2\"/><path d=\"M19.5 12a7.5 7.5 0 0 1-7.5 7.5 8.1 8.1 0 0 1-5.6-2.3l-1.9-1.9\"/><path d=\"M8.7 15.3H4.5v4.2\"/><circle cx=\"12\" cy=\"12\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "mail": "<rect x=\"3.5\" y=\"5.5\" width=\"17\" height=\"13\" rx=\"3.5\"/><path d=\"M4.5 7.5l6.2 4.8a2.2 2.2 0 0 0 2.6 0l6.2-4.8\"/>",
+ "kalender": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"3.5\"/><path d=\"M8 3.5v3\"/><path d=\"M16 3.5v3\"/><path d=\"M3.5 9.5h17\"/><circle cx=\"15.5\" cy=\"15\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "erledigt": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M8.3 12.2l2.6 2.6 4.9-5.2\"/>",
+ "achtung": "<path d=\"M10.3 4.6a2 2 0 0 1 3.4 0l7 12.2a2 2 0 0 1-1.7 3H5a2 2 0 0 1-1.7-3Z\"/><path d=\"M12 9.5v3.8\"/><circle cx=\"12\" cy=\"16.4\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "wartet": "<path d=\"M6.5 3.5h11\"/><path d=\"M6.5 20.5h11\"/><path d=\"M8 3.5v2.2a4 4 0 0 0 1.6 3.2L12 10.8l2.4-1.9A4 4 0 0 0 16 5.7V3.5\"/><path d=\"M8 20.5v-2.2a4 4 0 0 1 1.6-3.2L12 13.2l2.4 1.9a4 4 0 0 1 1.6 3.2v2.2\"/><circle cx=\"12\" cy=\"17.8\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "in-arbeit": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 3.5v17\"/><path d=\"M15.8 4.4v15.2\"/>",
+ "info": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 11v5\"/><circle cx=\"12\" cy=\"7.9\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "trend-hoch": "<path d=\"M5.5 18 10 12.5l3.5 3.5 6.5-8\"/><path d=\"M14.8 8h5.2v5.2\"/><circle cx=\"3.9\" cy=\"19.9\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "trend-runter": "<path d=\"M5.5 6 10 11.5l3.5-3.5 6.5 8\"/><path d=\"M14.8 16h5.2v-5.2\"/><circle cx=\"3.9\" cy=\"4.1\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "handy": "<rect x=\"6.5\" y=\"2.5\" width=\"11\" height=\"19\" rx=\"3\"/><path d=\"M10.5 18.5h3\"/><circle cx=\"12\" cy=\"5.6\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "qr": "<rect x=\"3.5\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1.8\"/><rect x=\"14\" y=\"3.5\" width=\"6.5\" height=\"6.5\" rx=\"1.8\"/><rect x=\"3.5\" y=\"14\" width=\"6.5\" height=\"6.5\" rx=\"1.8\"/><path d=\"M14 14h2.5\"/><path d=\"M20.5 14v2.5\"/><path d=\"M14 20.5h2.5\"/><circle cx=\"19.6\" cy=\"19.6\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "drucker-scan": "<rect x=\"3.5\" y=\"10\" width=\"17\" height=\"9.5\" rx=\"2.5\"/><path d=\"M4.5 7.5l15-3\"/><path d=\"M6.5 14.75h8.6\"/><circle cx=\"17.5\" cy=\"14.75\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "ordner-auge": "<path d=\"M3.5 7a2.5 2.5 0 0 1 2.5-2.5h3.2c.7 0 1.3.3 1.7.8l1 1.2c.4.5 1 .8 1.7.8H18a2.5 2.5 0 0 1 2.5 2.5v8.2a2.5 2.5 0 0 1-2.5 2.5H6a2.5 2.5 0 0 1-2.5-2.5Z\"/><path d=\"M3.5 10.3h17\"/><path d=\"M11 15.2c1.1-1.9 2.6-2.9 4.3-2.9s3.2 1 4.3 2.9c-1.1 1.9-2.6 2.9-4.3 2.9S12.1 17.1 11 15.2Z\"/><circle cx=\"15.3\" cy=\"15.2\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "ki": "<path d=\"M11 4c.9 5.1 2.9 7.1 8 8-5.1.9-7.1 2.9-8 8-.9-5.1-2.9-7.1-8-8 5.1-.9 7.1-2.9 8-8Z\"/><circle cx=\"19.3\" cy=\"4.8\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "gedaechtnis": "<path d=\"M12 4 20 8l-8 4-8-4Z\"/><path d=\"M4 12l8 4 8-4\"/><path d=\"M4 16l8 4 8-4\"/><circle cx=\"12\" cy=\"8\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "demo": "<path d=\"M9 3.5h6\"/><path d=\"M10.2 3.5v5.3L5.3 17.6a2 2 0 0 0 1.7 2.9h10a2 2 0 0 0 1.7-2.9l-4.9-8.8V3.5\"/><path d=\"M7.4 14h9.2\"/><circle cx=\"12.8\" cy=\"17.2\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "live": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "hell": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.8v1.7\"/><path d=\"M12 19.5v1.7\"/><path d=\"M2.8 12h1.7\"/><path d=\"M19.5 12h1.7\"/><path d=\"M5.5 5.5l1.2 1.2\"/><path d=\"M17.3 17.3l1.2 1.2\"/><path d=\"M5.5 18.5l1.2-1.2\"/><path d=\"M17.3 6.7l1.2-1.2\"/><circle cx=\"12\" cy=\"12\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "dunkel": "<path d=\"M19.5 14.3A7.8 7.8 0 1 1 9.7 4.5a6.2 6.2 0 0 0 9.8 9.8Z\"/><circle cx=\"17.3\" cy=\"5.6\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "system": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12.5\" rx=\"3\"/><path d=\"M12 4v12.5\"/><path d=\"M12 16.5v4\"/><path d=\"M8.5 20.5h7\"/><circle cx=\"7.5\" cy=\"10.25\" r=\"1.1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "csv": "<rect x=\"3.5\" y=\"4\" width=\"13.5\" height=\"12.5\" rx=\"3\"/><path d=\"M3.5 8.5H17\"/><path d=\"M8.5 8.5v8\"/><path d=\"M20 12.5v7\"/><path d=\"M17.5 17l2.5 2.5 2.5-2.5\"/><circle cx=\"12.8\" cy=\"12.5\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "buchung": "<path d=\"M6.2 8.5h11.3\"/><path d=\"M14 5l3.5 3.5L14 12\"/><path d=\"M19.5 15.5h-13\"/><path d=\"M10 12l-3.5 3.5L10 19\"/><circle cx=\"3.8\" cy=\"8.5\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "vollmacht": "<path d=\"M14 3.5H7.5A2.5 2.5 0 0 0 5 6v12a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18V8.5Z\"/><path d=\"M14 3.5V7a1.5 1.5 0 0 0 1.5 1.5H19\"/><path d=\"M8.6 8.6h3\"/><circle cx=\"12\" cy=\"14.6\" r=\"3\"/><circle cx=\"12\" cy=\"14.6\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "unterschrift": "<path d=\"M4 15.5c1.8-4.5 3.6-8.5 5.3-8.5 1.6 0 .6 5.4-.8 8.3 1.9-3.4 3.7-5 4.9-4.6 1 .4-.4 3.1.6 3.4 1 .3 2.4-.9 3.7-1.9\"/><path d=\"M4 20h11\"/><circle cx=\"18\" cy=\"20\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "stempel": "<circle cx=\"12\" cy=\"5.6\" r=\"2.3\"/><path d=\"M10.7 7.8 10.2 12\"/><path d=\"M13.3 7.8l.5 4.2\"/><path d=\"M5 14.5A2.5 2.5 0 0 1 7.5 12h9a2.5 2.5 0 0 1 2.5 2.5V17H5Z\"/><path d=\"M5.5 20.5h10\"/><circle cx=\"18.4\" cy=\"20.5\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "vorlage": "<rect x=\"4.5\" y=\"3.5\" width=\"15\" height=\"17\" rx=\"4\"/><path d=\"M4.5 9h15\"/><path d=\"M10 9v11.5\"/><circle cx=\"14.8\" cy=\"14.8\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>",
+ "alle": "<circle cx=\"12\" cy=\"6.3\" r=\"2.6\"/><circle cx=\"6.3\" cy=\"16.4\" r=\"2.6\"/><circle cx=\"17.7\" cy=\"16.4\" r=\"2.6\"/><circle cx=\"12\" cy=\"13\" r=\"1\" fill=\"var(--icon-dot, #4F6785)\" stroke=\"none\"/>"
 };
-const icon = n => `<svg class="i" viewBox="0 0 24 24">${ICONS[n] || ''}</svg>`;
+// alte Namen → neue Icons
+const ICON_ALT = {"home": "dashboard", "folder": "vorgaenge", "clock": "fristen", "file": "dokumente", "receipt": "vertraege", "wallet": "konten", "note": "notizen", "book": "adressbuch", "pen": "bearbeiten", "users": "personen", "sliders": "einstellungen", "print": "drucken", "save": "speichern", "lock": "schloss", "scan": "scanner", "phone": "handy", "cal": "kalender", "chart": "statistik", "trend": "trend-hoch", "upload": "hochladen", "euro": "finanzen"};
+const icon = n => `<svg class="i" viewBox="0 0 24 24">${ICONS[n] || ICONS[ICON_ALT[n]] || ''}</svg>`;
 
 // ---------- Datenbank (IndexedDB, lokal) ----------
 const DB = {
@@ -549,7 +593,7 @@ function openForm({title, fields, data = {}, onSave, onDelete, saveLabel}){
   closeModal();
   const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
   bg.innerHTML = `<div class="modal"><h3>${esc(title)}</h3><form id="mform" autocomplete="off">${fields.map(f => fieldHTML(f, data[f.k] ?? f.def ?? '')).join('')}</form>
-    <div class="acts">${onDelete ? '<button class="btn dan" data-m="del">Löschen</button>' : ''}<span class="sp"></span><button class="btn" data-m="cancel">Abbrechen</button><button class="btn pri" data-m="ok">${esc(saveLabel || 'Speichern')}</button></div></div>`;
+    <div class="acts">${onDelete ? '<button class="btn dan" data-m="del">' + icon('loeschen') + 'Löschen</button>' : ''}<span class="sp"></span><button class="btn" data-m="cancel">Abbrechen</button><button class="btn pri" data-m="ok">${esc(saveLabel || 'Speichern')}</button></div></div>`;
   document.body.appendChild(bg);
   const form = $('#mform', bg);
   const first = form.querySelector('input:not([type=checkbox]),textarea,select'); if (first) first.focus();
@@ -808,11 +852,11 @@ const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenze
 
 // ---------- Navigation ----------
 const NAV = [
-  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'home'}, {r:'stats', l:'Statistik', i:'chart'}, {r:'finance', l:'Finanzen', i:'euro'},
-  {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'folder'}, {r:'tasks', l:'Fristen & Aufgaben', i:'clock', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
-  {r:'letters', l:'Brief schreiben', i:'pen'}, {r:'documents', l:'Dokumente', i:'file'}, {r:'scan', l:'Scanner', i:'scan', cnt:() => (S.scans || []).length},
-  {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'receipt'}, {r:'assets', l:'Konten & Vermögen', i:'wallet'}, {r:'notes', l:'Notizen', i:'note'}, {r:'report', l:'Monatsbericht', i:'print'},
-  {grp:'Stammdaten'}, {r:'persons', l:'Personen & Vollmachten', i:'users'}, {r:'contacts', l:'Adressbuch', i:'book'}, {r:'vault', l:'Tresor', i:'lock'}, {r:'settings', l:'Einstellungen', i:'sliders'}
+  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'dashboard'}, {r:'stats', l:'Statistik', i:'statistik'}, {r:'finance', l:'Finanzen', i:'finanzen'},
+  {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'vorgaenge'}, {r:'tasks', l:'Fristen & Aufgaben', i:'fristen', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
+  {r:'letters', l:'Brief schreiben', i:'brief'}, {r:'documents', l:'Dokumente', i:'dokumente'}, {r:'scan', l:'Scanner', i:'scanner', cnt:() => (S.scans || []).length},
+  {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'vertraege'}, {r:'assets', l:'Konten & Vermögen', i:'konten'}, {r:'notes', l:'Notizen', i:'notizen'}, {r:'report', l:'Monatsbericht', i:'bericht'},
+  {grp:'Stammdaten'}, {r:'persons', l:'Personen & Vollmachten', i:'personen'}, {r:'contacts', l:'Adressbuch', i:'adressbuch'}, {r:'vault', l:'Tresor', i:'tresor'}, {r:'settings', l:'Einstellungen', i:'einstellungen'}
 ];
 const ROUTE_NAV = {case:'cases', brief:'letters', search:''};
 function parseHash(){
@@ -864,9 +908,9 @@ VIEWS.dashboard = () => {
                   .sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 6);
   return `
   <div class="head"><div class="grow"><h1>Übersicht</h1><p class="sub" style="margin:0">${fmtDateLong(today())}${UI.person !== 'all' ? ' · ' + esc(getPerson(UI.person)?.role) : ''}</p></div>
-    <button class="btn" data-act="newTask">${icon('plus')}Frist</button><button class="btn" data-act="newCase">${icon('plus')}Vorgang</button><button class="btn" data-act="newDoc">${icon('plus')}Dokument</button><a class="btn pri" href="#/brief/new">${icon('pen')}Brief schreiben</a></div>
-  ${setupMissing ? `<div class="banner blue">${icon('users')}<div><b>Willkommen bei Office Home!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.<br><a href="#" data-act="setMode" data-id="demo">Oder zuerst im Demo-Modus mit vielen Beispieldaten ausprobieren →</a></div></div>` : ''}
-  ${overdue.length ? `<div class="banner red">${icon('clock')}<div><b>${overdue.length} überfällige Frist${overdue.length > 1 ? 'en' : ''}!</b> ${overdue.slice(0, 3).map(i => esc(i.title)).join(' · ')}</div></div>` : ''}
+    <button class="btn" data-act="newTask">${icon('plus')}Frist</button><button class="btn" data-act="newCase">${icon('plus')}Vorgang</button><button class="btn" data-act="newDoc">${icon('plus')}Dokument</button><a class="btn pri" href="#/brief/new">${icon('brief')}Brief schreiben</a></div>
+  ${setupMissing ? `<div class="banner blue">${icon('info')}<div><b>Willkommen bei Office Home!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.<br><a href="#" data-act="setMode" data-id="demo">Oder zuerst im Demo-Modus mit vielen Beispieldaten ausprobieren →</a></div></div>` : ''}
+  ${overdue.length ? `<div class="banner red">${icon('achtung')}<div><b>${overdue.length} überfällige Frist${overdue.length > 1 ? 'en' : ''}!</b> ${overdue.slice(0, 3).map(i => esc(i.title)).join(' · ')}</div></div>` : ''}
   ${needBackup && !setupMissing ? `<div class="banner amber">${icon('save')}<div>${lb ? 'Letzte Datensicherung am ' + fmtDate(lb) + '.' : 'Noch keine Datensicherung erstellt.'} <a href="#" data-act="backup">Jetzt sichern</a></div></div>` : ''}
   <div class="kpis">
     <div class="kpi ${overdue.length ? 'red' : ''}" data-go="#/tasks"><div class="l">Überfällig</div><div class="v">${overdue.length}</div></div>
@@ -1201,8 +1245,8 @@ VIEWS.finance = () => {
   const list = cur.filter(b => !UI.finType || b.type === UI.finType).sort((a, b) => b.date.localeCompare(a.date));
   const seg = (k, v, l) => `<button class="seg ${String(UI[k]) === String(v) ? 'on' : ''}" data-act="stat" data-id="${k}:${v}">${l}</button>`;
   return `<div class="head"><div class="grow"><h1>Finanzen</h1><p class="sub" style="margin:0">Einnahmen, Ausgaben, Kontostand und Prognose – Verträge werden automatisch als Ausgabe gezählt.</p></div>
-    <button class="btn" data-act="finMonth" data-id="-1">‹</button><input type="month" data-chg="finMonth" value="${esc(ym)}" class="btn" style="padding:6px 10px"><button class="btn" data-act="finMonth" data-id="1">›</button>
-    <button class="btn" data-act="csvImport">${icon('upload')}Kontoauszug (CSV)</button><button class="btn pri" data-act="newBooking">${icon('plus')}Buchung</button></div>
+    <button class="btn" data-act="finMonth" data-id="-1">${icon('pfeil-links')}</button><input type="month" data-chg="finMonth" value="${esc(ym)}" class="btn" style="padding:6px 10px"><button class="btn" data-act="finMonth" data-id="1">${icon('pfeil-rechts')}</button>
+    <button class="btn" data-act="csvImport">${icon('csv')}Kontoauszug (CSV)</button><button class="btn pri" data-act="newBooking">${icon('plus')}Buchung</button></div>
   <div class="kpis">
     <div class="kpi"><div class="l">Einnahmen ${esc(monthLabel(ym))}</div><div class="v" style="color:var(--ok)">${eur(ein)}</div><div class="l">${trendChip(ein, pein)} vs Vormonat</div></div>
     <div class="kpi"><div class="l">Ausgaben ${esc(monthLabel(ym))}</div><div class="v" style="color:var(--danger)">${eur(aus)}</div><div class="l">${trendChip(aus, paus)} vs Vormonat</div></div>
@@ -1214,7 +1258,7 @@ VIEWS.finance = () => {
     <div class="card"><h3>${icon('trend')}${lineTitle} <span class="r muted small">6 Monate</span></h3><div class="legend">${series.map(s => `<span><i style="background:${s.color}"></i>${s.label}</span>`).join('')}</div>${svgLines(series, labels, {fmt:v => Math.round(v) + ' €'})}</div>
     <div class="card"><h3>${icon('chart')}Einnahmen & Ausgaben <span class="r muted small">6 Monate</span></h3><div class="legend"><span><i style="background:var(--c-in)"></i>Einnahmen</span><span><i style="background:var(--c-out)"></i>Ausgaben</span></div>
       ${svgGroupBars(per.map(p => ({label:ml(p.m), vals:[p.ein, p.aus]})), [{l:'Einnahmen', c:'var(--c-in)'}, {l:'Ausgaben', c:'var(--c-out)'}], {fmt:v => eur(v)})}</div>
-    <div class="card"><h3>${icon('receipt')}Ausgaben nach Kategorie</h3>
+    <div class="card"><h3>${icon('buchung')}Ausgaben nach Kategorie</h3>
       <div class="tiles"><div class="tile"><div class="l">Woche</div><div class="v">${eur(wk)}</div></div><div class="tile on"><div class="l">Monat</div><div class="v">${eur(aus)}</div></div><div class="tile"><div class="l">Jahr ${ym.slice(0, 4)}</div><div class="v">${eur(yr)}</div></div></div>${tree}</div>
     <div class="card"><h3>${icon('cal')}Jahreslauf · Ausgaben <span class="r segs">${seg('finYear', curY, curY)}${seg('finYear', curY - 1, curY - 1)}</span></h3>${svgRadial(yv, Number(fy) === curY ? new Date().getMonth() : yv.indexOf(Math.max(...yv)), {unit:' €', year:fy})}
       <div class="tiles"><div class="tile"><div class="l">Monatsschnitt</div><div class="v">${eur(ysum / gone)}</div></div><div class="tile"><div class="l">Jahr gesamt</div><div class="v">${eur(ysum)}</div></div><div class="tile"><div class="l">Teuerster Monat</div><div class="v">${ysum ? MON_SHORT[yv.indexOf(Math.max(...yv))] : '–'}</div></div></div></div>
@@ -1264,7 +1308,7 @@ VIEWS.stats = () => {
     S.cases.filter(c => c.personId === p.id && c.status !== 'erledigt').length, S.letters.filter(l => l.personId === p.id && (l.date || '').startsWith(ym)).length]}));
   const seg = (k, v, l) => `<button class="seg ${String(UI[k]) === String(v) ? 'on' : ''}" data-act="stat" data-id="${k}:${v}">${l}</button>`;
   const dM = W.doneM[5], dP = W.doneM[4];
-  return `<div class="head"><div class="grow"><h1>Statistik</h1><p class="sub" style="margin:0">Wie läuft die Arbeit? Erledigtes, Pünktlichkeit, Dauer der Vorgänge und Wartezeiten – die Auswahl oben (Alle / Personen) gilt auch hier.</p></div><a class="btn" href="#/finance">${icon('wallet')}Finanzen</a><a class="btn" href="#/report">${icon('print')}Monatsbericht</a></div>
+  return `<div class="head"><div class="grow"><h1>Statistik</h1><p class="sub" style="margin:0">Wie läuft die Arbeit? Erledigtes, Pünktlichkeit, Dauer der Vorgänge und Wartezeiten – die Auswahl oben (Alle / Personen) gilt auch hier.</p></div><a class="btn" href="#/finance">${icon('finanzen')}Finanzen</a><a class="btn" href="#/report">${icon('print')}Monatsbericht</a></div>
   <div class="kpis">
     <div class="kpi" data-go="#/tasks"><div class="l">Erledigt im ${esc(monthLabel(ym))}</div><div class="v">${dM}</div><div class="l">${trendChip(dM, dP)} vs Vormonat</div></div>
     <div class="kpi" data-go="#/tasks"><div class="l">Offene Aufgaben</div><div class="v">${W.openTasks}</div><div class="l">${W.overdueOpen} überfällig</div></div>
@@ -1301,7 +1345,7 @@ function dashStatsHTML(){
   for (let w = 0; w < 6; w++) bars.push({l: w ? '+' + w + ' W.' : 'diese W.', v:items.filter(i => { const d = daysUntil(i.date); return d >= w * 7 && d <= w * 7 + 6; }).length, c: w ? 'var(--c-1)' : 'var(--c-warn)'});
   return `<div class="grid g3 stats">
     <div class="card"><h3>${icon('trend')}Aktivität <span class="r muted small">30 Tage</span></h3><div class="bignum">${cur} ${trendChip(cur, prev)}</div>${svgLines(series, B.labels, {h:150})}</div>
-    <div class="card" data-go="#/finance" style="cursor:pointer"><h3>${icon('wallet')}Geldfluss ${esc(MON_SHORT[Number(ym.slice(5)) - 1])} <span class="r muted small">Finanzen →</span></h3>
+    <div class="card" data-go="#/finance" style="cursor:pointer"><h3>${icon('buchung')}Geldfluss ${esc(MON_SHORT[Number(ym.slice(5)) - 1])} <span class="r muted small">Finanzen →</span></h3>
       <div class="bignum" style="color:${ein - aus < 0 ? 'var(--danger)' : 'var(--ok)'}">${eur(ein - aus)}</div><div class="small muted">+${eur(ein)} · −${eur(aus)}</div>
       ${svgGroupBars(per, [{l:'Einnahmen', c:'var(--c-in)'}, {l:'Ausgaben', c:'var(--c-out)'}], {h:150, fmt:v => eur(v)})}</div>
     <div class="card"><h3>${icon('clock')}Fristen-Ausblick <a class="r small" href="#/stats">Alle Statistiken →</a></h3><div class="bignum">${items.filter(i => { const d = daysUntil(i.date); return d >= 0 && d <= 30; }).length} <small>in 30 Tagen</small></div>${svgBars(bars, {h:150})}</div>
@@ -1331,11 +1375,11 @@ VIEWS.case = id => {
   return `<div class="head"><div class="grow"><a href="#/cases" class="small">← Vorgänge</a><h1>${esc(c.title)}</h1>
     <div class="small muted">${personChip(c.personId)} ${ct ? '· ' + esc(ct.name) : ''} ${c.ref ? '· Az. ' + esc(c.ref) : ''} · begonnen ${fmtDate(c.start)}</div></div>
     <select class="btn" data-chg="caseStatus" data-id="${c.id}">${optHTML(CASE_STATUS, c.status)}</select>
-    <button class="btn" data-act="editCase" data-id="${c.id}">Bearbeiten</button>${memOn() ? `<button class="btn" data-act="memCase" data-id="${c.id}">${icon('note')}Im Gedächtnis festhalten</button>` : ''}<a class="btn pri" href="#/brief/new?case=${c.id}">${icon('pen')}Brief zu diesem Vorgang</a></div>
+    <button class="btn" data-act="editCase" data-id="${c.id}">${icon('bearbeiten')}Bearbeiten</button>${memOn() ? `<button class="btn" data-act="memCase" data-id="${c.id}">${icon('gedaechtnis')}Im Gedächtnis festhalten</button>` : ''}<a class="btn pri" href="#/brief/new?case=${c.id}">${icon('brief')}Brief zu diesem Vorgang</a></div>
   <div class="grid g2">
     <div>
       ${c.description ? `<div class="card"><h3>Beschreibung</h3><div style="white-space:pre-wrap">${esc(c.description)}</div></div>` : ''}
-      <div class="card"><h3>Schritte</h3><div class="list">${(c.steps || []).map(s => `<div class="row chk-row ${s.done ? 'done' : ''}"><input type="checkbox" ${s.done ? 'checked' : ''} data-act="toggleStep" data-id="${c.id}" data-sid="${s.id}"><div class="grow ttl" style="font-weight:400">${esc(s.text)}</div><button class="btn ghost sm" data-act="delStep" data-id="${c.id}" data-sid="${s.id}">✕</button></div>`).join('') || '<div class="muted small" style="padding:6px 0">Noch keine Schritte.</div>'}</div>
+      <div class="card"><h3>Schritte</h3><div class="list">${(c.steps || []).map(s => `<div class="row chk-row ${s.done ? 'done' : ''}"><input type="checkbox" ${s.done ? 'checked' : ''} data-act="toggleStep" data-id="${c.id}" data-sid="${s.id}"><div class="grow ttl" style="font-weight:400">${esc(s.text)}</div><button class="btn ghost sm" data-act="delStep" data-id="${c.id}" data-sid="${s.id}">${icon('loeschen')}</button></div>`).join('') || '<div class="muted small" style="padding:6px 0">Noch keine Schritte.</div>'}</div>
         <div style="display:flex;gap:8px;margin-top:10px"><input id="newStep" placeholder="Neuer Schritt …" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="addStep" data-id="${c.id}">Hinzufügen</button></div></div>
       <div class="card"><h3>${icon('clock')}Fristen & Aufgaben <button class="btn sm r" data-act="newTask" data-case="${c.id}">${icon('plus')}Frist</button></h3>
         <div class="list">${tasks.map(t => taskRow(t)).join('') || '<div class="muted small">Keine Fristen.</div>'}</div></div>
@@ -1347,7 +1391,7 @@ VIEWS.case = id => {
       <div class="card"><h3>${icon('mail')}Briefe</h3><div class="list">${letters.map(l => `<div class="row"><div class="grow"><a href="#/brief/${l.id}" class="trunc" style="display:block">${esc(letterSubject(l))}</a><span class="small muted">${fmtDate(l.date)}${l.shipping ? ' · ' + esc(l.shipping) : ''}</span></div></div>`).join('') || '<div class="muted small">Noch keine Briefe.</div>'}</div></div>
       <div class="card"><h3>Verlauf / Notizen</h3>
         <div style="display:flex;gap:8px;margin-bottom:10px"><input type="date" id="logDate" value="${today()}" style="padding:6px;border:1px solid var(--line);border-radius:8px"><input id="logText" placeholder="z. B. Anruf beim Sachbearbeiter, Ergebnis …" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="addLog" data-id="${c.id}">Eintragen</button></div>
-        <div class="list">${[...(c.log || [])].sort((a, b) => b.date.localeCompare(a.date)).map(l => `<div class="row"><span class="small muted" style="width:80px">${fmtDate(l.date)}</span><div class="grow" style="white-space:pre-wrap">${esc(l.text)}</div><button class="btn ghost sm" data-act="delLog" data-id="${c.id}" data-sid="${l.id}">✕</button></div>`).join('')}</div></div>
+        <div class="list">${[...(c.log || [])].sort((a, b) => b.date.localeCompare(a.date)).map(l => `<div class="row"><span class="small muted" style="width:80px">${fmtDate(l.date)}</span><div class="grow" style="white-space:pre-wrap">${esc(l.text)}</div><button class="btn ghost sm" data-act="delLog" data-id="${c.id}" data-sid="${l.id}">${icon('loeschen')}</button></div>`).join('')}</div></div>
     </div>
   </div>`;
 };
@@ -1355,7 +1399,7 @@ function taskRow(t){
   return `<div class="row chk-row ${t.done ? 'done' : ''}"><input type="checkbox" ${t.done ? 'checked' : ''} data-act="toggleTask" data-id="${t.id}">
     <div class="grow"><div class="ttl trunc">${esc(t.title)} ${t.priority === 'hoch' ? '<span class="badge red">hoch</span>' : ''} ${t.repeat ? '<span class="badge blue">↻</span>' : ''}</div>
     <div class="small muted">${personChip(t.personId)}${t.caseId && getCase(t.caseId) ? ` · <a href="#/case/${t.caseId}">${esc(getCase(t.caseId).title)}</a>` : ''}${t.notes ? ' · ' + esc(t.notes.slice(0, 60)) : ''}</div></div>
-    ${t.done ? `<span class="small muted">erledigt ${fmtDate(t.doneAt)}</span>` : dueBadge(t.due)}<button class="btn ghost sm" data-act="editTask" data-id="${t.id}">Bearbeiten</button></div>`;
+    ${t.done ? `<span class="small muted">erledigt ${fmtDate(t.doneAt)}</span>` : dueBadge(t.due)}<button class="btn ghost sm" data-act="editTask" data-id="${t.id}">${icon('bearbeiten')}Bearbeiten</button></div>`;
 }
 
 // Fristen & Aufgaben
@@ -1409,7 +1453,7 @@ VIEWS.documents = () => {
   <div class="card" style="padding:6px 8px">${list.length ? `<table class="t"><tr><th>Datum</th><th>Titel</th><th>Kategorie</th><th>Person</th><th>Absender</th><th>Vorgang</th><th>Frist</th><th></th></tr>
   ${list.map(d => `<tr><td class="small">${fmtDate(d.date)}</td><td><a href="#" data-act="openDoc" data-id="${d.id}"><b>${esc(d.title)}</b></a>${d.tags ? `<div class="small muted">${esc(d.tags)}</div>` : ''}${!d.fileId ? ' <span class="badge">ohne Datei</span>' : ''}</td><td>${esc(d.category || '')}</td><td>${personChip(d.personId)}</td><td>${esc(d.sender || '')}</td>
     <td class="small">${d.caseId && getCase(d.caseId) ? `<a href="#/case/${d.caseId}">${esc(getCase(d.caseId).title)}</a>` : ''}</td><td>${d.deadline ? dueBadge(d.deadline) : ''}</td>
-    <td class="act"><button class="btn sm" data-act="dlDoc" data-id="${d.id}">⬇</button> <button class="btn sm" data-act="editDoc" data-id="${d.id}">Bearbeiten</button></td></tr>`).join('')}</table>`
+    <td class="act"><button class="btn sm" data-act="dlDoc" data-id="${d.id}" title="Herunterladen">${icon('herunterladen')}</button> <button class="btn sm" data-act="editDoc" data-id="${d.id}" title="Bearbeiten">${icon('bearbeiten')}</button></td></tr>`).join('')}</table>`
   : '<div class="empty">Keine Dokumente gefunden.</div>'}</div>`;
 };
 AFTER.documents = () => {
@@ -1443,14 +1487,14 @@ VIEWS.notes = () => {
 // Personen
 VIEWS.persons = () => `<div class="head"><div class="grow"><h1>Personen & Vollmachten</h1><p class="sub" style="margin:0">Die Daten werden automatisch in Briefe eingesetzt (Name, Geburtsdatum, Anschrift).</p></div><button class="btn pri" data-act="newPerson">${icon('plus')}Person hinzufügen</button></div>
   <div class="grid g2">${S.persons.map(p => { const poaDoc = S.documents.find(d => d.personId === p.id && d.category === 'Vollmacht');
-    return `<div class="card pcard" style="border-top-color:${esc(p.color)}"><h3><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}<button class="btn sm r" data-act="editPerson" data-id="${p.id}">Bearbeiten</button></h3>
+    return `<div class="card pcard" style="border-top-color:${esc(p.color)}"><h3><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}<button class="btn sm r" data-act="editPerson" data-id="${p.id}">${icon('bearbeiten')}Bearbeiten</button></h3>
     <div class="kv"><div>Name</div><div><b>${esc([p.salutation !== '—' ? p.salutation : '', personName(p)].join(' '))}</b></div><div>Geburtsdatum</div><div>${fmtDate(p.birth) || '—'}</div>
     <div>Anschrift</div><div>${esc(addrOneLine(p)) || '—'}</div><div>Telefon / E-Mail</div><div>${esc([p.phone, p.email].filter(Boolean).join(' · ')) || '—'}</div>
     <div>Steuer-ID</div><div>${esc(p.taxId) || '—'}</div><div>Rentenvers.-Nr.</div><div>${esc(p.pensionNo) || '—'}</div><div>Krankenkasse</div><div>${esc(p.healthInsurance) || '—'}</div>
     <div>Vollmacht</div><div>${p.poaDate ? 'vom ' + fmtDate(p.poaDate) : '<span class="badge amber">nicht eingetragen</span>'} ${p.poaScope ? '· ' + esc(p.poaScope) : ''}</div>
     <div>Vollmacht-Dokument</div><div>${poaDoc ? `<a href="#" data-act="openDoc" data-id="${poaDoc.id}">${esc(poaDoc.title)} öffnen</a>` : `<a href="#" data-act="newDoc" data-person="${p.id}" data-cat="Vollmacht">Vollmacht hochladen</a>`}</div>
     ${p.notes ? `<div>Notizen</div><div style="white-space:pre-wrap">${esc(p.notes)}</div>` : ''}</div></div>`; }).join('')}</div>
-  <div class="banner blue">${icon('users')}<div>Tipp: Die Daten von Vater und Mutter bleiben getrennt. Über die Auswahl oben („Alle / Vater / Mutter“) siehst du jeweils nur die Unterlagen einer Person.</div></div>`;
+  <div class="banner blue">${icon('info')}<div>Tipp: Die Daten von Vater und Mutter bleiben getrennt. Über die Auswahl oben („Alle / Vater / Mutter“) siehst du jeweils nur die Unterlagen einer Person.</div></div>`;
 
 // Kontakte
 VIEWS.contacts = () => {
@@ -1465,7 +1509,7 @@ VIEWS.contacts = () => {
     <span style="flex:1"></span><input id="contactQ" placeholder="Name, Ort, Telefon …" value="${esc(UI.contactQ)}" style="max-width:260px"></div>
   <div class="card" style="padding:6px 8px">${list.length ? `<table class="t"><tr><th>Name</th><th>Abteilung</th><th>Anschrift</th><th>Telefon</th><th>E-Mail</th><th></th></tr>
   ${list.map(c => `<tr class="click" data-act="editContact" data-id="${c.id}"><td><b>${esc(isPrivate(c) && c.salutation && c.salutation !== '—' ? c.salutation + ' ' + c.name : c.name)}</b>${isPrivate(c) ? ' <span class="small muted">· privat</span>' : ''}${c.contactPerson ? `<div class="small muted">${esc(c.contactPerson)}</div>` : ''}</td><td>${esc(c.department || '')}</td><td class="small">${esc(addrOneLine(c))}</td><td class="small">${esc(c.phone || '')}</td><td class="small">${esc(c.email || '')}</td>
-  <td class="act"><a class="btn sm" data-stop="1" href="#/brief/new?contact=${c.id}">${icon('pen')}Brief</a></td></tr>`).join('')}</table>` : '<div class="empty">Keine Kontakte gefunden.</div>'}</div>`;
+  <td class="act"><a class="btn sm" data-stop="1" href="#/brief/new?contact=${c.id}">${icon('brief')}Brief</a></td></tr>`).join('')}</table>` : '<div class="empty">Keine Kontakte gefunden.</div>'}</div>`;
 };
 AFTER.contacts = () => {
   const i = $('#contactQ'); if (!i) return;
@@ -1480,8 +1524,8 @@ VIEWS.letters = () => {
     return L.length ? `<div class="small muted" style="font-weight:600;margin:10px 0 6px">${esc(cat)}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${L.map(t => `<a class="btn sm" href="#/brief/new?tpl=${t.id}">${esc(t.name)}</a>`).join('')}</div>` : ''; }).join('')}</div>
   <div class="card" style="padding:6px 8px"><h3 style="padding:8px 10px 0">Gespeicherte Briefe</h3>${list.length ? `<table class="t"><tr><th>Datum</th><th>Betreff</th><th>Empfänger</th><th>Person</th><th>Versand</th><th></th></tr>
   ${list.map(l => `<tr class="click" data-go="#/brief/${l.id}"><td class="small">${fmtDate(l.date)}</td><td><b>${esc(letterSubject(l))}</b></td><td class="small">${esc((l.recipient || '').split('\n')[0])}</td><td>${personChip(l.personId)}</td><td class="small">${esc(l.shipping || '')}</td>
-  <td class="act"><button class="btn sm" data-act="dupLetter" data-id="${l.id}" data-stop="1">Kopie</button> <button class="btn sm dan" data-act="delLetter" data-id="${l.id}" data-stop="1">Löschen</button></td></tr>`).join('')}</table>` : '<div class="empty">Noch keine Briefe gespeichert.</div>'}</div>
-  ${S.templates.length ? `<div class="card"><h3>Eigene Vorlagen</h3><div class="list">${S.templates.map(t => `<div class="row"><div class="grow">${esc(t.name)}</div><a class="btn sm" href="#/brief/new?tpl=${t.id}">Verwenden</a><button class="btn sm dan" data-act="delTpl" data-id="${t.id}">Löschen</button></div>`).join('')}</div></div>` : ''}`;
+  <td class="act"><button class="btn sm" data-act="dupLetter" data-id="${l.id}" data-stop="1">${icon('kopieren')}Kopie</button> <button class="btn sm dan" data-act="delLetter" data-id="${l.id}" data-stop="1">${icon('loeschen')}Löschen</button></td></tr>`).join('')}</table>` : '<div class="empty">Noch keine Briefe gespeichert.</div>'}</div>
+  ${S.templates.length ? `<div class="card"><h3>Eigene Vorlagen</h3><div class="list">${S.templates.map(t => `<div class="row"><div class="grow">${esc(t.name)}</div><a class="btn sm" href="#/brief/new?tpl=${t.id}">Verwenden</a><button class="btn sm dan" data-act="delTpl" data-id="${t.id}">${icon('loeschen')}Löschen</button></div>`).join('')}</div></div>` : ''}`;
 };
 
 // ---------- Brief-Editor ----------
@@ -1585,7 +1629,7 @@ VIEWS.brief = (id, q) => {
   }
   const L = LD; const ls = S.settings;
   return `<div class="head"><div class="grow"><a href="#/letters" class="small">← Briefe</a><h1>${L.isNew ? 'Neuer Brief' : 'Brief bearbeiten'}</h1></div>
-    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button>${memOn() ? `<button class="btn" data-act="memLetter">${icon('note')}Im Gedächtnis festhalten</button>` : ''}<button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('file')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
+    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button>${memOn() ? `<button class="btn" data-act="memLetter">${icon('gedaechtnis')}Im Gedächtnis festhalten</button>` : ''}<button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('pdf')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
   ${!ls.me.name ? `<div class="banner amber">Bitte zuerst <a href="#/settings">deine Absenderdaten</a> in den Einstellungen eintragen.</div>` : ''}
   <div class="brief ${UI.briefWide ? 'wide' : ''}">
     <div class="ed">
@@ -1615,7 +1659,7 @@ VIEWS.brief = (id, q) => {
         <div class="fld cb"><input type="checkbox" data-lf="useSig" id="cbSig" ${L.useSig ? 'checked' : ''}><label for="cbSig">Unterschrift einfügen ${ls.signature ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
         <div class="fld cb"><input type="checkbox" data-lf="useStamp" id="cbStamp" ${L.useStamp ? 'checked' : ''}><label for="cbStamp">Stempel einfügen ${ls.stamp ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
         <div class="fld cb"><input type="checkbox" data-lf="useMarke" id="cbMarke" ${L.useMarke ? 'checked' : ''}><label for="cbMarke">Internetmarke (Porto) im Adressfeld drucken</label></div>
-        <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox"><button class="btn sm" data-act="markeUpload">Internetmarke als Bild laden (PNG/JPG)</button> ${L.markeImg ? '<button class="btn sm dan" data-act="markeDel">entfernen</button>' : ''}
+        <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox"><button class="btn sm" data-act="markeUpload">${icon('hochladen')}Internetmarke als Bild laden (PNG/JPG)</button> ${L.markeImg ? '<button class="btn sm dan" data-act="markeDel">' + icon('loeschen') + 'entfernen</button>' : ''}
           ${L.markeImg ? `<img class="imgprev" src="${L.markeImg}">` : ''}<div class="hint small muted" style="margin-top:4px">Internetmarke bei der Deutschen Post online kaufen, als Bild speichern und hier laden. Vor dem ersten Versand einmal Probe drucken und mit Fensterumschlag (DL) prüfen.</div></div>
       </div>
       ${memPanelHTML([getContact(L.contactId)?.name || '', getPerson(L.personId) ? personName(getPerson(L.personId)) : ''].filter(Boolean).join(' '), L.personId)}
@@ -1787,8 +1831,8 @@ function reportHTML(ym){
   </div>`;
 }
 VIEWS.report = () => `<div class="head"><div class="grow"><h1>Monatsbericht</h1><p class="sub" style="margin:0">Übersicht eines Monats zum Drucken oder als PDF – z. B. für die eigenen Unterlagen oder zur Abstimmung in der Familie. Die Auswahl oben (Alle / Vater / Mutter) gilt auch hier.</p></div>
-  <button class="btn" data-act="repMonth" data-id="-1">‹</button><input type="month" data-chg="reportMonth" value="${esc(UI.reportMonth)}" class="btn" style="padding:6px 10px"><button class="btn" data-act="repMonth" data-id="1">›</button>
-  ${DESKTOP ? `<button class="btn" data-act="printReport">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfReport">${icon('save')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printReport">${icon('print')}Drucken / PDF</button>`}</div>
+  <button class="btn" data-act="repMonth" data-id="-1">${icon('pfeil-links')}</button><input type="month" data-chg="reportMonth" value="${esc(UI.reportMonth)}" class="btn" style="padding:6px 10px"><button class="btn" data-act="repMonth" data-id="1">${icon('pfeil-rechts')}</button>
+  ${DESKTOP ? `<button class="btn" data-act="printReport">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfReport">${icon('pdf')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printReport">${icon('print')}Drucken / PDF</button>`}</div>
   <div class="rpwrap">${reportHTML(UI.reportMonth)}</div>`;
 function printReport(asPDF){
   outputPrint(reportHTML(UI.reportMonth), 'Monatsbericht ' + UI.reportMonth + (UI.person !== 'all' ? ' ' + (getPerson(UI.person)?.role || '') : ''), asPDF);
@@ -1837,9 +1881,9 @@ VIEWS.settings = () => {
     <div class="card"><h3>Unterschrift & Stempel</h3>
       <p class="small muted" style="margin-top:0">Unterschrift auf weißem Papier mit dunklem Stift, abfotografieren oder scannen, zuschneiden und hier laden (PNG mit transparentem Hintergrund ist ideal).</p>
       <div style="display:flex;gap:28px;flex-wrap:wrap"><div><b class="small">Unterschrift</b>${s.signature ? `<img class="imgprev" src="${s.signature}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keine</div>'}
-        <button class="btn sm" data-act="upImg" data-id="signature">Laden</button> ${s.signature ? '<button class="btn sm dan" data-act="delImg" data-id="signature">Entfernen</button>' : ''}</div>
+        <button class="btn sm" data-act="upImg" data-id="signature">${icon('hochladen')}Laden</button> ${s.signature ? '<button class="btn sm dan" data-act="delImg" data-id="signature">' + icon('loeschen') + 'Entfernen</button>' : ''}</div>
       <div><b class="small">Stempel / Siegel</b>${s.stamp ? `<img class="imgprev" src="${s.stamp}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keiner</div>'}
-        <button class="btn sm" data-act="upImg" data-id="stamp">Laden</button> ${s.stamp ? '<button class="btn sm dan" data-act="delImg" data-id="stamp">Entfernen</button>' : ''}</div></div></div>
+        <button class="btn sm" data-act="upImg" data-id="stamp">${icon('hochladen')}Laden</button> ${s.stamp ? '<button class="btn sm dan" data-act="delImg" data-id="stamp">' + icon('loeschen') + 'Entfernen</button>' : ''}</div></div></div>
     <div class="card"><h3>Erinnerungen</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       <div class="fld"><label>Vertragskündigungen anzeigen (Tage vorher)</label><input type="number" data-set="contractDays" value="${s.contractDays}"></div><div></div>
     </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.</p></div>
@@ -2036,7 +2080,7 @@ function memCardHTML(){
   const m = memCfg(), st = MEM.status;
   let body = `<p style="margin-top:0">Verbindet Office Home mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>Memory-Ordner:</b> <span class="small">${m.root ? esc(m.root) : '<span class="muted">nicht gewählt</span>'}</span>
-      <span style="flex:1"></span><button class="btn" data-act="memPick">Ordner wählen</button>${m.root ? '<button class="btn dan" data-act="memOff">Verbindung trennen</button>' : ''}</div>`;
+      <span style="flex:1"></span><button class="btn" data-act="memPick">${icon('vorgaenge')}Ordner wählen</button>${m.root ? '<button class="btn dan" data-act="memOff">' + icon('schliessen') + 'Verbindung trennen</button>' : ''}</div>`;
   if (m.root && st && !st.ok) body += `<p style="color:var(--danger)">${esc(st.message || 'Nicht erreichbar')}</p>`;
   if (m.root && st && st.ok) {
     body += `<p class="small" style="color:var(--ok)">✓ Verbunden · ${st.workstations.length} Arbeitsbereiche gefunden</p>
@@ -2047,15 +2091,15 @@ function memCardHTML(){
       </form></div>
       <p class="small muted">Wichtig: Jede Person in ihren eigenen Arbeitsbereich legen – die Wände des Gedächtnisses trennen die Bereiche. Notizen landen unter „&lt;Arbeitsbereich&gt;/.memory/office-home/“, Erinnerungen in der Aufgabenliste des Gedächtnisses (Dashboard → Tasks). Keine Passwörter oder PINs in festgehaltene Texte schreiben.</p>`;
   }
-  return `<h3>${icon('note')}Gedächtnis (Memory)</h3>${body}`;
+  return `<h3>${icon('gedaechtnis')}Gedächtnis (Memory)</h3>${body}`;
 }
 function memCardUpdate(){ const c = $('#memCard'); if (c) c.innerHTML = memCardHTML(); }
 
 function memPanelHTML(q, personId){
   if (!memOn()) return '';
-  return `<div class="card"><h3>${icon('note')}Aus dem Gedächtnis</h3>
+  return `<div class="card"><h3>${icon('gedaechtnis')}Aus dem Gedächtnis</h3>
     <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap"><select id="memWs" style="padding:6px;border:1px solid var(--line);border-radius:8px;max-width:180px">${optHTML(memWsOpts(), memWsFor(personId))}</select>
-      <input id="memQ" value="${esc(q)}" placeholder="z. B. Jobcenter Aktenzeichen" style="flex:1;min-width:140px;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="memSearch">Suchen</button></div>
+      <input id="memQ" value="${esc(q)}" placeholder="z. B. Jobcenter Aktenzeichen" style="flex:1;min-width:140px;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="memSearch">${icon('suche')}Suchen</button></div>
     <div id="memHits" class="list"><div class="muted small">Suche im Gedächtnis – z. B. nach Behörde, Aktenzeichen oder letztem Schreiben.</div></div></div>`;
 }
 async function memSearch(){
@@ -2138,7 +2182,7 @@ let MODE = 'live';
 const stateKey = () => MODE === 'demo' ? 'demoState' : 'state';
 function modeSwitchHTML(){
   return `<div class="modesw ${MODE}"><button class="${MODE === 'live' ? 'on' : ''}" data-act="setMode" data-id="live">Live</button><button class="${MODE === 'demo' ? 'on' : ''}" data-act="setMode" data-id="demo">Demo</button></div>`
-    + (MODE === 'demo' ? `<span class="demotag">DEMO-MODUS · Beispieldaten <button class="btn sm" data-act="demoReset">Neu erzeugen</button></span>` : '');
+    + (MODE === 'demo' ? `<span class="demotag">DEMO-MODUS · Beispieldaten <button class="btn sm" data-act="demoReset">${icon('update')}Neu erzeugen</button></span>` : '');
 }
 async function setMode(m){
   if (m === MODE) return;
@@ -2419,13 +2463,13 @@ async function mcpHandle(tool, args){
 let MCPI = null;
 function mcpCardHTML(){
   const c = mcpCfg(), i = MCPI;
-  return `<h3>${icon('users')}Claude-Anbindung (MCP)</h3>
+  return `<h3>${icon('ki')}Claude-Anbindung (MCP)</h3>
     <p style="margin-top:0">Claude Desktop oder Claude Code können Office Home lesen – mit deinem normalen Claude-Abo, ohne API-Schlüssel. Die Daten bleiben hier; Claude bekommt nur, was du in einer Unterhaltung abfragst.</p>
     <div class="fld cb"><input type="checkbox" id="mcpOn" data-act="mcpToggle" ${c.enabled ? 'checked' : ''}><label for="mcpOn"><b>Verbindung einschalten</b> ${i ? (i.running ? '<span class="badge green">läuft</span>' : '<span class="badge">aus</span>') : ''}</label></div>
     <div class="fld cb"><input type="checkbox" id="mcpWr" data-act="mcpWrite" ${c.write ? 'checked' : ''} ${c.enabled ? '' : 'disabled'}><label for="mcpWr">Claude darf eintragen (Aufgaben, Notizen, Verlauf, Briefentwürfe, Buchungen)</label></div>
     ${c.enabled && i ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
-        <button class="btn pri" data-act="mcpInstall">${i.installed ? 'In Claude Desktop erneut eintragen' : 'In Claude Desktop eintragen'}</button>
-        <button class="btn" data-act="mcpCopyCode">Befehl für Claude Code kopieren</button></div>
+        <button class="btn pri" data-act="mcpInstall">${icon('ki')}${i.installed ? 'In Claude Desktop erneut eintragen' : 'In Claude Desktop eintragen'}</button>
+        <button class="btn" data-act="mcpCopyCode">${icon('kopieren')}Befehl für Claude Code kopieren</button></div>
       <p class="small muted" style="margin:0">${i.installed ? '✓ In Claude Desktop eingetragen. ' : ''}Danach Claude Desktop einmal ganz beenden (auch im Infobereich) und neu starten. Office Home muss geöffnet sein, wenn Claude zugreift.<br>Beispielfragen: „Welche Fristen sind bei Mutter überfällig?“ · „Was habe ich im Oktober für Lebensmittel ausgegeben?“ · „Schreib einen Widerspruch für den Vorgang Rollator als Entwurf.“</p>` : ''}`;
 }
 async function mcpRefresh(){ if (!DESKTOP || !window.officeHome.mcpInfo) return; MCPI = await window.officeHome.mcpInfo(); const el = $('#mcpCard'); if (el) el.innerHTML = mcpCardHTML(); }
@@ -2508,18 +2552,18 @@ function vField(e, k, label, secret){
   const v = e[k]; if (!v) return '';
   const id = e.id + ':' + k, shown = !secret || VT.show[id];
   return `<div class="vf"><span class="vl">${label}</span><code class="vv">${shown ? esc(v) : '••••••••'}</code>
-    ${secret ? `<button class="btn ghost sm" data-act="vShow" data-id="${esc(id)}" title="anzeigen">${VT.show[id] ? 'verbergen' : 'anzeigen'}</button>` : ''}
-    <button class="btn ghost sm" data-act="vCopy" data-id="${esc(id)}">kopieren</button></div>`;
+    ${secret ? `<button class="btn ghost sm" data-act="vShow" data-id="${esc(id)}" title="anzeigen">${icon(VT.show[id] ? 'auge-zu' : 'auge')}${VT.show[id] ? 'verbergen' : 'anzeigen'}</button>` : ''}
+    <button class="btn ghost sm" data-act="vCopy" data-id="${esc(id)}">${icon('kopieren')}kopieren</button></div>`;
 }
 VIEWS.vault = () => {
-  const head = (sub, btns = '') => `<div class="head"><div class="grow"><h1>${icon('lock')}Tresor</h1><p class="sub" style="margin:0">${sub}</p></div>${btns}</div>`;
+  const head = (sub, btns = '') => `<div class="head"><div class="grow"><h1>${icon('tresor')}Tresor</h1><p class="sub" style="margin:0">${sub}</p></div>${btns}</div>`;
   if (!VT.blob) return head('Zugangsdaten für Banken, Ämter und Websites – verschlüsselt mit deinem Hauptpasswort.') + `
     <div class="card vbox"><h3>Tresor einrichten</h3>
       <p>Wähle ein <b>Hauptpasswort</b> – am besten 3–4 Wörter, z. B. „Birne-Fahrrad-Wolke-7“. Ohne dieses Passwort (oder den Wiederherstellungsschlüssel) kann <b>niemand</b> den Tresor öffnen – auch nicht bei Diebstahl des Computers.</p>
       <div class="fld"><label>Hauptpasswort (mind. 10 Zeichen)</label><input type="password" id="vPw1" autocomplete="new-password"></div>
       <div class="fld"><label>Hauptpasswort wiederholen</label><input type="password" id="vPw2" autocomplete="new-password"></div>
       <div class="small muted" id="vStrength" style="margin:4px 0 10px"></div>
-      <button class="btn pri" data-act="vCreate">Tresor anlegen</button> <span class="small" id="vErr" style="color:var(--danger)"></span></div>`;
+      <button class="btn pri" data-act="vCreate">${icon('tresor')}Tresor anlegen</button> <span class="small" id="vErr" style="color:var(--danger)"></span></div>`;
   if (VT.recShown) return head('Wiederherstellungsschlüssel') + `
     <div class="card vbox"><h3>Wichtig: Wiederherstellungsschlüssel aufschreiben</h3>
       <p>Mit diesem Schlüssel öffnest du den Tresor, falls du das Hauptpasswort vergisst. Er wird <b>nur jetzt einmal</b> angezeigt.</p>
@@ -2528,9 +2572,9 @@ VIEWS.vault = () => {
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="vPrintRec">${icon('print')}Ausdrucken</button><button class="btn pri" data-act="vRecDone">Ich habe den Schlüssel sicher notiert</button></div></div>`;
   if (!VT.key) { const wait = Math.max(0, Math.ceil((VT.until - Date.now()) / 1000));
     return head('Gesperrt. Der Tresor sperrt sich nach 1 Minute ohne Benutzung und beim Verlassen der Seite.') + `
-    <div class="card vbox"><h3>${icon('lock')}Tresor entsperren</h3>
+    <div class="card vbox"><h3>${icon('tresor')}Tresor entsperren</h3>
       <div class="fld"><label>Hauptpasswort</label><input type="password" id="vPw" autocomplete="current-password" ${wait ? 'disabled' : ''}></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn pri" data-act="vUnlock" ${wait ? 'disabled' : ''}>Entsperren</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn pri" data-act="vUnlock" ${wait ? 'disabled' : ''}>${icon('schloss-offen')}Entsperren</button>
         <span class="small" id="vErr" style="color:var(--danger)">${wait ? 'Zu viele Fehlversuche – bitte ' + wait + ' s warten.' : ''}</span></div>
       <details style="margin-top:14px"><summary class="small">Passwort vergessen? Mit Wiederherstellungsschlüssel öffnen</summary>
         <div class="fld" style="margin-top:8px"><label>Wiederherstellungsschlüssel</label><input id="vRec" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off" spellcheck="false"></div>
@@ -2549,7 +2593,7 @@ VIEWS.vault = () => {
       ${vField(e, 'user', 'Benutzer', false)}${vField(e, 'password', 'Passwort', true)}${vField(e, 'pin', 'PIN', true)}${vField(e, 'extra', 'Weitere Nr.', true)}
       ${e.url ? `<div class="vf"><span class="vl">Adresse</span><a href="${/^https?:\/\//i.test(e.url) ? esc(e.url) : 'https://' + esc(e.url)}" target="_blank" rel="noopener" class="trunc">${esc(e.url)}</a></div>` : ''}
       ${e.notes ? `<div class="small muted" style="white-space:pre-wrap;margin-top:6px">${esc(e.notes)}</div>` : ''}
-      <div style="margin-top:8px;text-align:right"><button class="btn ghost sm" data-act="vEdit" data-id="${e.id}">Bearbeiten</button></div></div>`).join('')}</div>`
+      <div style="margin-top:8px;text-align:right"><button class="btn ghost sm" data-act="vEdit" data-id="${e.id}">${icon('bearbeiten')}Bearbeiten</button></div></div>`).join('')}</div>`
     : `<div class="empty">${VT.data.entries.length ? 'Keine Einträge für diese Auswahl.' : 'Noch keine Einträge. Lege z. B. das Online-Banking von Vater an.'}</div>`}`;
 };
 AFTER.vault = async () => {
@@ -2751,7 +2795,7 @@ async function scanCropEditor(b, pg){
 
 // ---------- Scanner: Seite ----------
 VIEWS.scan = () => {
-  const head = `<div class="head"><div class="grow"><h1>${icon('scan')}Scanner</h1><p class="sub" style="margin:0">Briefe mit Drucker, Handy oder aus Dateien erfassen – jede Sendung wird ein PDF und kann direkt als Dokument abgelegt werden.</p></div>
+  const head = `<div class="head"><div class="grow"><h1>${icon('scanner')}Scanner</h1><p class="sub" style="margin:0">Briefe mit Drucker, Handy oder aus Dateien erfassen – jede Sendung wird ein PDF und kann direkt als Dokument abgelegt werden.</p></div>
     ${DESKTOP ? `<button class="btn" data-act="scanPrinter">${icon('print')}Mit Drucker scannen</button><button class="btn" data-act="scanPhone">${icon('phone')}Mit Handy scannen</button>` : ''}
     <button class="btn pri" data-act="scanFiles">${icon('upload')}Dateien hinzufügen</button></div>`;
   if (!DESKTOP) return head + `<div class="banner amber">Der Scanner (PDF-Erstellung, Drucker, Handy) funktioniert nur im installierten Office-Home-Programm.</div>`;
@@ -2761,27 +2805,27 @@ VIEWS.scan = () => {
     ${P ? `<div class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><img src="${P.qr}" alt="QR-Code" style="width:170px;height:170px;border-radius:8px;border:1px solid var(--line)">
       <div style="flex:1;min-width:200px"><h3 style="margin-top:0">${icon('phone')}Handy verbinden</h3><ol class="small" style="padding-left:18px;margin:0 0 8px"><li>Handy im <b>selben WLAN</b> wie dieser PC.</li><li>QR-Code mit der Handy-Kamera scannen.</li><li>Seiten fotografieren → „Fertig“.</li></ol>
       <div class="small muted" style="word-break:break-all">${esc(P.url)}</div><div class="small muted" style="margin-top:6px">Fragt Windows beim ersten Mal nach der Firewall: „Private Netzwerke“ erlauben. Die Verbindung endet nach 30 Minuten ohne Nutzung.</div>
-      <button class="btn sm" style="margin-top:8px" data-act="scanPhoneStop">Verbindung beenden</button></div></div>` : ''}
-    <div class="card"><h3>${icon('folder')}Einstellungen</h3>
+      <button class="btn sm" style="margin-top:8px" data-act="scanPhoneStop">${icon('schliessen')}Verbindung beenden</button></div></div>` : ''}
+    <div class="card"><h3>${icon('ordner-auge')}Einstellungen</h3>
       <div class="fld"><label>Neue Seiten verarbeiten als</label><select data-chg="scanMode">${optHTML(SCAN_MODES, c.mode)}</select></div>
       <div class="fld"><label>Überwachter Ordner (z. B. Scan-Ordner des Druckers oder OneDrive)</label>
-        <div style="display:flex;gap:6px;align-items:center"><span class="small trunc" style="flex:1">${c.watchDir ? esc(c.watchDir) : '<span class="muted">aus</span>'}</span><button class="btn sm" data-act="scanWatchPick">Ordner wählen</button>${c.watchDir ? '<button class="btn sm" data-act="scanWatchOff">Aus</button>' : ''}</div>
+        <div style="display:flex;gap:6px;align-items:center"><span class="small trunc" style="flex:1">${c.watchDir ? esc(c.watchDir) : '<span class="muted">aus</span>'}</span><button class="btn sm" data-act="scanWatchPick">${icon('ordner-auge')}Ordner wählen</button>${c.watchDir ? '<button class="btn sm" data-act="scanWatchOff">Aus</button>' : ''}</div>
         <span class="hint">Neue PDFs/Fotos dort kommen automatisch hierher und werden danach in den Unterordner „importiert“ verschoben.</span></div></div>
   </div>
   <div id="scanDrop" class="dropzone">Dateien (Fotos oder PDF) hierher ziehen</div>
   ${L.length ? L.map(b => `<div class="card scanb"><h3><input class="scantitle" data-scan-title="${b.id}" value="${esc(b.title)}"> <span class="badge">${SCAN_SRC[b.source] || b.source}</span>${b.open ? ' <span class="badge amber">empfängt …</span>' : ''}
       <span class="r small muted">${b.pages.length} Seite${b.pages.length === 1 ? '' : 'n'} · ${fmtDate(b.created.slice(0, 10))}</span></h3>
     <div class="pages">${b.pages.map((pg, i) => `<div class="pgc"><div class="pgimg" data-thumb="${pg.id}">${pg.kind === 'pdf' ? '<b>PDF</b>' : '<span class="muted small">…</span>'}</div>
-      <div class="pgbar"><span class="small">${i + 1}</span>${pg.kind === 'img' ? `<button class="btn ghost sm" title="zuschneiden" data-act="scanCrop" data-id="${b.id}:${pg.id}">✂</button><button class="btn ghost sm" title="drehen" data-act="scanRot" data-id="${b.id}:${pg.id}">↻</button>` : ''}
-      ${i ? `<button class="btn ghost sm" title="nach vorne" data-act="scanMove" data-id="${b.id}:${pg.id}:-1">◀</button>` : ''}${i < b.pages.length - 1 ? `<button class="btn ghost sm" title="nach hinten" data-act="scanMove" data-id="${b.id}:${pg.id}:1">▶</button>` : ''}
-      <button class="btn ghost sm" title="Seite löschen" data-act="scanDelPage" data-id="${b.id}:${pg.id}">✕</button></div>
+      <div class="pgbar"><span class="small">${i + 1}</span>${pg.kind === 'img' ? `<button class="btn ghost sm" title="zuschneiden" data-act="scanCrop" data-id="${b.id}:${pg.id}">${icon('zuschneiden')}</button><button class="btn ghost sm" title="drehen" data-act="scanRot" data-id="${b.id}:${pg.id}">${icon('drehen')}</button>` : ''}
+      ${i ? `<button class="btn ghost sm" title="nach vorne" data-act="scanMove" data-id="${b.id}:${pg.id}:-1">${icon('pfeil-links')}</button>` : ''}${i < b.pages.length - 1 ? `<button class="btn ghost sm" title="nach hinten" data-act="scanMove" data-id="${b.id}:${pg.id}:1">${icon('pfeil-rechts')}</button>` : ''}
+      <button class="btn ghost sm" title="Seite löschen" data-act="scanDelPage" data-id="${b.id}:${pg.id}">${icon('loeschen')}</button></div>
       ${pg.kind === 'img' ? `<select class="pgmode" data-scan-mode="${b.id}:${pg.id}">${optHTML(SCAN_MODES.map(m => ({v:m.v, l:m.l.split(' ')[0]})), pg.mode)}</select>` : ''}</div>`).join('')}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       <button class="btn pri" data-act="scanFile" data-id="${b.id}" ${b.pages.length ? '' : 'disabled'}>${icon('file')}Als Dokument ablegen</button>
-      <button class="btn" data-act="scanView" data-id="${b.id}" ${b.pages.length ? '' : 'disabled'}>PDF ansehen</button>
-      ${b.source === 'drucker' ? `<button class="btn" data-act="scanPrinter" data-id="${b.id}">Weitere Seite scannen</button>` : ''}
+      <button class="btn" data-act="scanView" data-id="${b.id}" ${b.pages.length ? '' : 'disabled'}>${icon('pdf')}PDF ansehen</button>
+      ${b.source === 'drucker' ? `<button class="btn" data-act="scanPrinter" data-id="${b.id}">${icon('drucker-scan')}Weitere Seite scannen</button>` : ''}
       ${L.length > 1 ? `<select data-scan-merge="${b.id}" style="width:auto"><option value="">Seiten anhängen an …</option>${L.filter(x => x.id !== b.id).map(x => `<option value="${x.id}">${esc(x.title)}</option>`).join('')}</select>` : ''}
-      <span style="flex:1"></span><button class="btn dan" data-act="scanDel" data-id="${b.id}">Löschen</button></div></div>`).join('')
+      <span style="flex:1"></span><button class="btn dan" data-act="scanDel" data-id="${b.id}">${icon('loeschen')}Löschen</button></div></div>`).join('')
     : '<div class="empty">Noch nichts gescannt. Wähle oben Drucker, Handy oder Dateien.</div>'}`;
 };
 AFTER.scan = () => {
