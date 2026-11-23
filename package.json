@@ -1,7 +1,7 @@
 {
   "name": "office-home",
   "productName": "Office Home",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Office Home – Familienbüro für Bevollmächtigte (offline)",
   "author": "Leon",
   "private": true,
@@ -26,6 +26,8 @@
       "main.js",
       "preload.js",
       "OfficeHome.html",
+      "scan-main.js",
+      "phone.html",
       "package.json"
     ],
     "extraResources": [
@@ -65,6 +67,8 @@
     "electron-winstaller": false
   },
   "dependencies": {
-    "electron-updater": "6.8.12"
+    "electron-updater": "6.8.12",
+    "pdf-lib": "1.17.1",
+    "qrcode": "1.5.4"
   }
 }

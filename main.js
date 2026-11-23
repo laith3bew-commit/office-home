@@ -313,6 +313,9 @@ ipcMain.handle('oh:mcpInstallDesktop', async () => {
 });
 app.on('will-quit', mcpStop);
 
+// ---------- Scanner (Drucker, Handy, Ordner, PDF) ----------
+require('./scan-main.js')({ app, ipcMain, dialog, BrowserWindow, getWin: () => win });
+
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);

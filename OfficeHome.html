@@ -222,6 +222,10 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 #f59e0b}
 .vbox{max-width:620px} .reckey{font:600 22px/1.4 Consolas,monospace;letter-spacing:2px;text-align:center;padding:16px;border:2px dashed var(--accent);border-radius:10px;background:var(--accent-soft);margin:10px 0;user-select:all}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px} .ventry h3{flex-wrap:wrap}
 .vf{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)} .vf .vl{width:86px;font-size:12px;color:var(--muted)} .vf .vv{flex:1;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dropzone{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);margin-bottom:14px} .dropzone.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.scanb h3{flex-wrap:wrap;gap:8px} .scantitle{font:inherit;font-weight:700;border:1px solid transparent;border-radius:6px;padding:2px 6px;min-width:220px} .scantitle:hover,.scantitle:focus{border-color:var(--line)}
+.pages{display:flex;gap:12px;flex-wrap:wrap} .pgc{width:150px} .pgimg{height:200px;border:1px solid var(--line);border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden} .pgimg img{max-width:100%;max-height:100%}
+.pgbar{display:flex;align-items:center;gap:2px;margin-top:4px} .pgbar .btn{padding:2px 6px} .pgmode{width:100%;font-size:12px;padding:3px;margin-top:2px}
 .updchip{display:block;margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#f59e0b;color:#1f2937;font-size:12.5px;font-weight:600;text-decoration:none;text-align:center}
 .dsgrid{display:flex;flex-wrap:wrap;gap:14px}
 .dstile{border:2px solid var(--line,#d9dee7);border-radius:10px;padding:8px;background:transparent;cursor:pointer;text-align:center;font:inherit;color:inherit}
@@ -344,6 +348,8 @@ const ICONS = {
   print:'<path d="M6 9V2h12v7"/><path d="M6 18H4v-7h16v7h-2"/><path d="M6 14h12v8H6z"/>',
   save:'<path d="M5 3h11l5 5v13H5z"/><path d="M8 3v5h8M8 21v-7h8v7"/>',
   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
+  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
   cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
   chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-8"/>',
   trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
@@ -383,11 +389,11 @@ function defaultState(){
     settings: {
       me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
       letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79'},
-      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true,
+      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true, scan:{mode:'dok', watchDir:''},
       memory: {root:'', map:{}, defaultWs:'', remindDays:14}
     },
     persons: [p('p_vater', 'Vater', 'Herr', '#2563eb'), p('p_mutter', 'Mutter', 'Frau', '#db2777')],
-    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[]
+    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[]
   };
 }
 let S = defaultState();
@@ -627,7 +633,7 @@ function editNote(n){
     onSave: v => { upsert('notes', Object.assign(n || {id:uid(), created:today()}, v, {updated:today()})); render(); },
     onDelete: n ? () => { remove('notes', n.id); render(); } : null});
 }
-function editDoc(d, preset = {}, presetFile = null){
+function editDoc(d, preset = {}, presetFile = null, after = null){
   const fields = F.doc.map(f => f.k === 'file' && d ? Object.assign({}, f, {l:'Datei ersetzen (optional)'}) : f).filter(f => !(presetFile && f.k === 'file'));
   openForm({title: d ? 'Dokument bearbeiten' : 'Dokument hinzufügen' + (presetFile ? ': ' + presetFile.name : ''), fields,
     data: d || Object.assign({date:today(), category:'Behörde', personId:prefillPerson(), title: presetFile ? presetFile.name.replace(/\.[^.]+$/, '') : ''}, preset),
@@ -638,7 +644,7 @@ function editDoc(d, preset = {}, presetFile = null){
       if (mk && o.deadline && !S.tasks.some(t => t.docId === o.id && t.due === o.deadline))
         S.tasks.push({id:uid(), title:'Frist: ' + o.title, due:o.deadline, personId:o.personId, caseId:o.caseId, docId:o.id, priority:'hoch', done:false, created:today()});
       if (o.caseId) { const c = getCase(o.caseId); if (c && !d) c.log.push({id:uid(), date:today(), text:'Dokument hinzugefügt: ' + o.title}); }
-      upsert('documents', o); render();
+      upsert('documents', o); render(); if (after) await after(o);
     },
     onDelete: d ? async () => { if (d.fileId) await fileDel(d.fileId); remove('documents', d.id); render(); } : null});
 }
@@ -741,7 +747,7 @@ const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenze
 const NAV = [
   {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'home'}, {r:'stats', l:'Statistik', i:'chart'}, {r:'finance', l:'Finanzen', i:'euro'},
   {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'folder'}, {r:'tasks', l:'Fristen & Aufgaben', i:'clock', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
-  {r:'letters', l:'Brief schreiben', i:'pen'}, {r:'documents', l:'Dokumente', i:'file'},
+  {r:'letters', l:'Brief schreiben', i:'pen'}, {r:'documents', l:'Dokumente', i:'file'}, {r:'scan', l:'Scanner', i:'scan', cnt:() => (S.scans || []).length},
   {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'receipt'}, {r:'assets', l:'Konten & Vermögen', i:'wallet'}, {r:'notes', l:'Notizen', i:'note'}, {r:'report', l:'Monatsbericht', i:'print'},
   {grp:'Stammdaten'}, {r:'persons', l:'Personen & Vollmachten', i:'users'}, {r:'contacts', l:'Adressbuch', i:'book'}, {r:'vault', l:'Tresor', i:'lock'}, {r:'settings', l:'Einstellungen', i:'sliders'}
 ];
@@ -1886,6 +1892,7 @@ document.addEventListener('change', e => {
   if (el.dataset.chg === 'caseStatus') { const c = getCase(el.dataset.id); c.status = el.value; c.statusSince = today(); if (el.value === 'erledigt') c.closedAt = today(); c.log.push({id:uid(), date:today(), text:'Status: ' + el.value}); save(); render(); }
   if (el.dataset.chg === 'docCat') { UI.docCat = el.value; render(); }
   if (el.dataset.chg === 'reportMonth' && /^\d{4}-\d{2}$/.test(el.value)) { UI.reportMonth = el.value; render(); }
+  if (el.dataset.chg === 'scanMode') { S.settings.scan = Object.assign(scanCfg(), {mode:el.value}); save(); toast('Gespeichert'); }
   if (el.dataset.chg === 'finMonth' && /^\d{4}-\d{2}$/.test(el.value)) { UI.finMonth = el.value; render(); }
 });
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { location.hash = '#/search?q=' + encodeURIComponent(e.target.value); } });
@@ -2509,13 +2516,248 @@ Object.assign(ACT, {
       if (v.newRec) { await vaultNewRec(); } render(); }})
 });
 
+// ---------- Scanner: Bildverarbeitung ----------
+// Ablauf je Seite: Original (max. 2400 px) wird gespeichert; Zuschnitt (quad), Drehung und Modus werden erst beim
+// Anzeigen bzw. beim PDF-Bau angewendet – so lässt sich alles nachträglich ändern.
+const SCAN_MODES = [{v:'dok', l:'Dokument (schwarz-weiß, klar)'}, {v:'grau', l:'Graustufen'}, {v:'farbe', l:'Farbe'}];
+const SCAN_SRC = {handy:'Handy', drucker:'Drucker', datei:'Datei', ordner:'Ordner'};
+const THUMB = {};
+async function blobToBitmap(blob){ return createImageBitmap(blob); }
+function canvasOf(w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+function toBlob(c, type = 'image/jpeg', q = 0.85){ return new Promise(r => c.toBlob(r, type, q)); }
+// Seitenränder finden: helles Papier auf dunklerem Untergrund (Otsu-Schwelle, größte helle Fläche, Ecken)
+function detectQuad(bmp){
+  const s = Math.min(1, 360 / Math.max(bmp.width, bmp.height)), w = Math.max(8, Math.round(bmp.width * s)), h = Math.max(8, Math.round(bmp.height * s));
+  const c = canvasOf(w, h), x = c.getContext('2d', {willReadFrequently:true}); x.drawImage(bmp, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, g = new Uint8Array(w * h), hist = new Array(256).fill(0);
+  for (let i = 0; i < w * h; i++) { const v = (d[i * 4] * 77 + d[i * 4 + 1] * 150 + d[i * 4 + 2] * 29) >> 8; g[i] = v; hist[v]++; }
+  let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sB = 0, wB = 0, best = 0, thr = 128; for (let t = 0; t < 256; t++) { wB += hist[t]; if (!wB) continue; const wF = w * h - wB; if (!wF) break; sB += t * hist[t];
+    const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) ** 2; if (v > best) { best = v; thr = t; } }
+  const lab = new Int32Array(w * h).fill(-1); let bestLab = -1, bestSize = 0; const stack = new Int32Array(w * h);
+  for (let i = 0; i < w * h; i++) { if (g[i] <= thr || lab[i] >= 0) continue; let sp = 0, size = 0; stack[sp++] = i; lab[i] = i;
+    while (sp) { const p = stack[--sp]; size++; const px = p % w, py = (p / w) | 0;
+      for (const q of [px > 0 ? p - 1 : -1, px < w - 1 ? p + 1 : -1, py > 0 ? p - w : -1, py < h - 1 ? p + w : -1]) if (q >= 0 && lab[q] < 0 && g[q] > thr) { lab[q] = i; stack[sp++] = q; } }
+    if (size > bestSize) { bestSize = size; bestLab = i; } }
+  const frac = bestSize / (w * h); if (frac < 0.15 || frac > 0.97) return null;
+  let tl = [w, h, Infinity], br = [0, 0, -Infinity], tr = [0, 0, -Infinity], bl = [0, 0, Infinity];
+  for (let i = 0; i < w * h; i++) if (lab[i] === bestLab) { const px = i % w, py = (i / w) | 0, a = px + py, b = px - py;
+    if (a < tl[2]) tl = [px, py, a]; if (a > br[2]) br = [px, py, a]; if (b > tr[2]) tr = [px, py, b]; if (b < bl[2]) bl = [px, py, b]; }
+  const q = [tl, tr, br, bl].map(p => [p[0] / s, p[1] / s]);
+  const area = Math.abs((q[0][0] * q[1][1] - q[1][0] * q[0][1]) + (q[1][0] * q[2][1] - q[2][0] * q[1][1]) + (q[2][0] * q[3][1] - q[3][0] * q[2][1]) + (q[3][0] * q[0][1] - q[0][0] * q[3][1])) / 2;
+  return area / (bmp.width * bmp.height) > 0.12 ? q : null;
+}
+// Perspektive: Matrix, die Zielrechteck (u,v) auf das Viereck im Original abbildet
+function homography(src, dst){
+  const A = [], B = [];
+  for (let i = 0; i < 4; i++) { const [x, y] = dst[i], [X, Y] = src[i];
+    A.push([x, y, 1, 0, 0, 0, -X * x, -X * y]); B.push(X); A.push([0, 0, 0, x, y, 1, -Y * x, -Y * y]); B.push(Y); }
+  for (let c = 0; c < 8; c++) { let p = c; for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]]; [B[c], B[p]] = [B[p], B[c]];
+    for (let r = 0; r < 8; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k]; B[r] -= f * B[c]; } }
+  return B.map((b, i) => b / A[i][i]);
+}
+function warp(bmp, q){
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  let W = Math.max(dist(q[0], q[1]), dist(q[3], q[2])), H = Math.max(dist(q[0], q[3]), dist(q[1], q[2]));
+  const k = Math.min(1, 2200 / Math.max(W, H)); W = Math.round(W * k); H = Math.round(H * k);
+  const sc = canvasOf(bmp.width, bmp.height), sx = sc.getContext('2d', {willReadFrequently:true}); sx.drawImage(bmp, 0, 0);
+  const sd = sx.getImageData(0, 0, bmp.width, bmp.height).data, sw = bmp.width, sh = bmp.height;
+  const m = homography(q, [[0, 0], [W, 0], [W, H], [0, H]]);
+  const out = canvasOf(W, H), ox = out.getContext('2d'), od = ox.createImageData(W, H), o = od.data;
+  for (let v = 0; v < H; v++) for (let u = 0; u < W; u++) {
+    const den = m[6] * u + m[7] * v + 1, X = (m[0] * u + m[1] * v + m[2]) / den, Y = (m[3] * u + m[4] * v + m[5]) / den;
+    const x0 = Math.max(0, Math.min(sw - 2, X | 0)), y0 = Math.max(0, Math.min(sh - 2, Y | 0)), fx = Math.min(1, Math.max(0, X - x0)), fy = Math.min(1, Math.max(0, Y - y0));
+    const i00 = (y0 * sw + x0) * 4, i10 = i00 + 4, i01 = i00 + sw * 4, i11 = i01 + 4, oi = (v * W + u) * 4;
+    for (let ch = 0; ch < 3; ch++) o[oi + ch] = (sd[i00 + ch] * (1 - fx) + sd[i10 + ch] * fx) * (1 - fy) + (sd[i01 + ch] * (1 - fx) + sd[i11 + ch] * fx) * fy;
+    o[oi + 3] = 255; }
+  ox.putImageData(od, 0, 0); return out;
+}
+// „Dokument“: Beleuchtung ausgleichen (Hintergrund schätzen), dann Kontrast – Ergebnis wie vom Flachbettscanner
+function enhance(c, mode){
+  if (mode === 'farbe') return c;
+  const w = c.width, h = c.height, x = c.getContext('2d', {willReadFrequently:true}), id = x.getImageData(0, 0, w, h), d = id.data;
+  let bg = null;
+  if (mode === 'dok') { const sw = Math.max(4, Math.round(w / 28)), sh = Math.max(4, Math.round(h / 28)), small = canvasOf(sw, sh), sx = small.getContext('2d');
+    sx.imageSmoothingQuality = 'high'; sx.drawImage(c, 0, 0, sw, sh); sx.filter = 'blur(2px)'; sx.drawImage(small, 0, 0);
+    const big = canvasOf(w, h), bx = big.getContext('2d', {willReadFrequently:true}); bx.imageSmoothingQuality = 'high'; bx.drawImage(small, 0, 0, w, h); bg = bx.getImageData(0, 0, w, h).data; }
+  for (let i = 0; i < d.length; i += 4) {
+    let v = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+    if (bg) { const b = Math.max(40, bg[i] * 0.299 + bg[i + 1] * 0.587 + bg[i + 2] * 0.114); v = Math.min(255, v / b * 255);
+      v = Math.max(0, Math.min(255, (v - 70) * 255 / 165)); v = 255 * Math.pow(v / 255, 1.35); if (v > 232) v = 255; }
+    d[i] = d[i + 1] = d[i + 2] = v; }
+  x.putImageData(id, 0, 0); return c;
+}
+function rotate(c, deg){
+  deg = ((deg % 360) + 360) % 360; if (!deg) return c;
+  const r = deg === 180 ? canvasOf(c.width, c.height) : canvasOf(c.height, c.width), x = r.getContext('2d');
+  x.translate(r.width / 2, r.height / 2); x.rotate(deg * Math.PI / 180); x.drawImage(c, -c.width / 2, -c.height / 2); return r;
+}
+async function renderPage(pg, maxSide){
+  const f = await fileGet(pg.fileId); if (!f) throw new Error('Seite fehlt');
+  const bmp = await blobToBitmap(f.blob);
+  let c = pg.quad ? warp(bmp, pg.quad) : (() => { const k = canvasOf(bmp.width, bmp.height); k.getContext('2d').drawImage(bmp, 0, 0); return k; })();
+  c = rotate(enhance(c, pg.mode || 'dok'), pg.rot || 0);
+  if (maxSide && Math.max(c.width, c.height) > maxSide) { const k = maxSide / Math.max(c.width, c.height), t = canvasOf(Math.round(c.width * k), Math.round(c.height * k)); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height); c = t; }
+  return c;
+}
+async function pageThumb(pg){
+  const key = pg.id + '|' + JSON.stringify([pg.quad, pg.rot, pg.mode]);
+  if (THUMB[pg.id] && THUMB[pg.id].key === key) return THUMB[pg.id].url;
+  const url = pg.kind === 'pdf' ? '' : (await renderPage(pg, 420)).toDataURL('image/jpeg', 0.8);
+  THUMB[pg.id] = {key, url}; return url;
+}
+
+// ---------- Scanner: Eingang ----------
+const scanCfg = () => Object.assign({mode:'dok', watchDir:''}, S.settings.scan || {});
+const getScan = id => (S.scans || []).find(b => b.id === id);
+const SCANUI = {phone:null, busy:0, target:''};
+async function scanIntake(d, targetId){
+  S.scans = S.scans || [];
+  const src = d.source; let b = targetId ? getScan(targetId) : null;
+  if (!b && src === 'handy' && d.batch) b = S.scans.find(x => x.phoneBatch === d.batch);
+  if (!b && src === 'drucker' && SCANUI.target) b = getScan(SCANUI.target);
+  if (!b) { b = {id:uid(), created:new Date().toISOString(), source:src, title:(src === 'handy' ? 'Handy-Scan ' : src === 'drucker' ? 'Druckerscan ' : (d.name || 'Scan').replace(/\.[^.]+$/, '') + ' ') .trim() + (src === 'handy' || src === 'drucker' ? ' ' + fmtDate(today()) : ''), pages:[], phoneBatch:d.batch || '', open: src === 'handy'};
+    S.scans.unshift(b); if (src === 'drucker') SCANUI.target = b.id; }
+  const blob = new Blob([d.data], {type:d.mime}), pg = {id:uid(), fileId:uid(), mime:d.mime, kind: d.mime === 'application/pdf' ? 'pdf' : 'img', rot:0, mode:scanCfg().mode, quad:null, name:d.name || ''};
+  if (pg.kind === 'img') {
+    let bmp = await blobToBitmap(blob), store = blob;
+    if (Math.max(bmp.width, bmp.height) > 2400) { const k = 2400 / Math.max(bmp.width, bmp.height), c = canvasOf(Math.round(bmp.width * k), Math.round(bmp.height * k)); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); store = await toBlob(c, 'image/jpeg', 0.9); bmp = await blobToBitmap(store); pg.mime = 'image/jpeg'; }
+    if (src !== 'drucker') pg.quad = detectQuad(bmp);
+    await filePut(pg.fileId, {blob:store, name:'seite.jpg', type:pg.mime});
+  } else await filePut(pg.fileId, {blob, name:d.name || 'scan.pdf', type:'application/pdf'});
+  b.pages.push(pg); save();
+  if (parseHash().route === 'scan') render(); else { renderNav(parseHash().route); }
+  return b;
+}
+async function scanPdf(b){
+  const parts = [];
+  for (const pg of b.pages) {
+    if (pg.kind === 'pdf') { const f = await fileGet(pg.fileId); parts.push({mime:'application/pdf', data:new Uint8Array(await f.blob.arrayBuffer())}); continue; }
+    const c = await renderPage(pg, 2200); const bl = await toBlob(c, 'image/jpeg', pg.mode === 'farbe' ? 0.85 : 0.8); parts.push({mime:'image/jpeg', data:new Uint8Array(await bl.arrayBuffer())});
+  }
+  const r = await window.officeHome.makePdf(parts, b.title); if (!r.ok) throw new Error(r.message);
+  return new Blob([r.data], {type:'application/pdf'});
+}
+async function scanDelete(b, keepFiles){
+  if (!keepFiles) for (const pg of b.pages) await fileDel(pg.fileId);
+  S.scans = S.scans.filter(x => x.id !== b.id); if (SCANUI.target === b.id) SCANUI.target = ''; save(); render();
+}
+// Eckpunkte von Hand korrigieren
+async function scanCropEditor(b, pg){
+  const f = await fileGet(pg.fileId), bmp = await blobToBitmap(f.blob), url = URL.createObjectURL(f.blob);
+  let q = pg.quad ? pg.quad.map(p => p.slice()) : [[0, 0], [bmp.width, 0], [bmp.width, bmp.height], [0, bmp.height]];
+  closeModal(); const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
+  bg.innerHTML = `<div class="modal" style="width:min(900px,96vw)"><h3>Seite zuschneiden</h3><p class="small muted" style="margin:0 18px">Die vier Punkte auf die Ecken des Blattes ziehen.</p>
+    <div style="position:relative;margin:10px auto;max-width:100%;width:fit-content"><img id="cropImg" src="${url}" style="display:block;max-width:86vw;max-height:62vh">
+    <svg id="cropSvg" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></svg></div>
+    <div class="acts"><button class="btn" data-c="auto">Automatisch erkennen</button><button class="btn" data-c="full">Ganze Seite</button><span class="sp"></span><button class="btn" data-c="cancel">Abbrechen</button><button class="btn pri" data-c="ok">Übernehmen</button></div></div>`;
+  document.body.appendChild(bg);
+  const img = $('#cropImg', bg), svg = $('#cropSvg', bg); await img.decode();
+  const draw = () => { const k = img.clientWidth / bmp.width, P = q.map(p => [p[0] * k, p[1] * k]);
+    svg.innerHTML = `<polygon points="${P.map(p => p.join(',')).join(' ')}" fill="rgba(37,99,235,.15)" stroke="#2563eb" stroke-width="2"/>` + P.map((p, i) => `<circle data-i="${i}" cx="${p[0]}" cy="${p[1]}" r="11" fill="#fff" stroke="#2563eb" stroke-width="3" style="cursor:grab"/>`).join(''); };
+  draw(); let drag = -1;
+  svg.addEventListener('pointerdown', e => { const t = e.target.closest('circle'); if (t) { drag = Number(t.dataset.i); svg.setPointerCapture(e.pointerId); } });
+  svg.addEventListener('pointermove', e => { if (drag < 0) return; const r = svg.getBoundingClientRect(), k = bmp.width / img.clientWidth;
+    q[drag] = [Math.max(0, Math.min(bmp.width, (e.clientX - r.left) * k)), Math.max(0, Math.min(bmp.height, (e.clientY - r.top) * k))]; draw(); });
+  svg.addEventListener('pointerup', () => drag = -1);
+  bg.addEventListener('click', e => { const c = e.target.closest('[data-c]'); if (e.target === bg) { URL.revokeObjectURL(url); return closeModal(); } if (!c) return;
+    if (c.dataset.c === 'auto') { const a = detectQuad(bmp); if (a) { q = a; draw(); } else toast('Keine Blattkanten erkannt – bitte von Hand ziehen'); return; }
+    if (c.dataset.c === 'full') { q = [[0, 0], [bmp.width, 0], [bmp.width, bmp.height], [0, bmp.height]]; draw(); return; }
+    if (c.dataset.c === 'ok') { const full = q[0][0] < 2 && q[0][1] < 2 && q[2][0] > bmp.width - 2 && q[2][1] > bmp.height - 2 && q[1][0] > bmp.width - 2 && q[3][1] > bmp.height - 2; pg.quad = full ? null : q; save(); }
+    URL.revokeObjectURL(url); closeModal(); render(); });
+}
+
+// ---------- Scanner: Seite ----------
+VIEWS.scan = () => {
+  const head = `<div class="head"><div class="grow"><h1>${icon('scan')}Scanner</h1><p class="sub" style="margin:0">Briefe mit Drucker, Handy oder aus Dateien erfassen – jede Sendung wird ein PDF und kann direkt als Dokument abgelegt werden.</p></div>
+    ${DESKTOP ? `<button class="btn" data-act="scanPrinter">${icon('print')}Mit Drucker scannen</button><button class="btn" data-act="scanPhone">${icon('phone')}Mit Handy scannen</button>` : ''}
+    <button class="btn pri" data-act="scanFiles">${icon('upload')}Dateien hinzufügen</button></div>`;
+  if (!DESKTOP) return head + `<div class="banner amber">Der Scanner (PDF-Erstellung, Drucker, Handy) funktioniert nur im installierten Office-Home-Programm.</div>`;
+  const c = scanCfg(), P = SCANUI.phone, L = S.scans || [];
+  return head + `
+  <div class="grid g2" style="margin-bottom:14px">
+    ${P ? `<div class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><img src="${P.qr}" alt="QR-Code" style="width:170px;height:170px;border-radius:8px;border:1px solid var(--line)">
+      <div style="flex:1;min-width:200px"><h3 style="margin-top:0">${icon('phone')}Handy verbinden</h3><ol class="small" style="padding-left:18px;margin:0 0 8px"><li>Handy im <b>selben WLAN</b> wie dieser PC.</li><li>QR-Code mit der Handy-Kamera scannen.</li><li>Seiten fotografieren → „Fertig“.</li></ol>
+      <div class="small muted" style="word-break:break-all">${esc(P.url)}</div><div class="small muted" style="margin-top:6px">Fragt Windows beim ersten Mal nach der Firewall: „Private Netzwerke“ erlauben. Die Verbindung endet nach 30 Minuten ohne Nutzung.</div>
+      <button class="btn sm" style="margin-top:8px" data-act="scanPhoneStop">Verbindung beenden</button></div></div>` : ''}
+    <div class="card"><h3>${icon('folder')}Einstellungen</h3>
+      <div class="fld"><label>Neue Seiten verarbeiten als</label><select data-chg="scanMode">${optHTML(SCAN_MODES, c.mode)}</select></div>
+      <div class="fld"><label>Überwachter Ordner (z. B. Scan-Ordner des Druckers oder OneDrive)</label>
+        <div style="display:flex;gap:6px;align-items:center"><span class="small trunc" style="flex:1">${c.watchDir ? esc(c.watchDir) : '<span class="muted">aus</span>'}</span><button class="btn sm" data-act="scanWatchPick">Ordner wählen</button>${c.watchDir ? '<button class="btn sm" data-act="scanWatchOff">Aus</button>' : ''}</div>
+        <span class="hint">Neue PDFs/Fotos dort kommen automatisch hierher und werden danach in den Unterordner „importiert“ verschoben.</span></div></div>
+  </div>
+  <div id="scanDrop" class="dropzone">Dateien (Fotos oder PDF) hierher ziehen</div>
+  ${L.length ? L.map(b => `<div class="card scanb"><h3><input class="scantitle" data-scan-title="${b.id}" value="${esc(b.title)}"> <span class="badge">${SCAN_SRC[b.source] || b.source}</span>${b.open ? ' <span class="badge amber">empfängt …</span>' : ''}
+      <span class="r small muted">${b.pages.length} Seite${b.pages.length === 1 ? '' : 'n'} · ${fmtDate(b.created.slice(0, 10))}</span></h3>
+    <div class="pages">${b.pages.map((pg, i) => `<div class="pgc"><div class="pgimg" data-thumb="${pg.id}">${pg.kind === 'pdf' ? '<b>PDF</b>' : '<span class="muted small">…</span>'}</div>
+      <div class="pgbar"><span class="small">${i + 1}</span>${pg.kind === 'img' ? `<button class="btn ghost sm" title="zuschneiden" data-act="scanCrop" data-id="${b.id}:${pg.id}">✂</button><button class="btn ghost sm" title="drehen" data-act="scanRot" data-id="${b.id}:${pg.id}">↻</button>` : ''}
+      ${i ? `<button class="btn ghost sm" title="nach vorne" data-act="scanMove" data-id="${b.id}:${pg.id}:-1">◀</button>` : ''}${i < b.pages.length - 1 ? `<button class="btn ghost sm" title="nach hinten" data-act="scanMove" data-id="${b.id}:${pg.id}:1">▶</button>` : ''}
+      <button class="btn ghost sm" title="Seite löschen" data-act="scanDelPage" data-id="${b.id}:${pg.id}">✕</button></div>
+      ${pg.kind === 'img' ? `<select class="pgmode" data-scan-mode="${b.id}:${pg.id}">${optHTML(SCAN_MODES.map(m => ({v:m.v, l:m.l.split(' ')[0]})), pg.mode)}</select>` : ''}</div>`).join('')}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn pri" data-act="scanFile" data-id="${b.id}" ${b.pages.length ? '' : 'disabled'}>${icon('file')}Als Dokument ablegen</button>
+      <button class="btn" data-act="scanView" data-id="${b.id}" ${b.pages.length ? '' : 'disabled'}>PDF ansehen</button>
+      ${b.source === 'drucker' ? `<button class="btn" data-act="scanPrinter" data-id="${b.id}">Weitere Seite scannen</button>` : ''}
+      ${L.length > 1 ? `<select data-scan-merge="${b.id}" style="width:auto"><option value="">Seiten anhängen an …</option>${L.filter(x => x.id !== b.id).map(x => `<option value="${x.id}">${esc(x.title)}</option>`).join('')}</select>` : ''}
+      <span style="flex:1"></span><button class="btn dan" data-act="scanDel" data-id="${b.id}">Löschen</button></div></div>`).join('')
+    : '<div class="empty">Noch nichts gescannt. Wähle oben Drucker, Handy oder Dateien.</div>'}`;
+};
+AFTER.scan = () => {
+  $$('[data-thumb]').forEach(async el => { const [b, pg] = (() => { for (const x of S.scans || []) { const p = x.pages.find(y => y.id === el.dataset.thumb); if (p) return [x, p]; } return []; })();
+    if (!pg || pg.kind === 'pdf') return; try { const u = await pageThumb(pg); el.innerHTML = `<img src="${u}">`; } catch (e) { el.innerHTML = '<span class="small" style="color:var(--danger)">Fehler</span>'; } });
+  $$('[data-scan-title]').forEach(i => i.addEventListener('change', () => { const b = getScan(i.dataset.scanTitle); if (b) { b.title = i.value.trim() || b.title; save(); } }));
+  $$('[data-scan-mode]').forEach(s => s.addEventListener('change', () => { const [bid, pid] = s.dataset.scanMode.split(':'); const pg = getScan(bid)?.pages.find(p => p.id === pid); if (pg) { pg.mode = s.value; save(); render(); } }));
+  $$('[data-scan-merge]').forEach(s => s.addEventListener('change', () => { const src = getScan(s.dataset.scanMerge), dst = getScan(s.value); if (!src || !dst) return;
+    dst.pages.push(...src.pages); S.scans = S.scans.filter(x => x.id !== src.id); save(); render(); toast('Seiten angehängt an „' + dst.title + '“'); }));
+  const dz = $('#scanDrop'); if (dz) {
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('on'); }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('on'); }));
+    dz.addEventListener('drop', e => scanAddFiles([...e.dataTransfer.files])); }
+};
+async function scanAddFiles(files){
+  files = files.filter(f => /^(image\/(jpeg|png)|application\/pdf)$/.test(f.type)); if (!files.length) return toast('Nur JPG, PNG oder PDF');
+  let b = null; for (const f of files) b = await scanIntake({source:'datei', name:f.name, mime:f.type, data:await f.arrayBuffer()}, b && b.id);
+  toast(files.length + ' Datei(en) im Scanner');
+}
+function initScan(){
+  if (!DESKTOP || !window.officeHome.onScanIncoming) return;
+  window.officeHome.onScanIncoming(async d => { try { const b = await scanIntake(d); toast('Neue Seite im Scanner: ' + b.title); } catch (e) { toast('Scan konnte nicht übernommen werden: ' + e.message); } });
+  window.officeHome.onPhoneDone(d => { const b = (S.scans || []).find(x => x.phoneBatch === d.batch); if (b) { b.open = false; save(); if (parseHash().route === 'scan') render(); toast('Handy-Scan fertig: ' + b.pages.length + ' Seite(n)'); } });
+  window.officeHome.onPhoneState(d => { if (!d.running) { SCANUI.phone = null; if (parseHash().route === 'scan') render(); } });
+  if (scanCfg().watchDir) window.officeHome.watchSet(scanCfg().watchDir).then(r => { if (!r.ok) toast('Scan-Ordner: ' + r.message); });
+}
+const scanPg = id => { const [bid, pid] = id.split(':'); const b = getScan(bid); return [b, b && b.pages.find(p => p.id === pid)]; };
+Object.assign(ACT, {
+  scanPrinter: async d => { if (SCANUI.busy) return; SCANUI.busy = 1; if (d && d.id) SCANUI.target = d.id; else SCANUI.target = ''; toast('Scanner-Fenster von Windows öffnet sich …');
+    try { const r = await window.officeHome.scanWia(); if (r.ok) await scanIntake({source:'drucker', name:r.name, mime:r.mime, data:r.data}); else if (!r.cancelled) alert('Scannen nicht möglich: ' + r.message); }
+    finally { SCANUI.busy = 0; } },
+  scanPhone: async () => { const r = await window.officeHome.phoneStart(); if (!r.ok) return alert(r.message); SCANUI.phone = r; render(); },
+  scanPhoneStop: async () => { await window.officeHome.phoneStop(); SCANUI.phone = null; render(); },
+  scanFiles: async () => { const inp = $('#hiddenFile'); inp.value = ''; inp.accept = 'image/jpeg,image/png,application/pdf'; inp.multiple = true;
+    inp.onchange = () => { const fs = [...inp.files]; inp.multiple = false; scanAddFiles(fs); }; inp.click(); },
+  scanWatchPick: async () => { const dir = await window.officeHome.watchPick(); if (!dir) return; const r = await window.officeHome.watchSet(dir); if (!r.ok) return alert(r.message);
+    S.settings.scan = Object.assign(scanCfg(), {watchDir:dir}); save(); render(); toast('Ordner wird überwacht'); },
+  scanWatchOff: async () => { await window.officeHome.watchSet(''); S.settings.scan = Object.assign(scanCfg(), {watchDir:''}); save(); render(); },
+  scanCrop: d => { const [b, pg] = scanPg(d.id); if (pg) scanCropEditor(b, pg); },
+  scanRot: d => { const [, pg] = scanPg(d.id); if (pg) { pg.rot = ((pg.rot || 0) + 90) % 360; save(); render(); } },
+  scanMove: d => { const [bid, pid, dir] = d.id.split(':'); const b = getScan(bid); const i = b.pages.findIndex(p => p.id === pid), j = i + Number(dir); if (j < 0 || j >= b.pages.length) return; [b.pages[i], b.pages[j]] = [b.pages[j], b.pages[i]]; save(); render(); },
+  scanDelPage: async d => { const [b, pg] = scanPg(d.id); if (!pg || !confirm('Diese Seite löschen?')) return; await fileDel(pg.fileId); b.pages = b.pages.filter(p => p.id !== pg.id); save(); render(); },
+  scanDel: async d => { const b = getScan(d.id); if (b && confirm('„' + b.title + '“ mit allen Seiten löschen?')) await scanDelete(b); },
+  scanView: async d => { const b = getScan(d.id); toast('PDF wird erstellt …'); try { const pdf = await scanPdf(b); await window.officeHome.openFile(b.title + '.pdf', await pdf.arrayBuffer()); } catch (e) { alert('PDF fehlgeschlagen: ' + e.message); } },
+  scanFile: async d => { const b = getScan(d.id); toast('PDF wird erstellt …');
+    try { const pdf = await scanPdf(b); const file = new File([pdf], b.title.replace(/[\\/:*?"<>|]/g, '') + '.pdf', {type:'application/pdf'});
+      editDoc(null, {title:b.title, date:today()}, file, async () => { await scanDelete(b); toast('Als Dokument abgelegt'); }); }
+    catch (e) { alert('PDF fehlgeschlagen: ' + e.message); } }
+});
+
 // ---------- Start ----------
 (async () => {
   try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   document.body.classList.toggle('is-demo', MODE === 'demo');
-  render(); initUpdates(); initMcp();
+  render(); initUpdates(); initMcp(); initScan();
   if (memCfg().root) { await memLoadStatus(); render(); }
 })();
 </script>

@@ -26,6 +26,16 @@ contextBridge.exposeInMainWorld('officeHome', {
   mcpEnable: (on) => ipcRenderer.invoke('oh:mcpEnable', !!on),
   mcpInfo: () => ipcRenderer.invoke('oh:mcpInfo'),
   mcpInstallDesktop: () => ipcRenderer.invoke('oh:mcpInstallDesktop'),
+  // Scanner
+  makePdf: (parts, title) => ipcRenderer.invoke('oh:makePdf', parts, title),
+  scanWia: () => ipcRenderer.invoke('oh:scanWia'),
+  phoneStart: () => ipcRenderer.invoke('oh:phoneStart'),
+  phoneStop: () => ipcRenderer.invoke('oh:phoneStop'),
+  watchPick: () => ipcRenderer.invoke('oh:watchPick'),
+  watchSet: (dir) => ipcRenderer.invoke('oh:watchSet', dir),
+  onScanIncoming: (cb) => ipcRenderer.on('oh:scanIncoming', (e, d) => cb(d)),
+  onPhoneDone: (cb) => ipcRenderer.on('oh:phoneDone', (e, d) => cb(d)),
+  onPhoneState: (cb) => ipcRenderer.on('oh:phoneState', (e, d) => cb(d)),
   onMcpCall: (cb) => ipcRenderer.on('oh:mcpCall', async (e, m) => {
     let r; try { r = await cb(m.tool, m.args); } catch (err) { r = { ok: false, error: String(err && err.message || err) }; }
     ipcRenderer.send('oh:mcpReply', m.id, r);
