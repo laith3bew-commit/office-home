@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__Claude_Browser__browser_batch",
+  "tool_input_preview": "{\"actions\":[{\"name\":\"computer\",\"input\":{\"action\":\"scroll\",\"coordinate\":[700,600],\"scroll_direction\":\"down\",\"scroll_amount\":10}},{\"name\":\"computer\",\"input\":{\"action\":\"screenshot\",\"scale\":0.6}},{\"name\":...",
+  "error": "actions[0] (computer:scroll) failed: scroll with `coordinate` requires a prior computer{action:\"screenshot\"} (no screenshot dimensions cached) (0 completed, 2 remaining)",
+  "timestamp": "2026-11-23T14:33:20.401Z",
+  "retry_count": 1
+}

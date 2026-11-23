@@ -187,6 +187,32 @@ input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#
 .letter.d-linie .l-head .n{color:var(--acc)}
 .letter.d-linie .l-head .a{color:#555}
 .letter.d-linie .l-subj{border-left:1mm solid var(--acc);padding-left:2.5mm;margin-left:-3.5mm}
+.stats{margin-bottom:16px}
+.stats .chart{width:100%;height:auto;display:block;margin-top:6px}
+.bignum{font-size:30px;font-weight:700;letter-spacing:-.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bignum small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.chip{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:#eef1f5;color:var(--muted);letter-spacing:0}
+.chip.up{background:var(--ok-soft);color:var(--ok)} .chip.down{background:var(--danger-soft);color:var(--danger)}
+.segs{display:inline-flex;gap:2px;background:#eef1f5;border-radius:999px;padding:3px}
+.seg{border:0;background:transparent;padding:4px 11px;border-radius:999px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}
+.seg.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend.col{flex-direction:column;gap:7px;font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend b{color:var(--ink);margin-left:3px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:6px 0 12px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.tile.on{border-color:var(--accent);background:var(--accent-soft)}
+.tile .l{font-size:12px;color:var(--muted)} .tile .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.tree{display:flex;flex-wrap:wrap;gap:6px;min-height:150px}
+.tb{min-width:110px;min-height:72px;border-radius:10px;padding:10px 12px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.tb .tn{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;opacity:.95}
+.tb .tv{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.tb .tp{align-self:flex-start;font-size:10.5px;font-weight:700;background:rgba(0,0,0,.22);padding:1px 6px;border-radius:6px;margin-top:4px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.num.aus,b.aus{color:var(--danger)} .num.ein{color:var(--ok)}
+.hb{margin-bottom:10px} .hbl{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:3px}
+@media (max-width:1100px){.stats.g2,.stats.g3{grid-template-columns:1fr}}
 .updchip{display:block;margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#f59e0b;color:#1f2937;font-size:12.5px;font-weight:600;text-decoration:none;text-align:center}
 .dsgrid{display:flex;flex-wrap:wrap;gap:14px}
 .dstile{border:2px solid var(--line,#d9dee7);border-radius:10px;padding:8px;background:transparent;cursor:pointer;text-align:center;font:inherit;color:inherit}
@@ -209,6 +235,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#
 .report .sums{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:2mm}
 .report .sums div{border:.6pt solid #bbb;border-radius:2mm;padding:2mm 3mm}
 .report .sums b{display:block;font-size:13pt}
+.report .rchart{margin:1mm 0 3mm;break-inside:avoid} .report .rchart svg{width:100%;max-height:45mm}
+.report .rleg{font-size:8.5pt;color:#555;display:flex;gap:2mm;align-items:center} .report .rleg span{display:inline-block;width:3mm;height:3mm;border-radius:.6mm}
 .report .rsig{margin-top:14mm;display:grid;grid-template-columns:1fr 1fr;gap:20mm;font-size:9pt;break-inside:avoid}
 .report .rsig div{border-top:.6pt solid #000;padding-top:1.5mm}
 #print-root{display:none}
@@ -305,7 +333,11 @@ const ICONS = {
   plus:'<path d="M12 5v14M5 12h14"/>',
   print:'<path d="M6 9V2h12v7"/><path d="M6 18H4v-7h16v7h-2"/><path d="M6 14h12v8H6z"/>',
   save:'<path d="M5 3h11l5 5v13H5z"/><path d="M8 3v5h8M8 21v-7h8v7"/>',
-  cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>'
+  cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-8"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>',
+  euro:'<path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h10M4 14h10"/>'
 };
 const icon = n => `<svg class="i" viewBox="0 0 24 24">${ICONS[n] || ''}</svg>`;
 
@@ -340,14 +372,14 @@ function defaultState(){
     settings: {
       me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
       letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79'},
-      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:''
+      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true
     },
     persons: [p('p_vater', 'Vater', 'Herr', '#2563eb'), p('p_mutter', 'Mutter', 'Frau', '#db2777')],
-    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[]
+    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[]
   };
 }
 let S = defaultState();
-const UI = {person:'all', contactKind:'', contactQ:'',taskTab:'open', caseTab:'open', docCat:'', docQ:'', reportMonth: today().slice(0, 7)};
+const UI = {person:'all', contactKind:'', contactQ:'', statRange:'monat', statYear:new Date().getFullYear(), finMonth: today().slice(0, 7), finYear:new Date().getFullYear(), finType:'', taskTab:'open', caseTab:'open', docCat:'', docQ:'', reportMonth: today().slice(0, 7)};
 let saveTimer = null;
 function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.db && DB.put('kv', 'state', S).catch(e => alert('Speichern fehlgeschlagen: ' + e)), 250); }
 function migrate(st){
@@ -675,7 +707,7 @@ const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenze
 
 // ---------- Navigation ----------
 const NAV = [
-  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'home'},
+  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'home'}, {r:'stats', l:'Statistik', i:'chart'}, {r:'finance', l:'Finanzen', i:'euro'},
   {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'folder'}, {r:'tasks', l:'Fristen & Aufgaben', i:'clock', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
   {r:'letters', l:'Brief schreiben', i:'pen'}, {r:'documents', l:'Dokumente', i:'file'},
   {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'receipt'}, {r:'assets', l:'Konten & Vermögen', i:'wallet'}, {r:'notes', l:'Notizen', i:'note'}, {r:'report', l:'Monatsbericht', i:'print'},
@@ -742,6 +774,7 @@ VIEWS.dashboard = () => {
     <div class="kpi ${cancelSoon.length ? 'amber' : ''}" data-go="#/contracts"><div class="l">Kündigungsfristen (${S.settings.contractDays} T.)</div><div class="v">${cancelSoon.length}</div></div>
     <div class="kpi" data-go="#/documents"><div class="l">Dokumente</div><div class="v">${byPerson(S.documents).length}</div></div>
   </div>
+  ${dashStatsHTML()}
   <div class="grid g2">
     <div class="card"><h3>${icon('clock')}Anstehende Fristen <a class="r" href="#/tasks">alle anzeigen</a></h3>
       <div class="list">${soon.length ? soon.slice(0, 9).map(i => `<div class="row">${i.taskId ? `<span class="chk-row"><input type="checkbox" data-act="toggleTask" data-id="${i.taskId}" title="erledigt"></span>` : `<span class="badge blue">Vertrag</span>`}
@@ -760,12 +793,418 @@ VIEWS.dashboard = () => {
         <div>Offene Vorgänge</div><div>${pc}</div><div>Nächste Frist</div><div>${nt ? esc(nt.title) + ' ' + dueBadge(nt.due) : '—'}</div>
         <div>Fixkosten / Monat</div><div>${eur(pm)}</div><div>Vermögen (Saldo)</div><div>${eur(pa)}</div></div></div>`; }).join('')}
   </div>
-  <div class="grid g2">
-    <div class="card"><h3>${icon('receipt')}Fixkosten nach Kategorie <span class="r muted">pro Monat</span></h3>
-      ${cats.length ? cats.map(([k, v]) => `<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between" class="small"><span>${esc(k)}</span><b>${eur(v)}</b></div><div class="bar"><span style="width:${Math.max(3, v / maxCat * 100)}%"></span></div></div>`).join('') : '<div class="empty">Noch keine Verträge erfasst</div>'}</div>
+  <div class="grid">
     <div class="card"><h3>${icon('file')}Zuletzt hinzugefügt</h3><div class="list">${recent.length ? recent.map(r => `<div class="row"><span class="badge">${r.t}</span><div class="grow"><a class="trunc" style="display:block;color:inherit" href="${r.href}">${esc(r.title)}</a></div>${personChip(r.p)}<span class="small muted">${fmtDate(r.date)}</span></div>`).join('') : '<div class="empty">Noch nichts vorhanden</div>'}</div></div>
   </div>`;
 };
+// ---------- Statistik & Diagramme (Übersicht) ----------
+const ST_COL = {done:'#0d9488', letter:'#2563eb', doc:'#f59e0b'};
+const ST_LAB = {done:'Erledigt', letter:'Briefe', doc:'Dokumente'};
+const TREE_COL = ['#2563eb', '#0d9488', '#f59e0b', '#db2777', '#7c3aed', '#16a34a', '#ea580c', '#0891b2', '#64748b'];
+const MON_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const dshift = (iso, n) => { const d = new Date(iso + 'T12:00'); d.setDate(d.getDate() + n); return isoDate(d); };
+const mshift = (ym, n) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+function activityEvents(){
+  const ev = [];
+  for (const t of byPerson(S.tasks)) { if (t.done && t.doneAt) ev.push({d:t.doneAt, k:'done'}); else if (t.lastDone) ev.push({d:t.lastDone, k:'done'}); }
+  for (const c of byPerson(S.cases)) for (const l of (c.log || [])) if (/^Schritt erledigt:/.test(l.text || '')) ev.push({d:l.date, k:'done'});
+  for (const l of byPerson(S.letters)) if (l.date) ev.push({d:l.date.slice(0, 10), k:'letter'});
+  for (const d of byPerson(S.documents)) { const x = (d.added || d.date || '').slice(0, 10); if (x) ev.push({d:x, k:'doc'}); }
+  return ev;
+}
+function statBuckets(range){
+  const t = today();
+  if (range === 'jahr') { const cur = t.slice(0, 7); const keys = Array.from({length:12}, (_, i) => mshift(cur, i - 11));
+    return {keys, labels:keys.map(k => MON_SHORT[Number(k.slice(5)) - 1]), key:d => d.slice(0, 7), inCur:d => d.slice(0, 7) >= keys[0] && d.slice(0, 7) <= cur, inPrev:d => d.slice(0, 7) >= mshift(cur, -23) && d.slice(0, 7) <= mshift(cur, -12), prevLabel:'Vorjahr'}; }
+  const n = range === 'woche' ? 7 : 30; const keys = Array.from({length:n}, (_, i) => dshift(t, i - n + 1));
+  const wd = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  return {keys, labels:keys.map((k, i) => n === 7 ? wd[new Date(k + 'T12:00').getDay()] : (i % 5 === 4 || i === n - 1 ? k.slice(8) + '.' + k.slice(5, 7) + '.' : '')),
+    key:d => d, inCur:d => d >= keys[0] && d <= t, inPrev:d => d >= dshift(t, -2 * n + 1) && d <= dshift(t, -n), prevLabel: n === 7 ? 'Vorwoche' : 'vorherige 30 Tage'};
+}
+function smoothPath(pts){ return pts.map((p, i) => { if (!i) return `M${p[0].toFixed(1)},${p[1].toFixed(1)}`; const q = pts[i - 1], mx = (q[0] + p[0]) / 2; return `C${mx.toFixed(1)},${q[1].toFixed(1)} ${mx.toFixed(1)},${p[1].toFixed(1)} ${p[0].toFixed(1)},${p[1].toFixed(1)}`; }).join(' '); }
+function svgLines(series, labels, {w = 640, h = 190, pad = 26, fmt = v => Math.round(v)} = {}){
+  const n = labels.length, all = series.flatMap(s => s.values).filter(v => v != null);
+  const max = Math.max(1, ...all), min = Math.min(0, ...all), span = max - min || 1;
+  const X = i => pad + (n === 1 ? 0 : i * (w - 2 * pad) / (n - 1)), Y = v => h - 24 - (v - min) / span * (h - 44);
+  const grid = [0, .5, 1].map(f => { const v = min + span * f, y = Y(v); return `<line x1="${pad}" x2="${w - pad}" y1="${y}" y2="${y}" stroke="#e3e7ee" stroke-dasharray="3 4"/><text x="${w - pad + 4}" y="${y + 4}" font-size="10" fill="#9aa3b2">${esc(String(fmt(v)))}</text>`; }).join('');
+  const lines = series.map((s, si) => {
+    const pts = s.values.map((v, i) => v == null ? null : [X(i), Y(v), v, i]).filter(Boolean); if (!pts.length) return '';
+    const d = smoothPath(pts);
+    const area = s.area !== false && si === 0 && pts.length > 1 ? `<path d="${d} L${pts[pts.length - 1][0]},${Y(Math.max(min, 0))} L${pts[0][0]},${Y(Math.max(min, 0))} Z" fill="url(#stg${si})" opacity=".9"/>` : '';
+    return area + `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linecap="round" ${s.dash ? 'stroke-dasharray="6 5"' : ''}/>` +
+      pts.map(p => (p[2] || s.dots) ? `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#fff" stroke="${s.color}" stroke-width="1.6"><title>${esc(labels[p[3]] || '')} · ${esc(s.label)}: ${esc(String(fmt(p[2])))}</title></circle>` : '').join('');
+  }).join('');
+  const xl = labels.map((l, i) => l ? `<text x="${X(i)}" y="${h - 6}" font-size="10.5" text-anchor="middle" fill="#6b7280">${esc(l)}</text>` : '').join('');
+  return `<svg viewBox="0 0 ${w + 36} ${h}" class="chart"><defs>${series.map((s, si) => `<linearGradient id="stg${si}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".28"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('')}</defs>${grid}${lines}${xl}</svg>`;
+}
+// Gruppierte Balken: groups = [{label, vals:[…]}], keys = [{l, c}]
+function svgGroupBars(groups, keys, {w = 640, h = 190, fmt = v => Math.round(v)} = {}){
+  const n = groups.length, k = keys.length, max = Math.max(1, ...groups.flatMap(g => g.vals)), gw = (w - 20) / Math.max(1, n), bw = gw * .7 / k;
+  return `<svg viewBox="0 0 ${w} ${h}" class="chart">${groups.map((g, gi) => g.vals.map((v, ki) => { const bh = Math.max(v ? 3 : 2, v / max * (h - 50)), x = 10 + gi * gw + gw * .15 + ki * bw;
+      return `<rect x="${x.toFixed(1)}" y="${(h - 26 - bh).toFixed(1)}" width="${(bw * .86).toFixed(1)}" height="${bh.toFixed(1)}" rx="4" fill="${keys[ki].c}" opacity="${v ? 1 : .2}"><title>${esc(g.label)} · ${esc(keys[ki].l)}: ${esc(String(fmt(v)))}</title></rect>`; }).join('')
+    + `<text x="${(10 + gi * gw + gw / 2).toFixed(1)}" y="${h - 8}" font-size="10.5" text-anchor="middle" fill="#6b7280">${esc(g.label)}</text>`).join('')}</svg>`;
+}
+// Waagerechte Balken als HTML: rows = [{l, v, c, sub}]
+function hBars(rows, fmt = v => v){
+  if (!rows.length) return '<div class="empty">Noch keine Daten</div>';
+  const max = Math.max(1, ...rows.map(r => r.v));
+  return rows.map(r => `<div class="hb"><div class="hbl"><span class="trunc">${esc(r.l)}</span><b>${esc(String(fmt(r.v)))}</b></div><div class="bar"><span style="width:${Math.max(2, r.v / max * 100)}%;background:${r.c || 'var(--accent)'}"></span></div>${r.sub ? `<div class="small muted">${esc(r.sub)}</div>` : ''}</div>`).join('');
+}
+function svgBars(bars, {w = 640, h = 190} = {}){
+  const n = bars.length, max = Math.max(1, ...bars.map(b => b.v)), bw = (w - 20) / n;
+  return `<svg viewBox="0 0 ${w} ${h}" class="chart">${bars.map((b, i) => { const bh = b.v / max * (h - 52), x = 10 + i * bw + bw * .18, y = h - 26 - bh;
+    return `<rect x="${x}" y="${h - 26 - Math.max(bh, 2)}" width="${bw * .64}" height="${Math.max(bh, 2)}" rx="6" fill="${b.c}" opacity="${b.v ? 1 : .25}"><title>${esc(b.l)}: ${b.v}</title></rect>
+      ${b.v ? `<text x="${x + bw * .32}" y="${y - 6}" font-size="12" font-weight="700" text-anchor="middle" fill="#1c2533">${b.v}</text>` : ''}
+      <text x="${x + bw * .32}" y="${h - 8}" font-size="10.5" text-anchor="middle" fill="#6b7280">${esc(b.l)}</text>`; }).join('')}</svg>`;
+}
+function svgRadial(vals, hi, {unit = ' Aktivitäten', year = UI.statYear} = {}){
+  const cx = 150, cy = 140, r0 = 26, R = 100, max = Math.max(1, ...vals), ang = i => -Math.PI / 2 + i * Math.PI / 6;
+  const pt = (i, v) => { const r = r0 + (R - r0) * v / max; return [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))]; };
+  const pts = vals.map((v, i) => pt(i, v));
+  let d = ''; for (let i = 0; i < 12; i++) { const p0 = pts[(i + 11) % 12], p1 = pts[i], p2 = pts[(i + 1) % 12], p3 = pts[(i + 2) % 12];
+    if (!i) d += `M${p1[0].toFixed(1)},${p1[1].toFixed(1)}`;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${c1.map(n => n.toFixed(1))} ${c2.map(n => n.toFixed(1))} ${p2.map(n => n.toFixed(1))}`; }
+  const rings = [.33, .66, 1].map(f => `<circle cx="${cx}" cy="${cy}" r="${r0 + (R - r0) * f}" fill="none" stroke="#e3e7ee" stroke-dasharray="2 4"/>`).join('');
+  const spokes = vals.map((v, i) => { const lx = cx + (R + 18) * Math.cos(ang(i)), ly = cy + (R + 18) * Math.sin(ang(i));
+    return `<line x1="${cx}" y1="${cy}" x2="${cx + R * Math.cos(ang(i))}" y2="${cy + R * Math.sin(ang(i))}" stroke="#eef1f5"/><text x="${lx}" y="${ly + 4}" font-size="10.5" text-anchor="middle" fill="${i === hi ? '#2563eb' : '#6b7280'}" font-weight="${i === hi ? 700 : 400}">${MON_SHORT[i]}</text>`; }).join('');
+  const dots = pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === hi ? 5 : 3}" fill="${i === hi ? '#2563eb' : '#fff'}" stroke="#2563eb" stroke-width="1.6"><title>${MON_SHORT[i]}: ${vals[i]}${esc(unit)}</title></circle>`).join('');
+  return `<svg viewBox="0 0 300 285" class="chart" style="max-width:340px;margin:auto;display:block">${rings}${spokes}<path d="${d} Z" fill="rgba(37,99,235,.14)" stroke="#2563eb" stroke-width="2.4"/>${dots}<circle cx="${cx}" cy="${cy}" r="${r0 - 6}" fill="#16324f"/><text x="${cx}" y="${cy + 5}" font-size="13" text-anchor="middle" fill="#fff" font-weight="700">${esc(String(year).slice(2))}</text></svg>`;
+}
+function svgDonut(parts){
+  const tot = parts.reduce((s, p) => s + p.v, 0); if (!tot) return '<div class="empty">Keine Vorgänge</div>';
+  let a = -Math.PI / 2; const R = 54, r = 36, cx = 70, cy = 70;
+  const arcs = parts.filter(p => p.v).map(p => { const a2 = a + p.v / tot * Math.PI * 2 - (parts.filter(x => x.v).length > 1 ? .03 : 0), big = a2 - a > Math.PI ? 1 : 0;
+    const P = (rr, t) => `${(cx + rr * Math.cos(t)).toFixed(2)},${(cy + rr * Math.sin(t)).toFixed(2)}`;
+    const path = p.v === tot ? `<circle cx="${cx}" cy="${cy}" r="${(R + r) / 2}" fill="none" stroke="${p.c}" stroke-width="${R - r}"/>` : `<path d="M${P(R, a)} A${R},${R} 0 ${big} 1 ${P(R, a2)} L${P(r, a2)} A${r},${r} 0 ${big} 0 ${P(r, a)} Z" fill="${p.c}"><title>${esc(p.l)}: ${p.v}</title></path>`;
+    a = a + p.v / tot * Math.PI * 2; return path; }).join('');
+  return `<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"><svg viewBox="0 0 140 140" width="140" height="140">${arcs}<text x="70" y="68" font-size="22" font-weight="700" text-anchor="middle" fill="#1c2533">${tot}</text><text x="70" y="86" font-size="10" text-anchor="middle" fill="#6b7280">Vorgänge</text></svg>
+    <div class="legend col">${parts.map(p => `<span><i style="background:${p.c}"></i>${esc(p.l)} <b>${p.v}</b></span>`).join('')}</div></div>`;
+}
+function trendChip(cur, prev){
+  if (!prev && !cur) return '<span class="chip">–</span>';
+  if (!prev) return '<span class="chip up">neu</span>';
+  const p = Math.round((cur - prev) / prev * 100); return `<span class="chip ${p >= 0 ? 'up' : 'down'}">${p >= 0 ? '↑' : '↓'} ${Math.abs(p)} %</span>`;
+}
+// ---------- Finanzen: Buchungen (Einnahmen / Ausgaben) ----------
+const BK_OUT = ['Wohnen', 'Lebensmittel', 'Gesundheit & Pflege', 'Mobilität', 'Versicherungen', 'Verträge & Abos', 'Freizeit', 'Kleidung', 'Behörden & Gebühren', 'Bargeld', 'Sonstiges'];
+const BK_IN = ['Rente', 'Gehalt', 'Sozialleistung', 'Pflegegeld', 'Erstattung', 'Sonstiges'];
+const BK_ALL = [...new Set([...BK_OUT, ...BK_IN])];
+const CONTRACT_TO_BK = {'Strom':'Wohnen', 'Gas':'Wohnen', 'Wasser':'Wohnen', 'Miete':'Wohnen', 'Versicherung':'Versicherungen', 'Kredit':'Sonstiges'};
+const bkCatOfContract = c => CONTRACT_TO_BK[c.category] || 'Verträge & Abos';
+const AUTO_RULES = [
+  [/rentenversicherung|\brente\b|\bdrv\b|rentenservice/i, 'ein', 'Rente'],
+  [/jobcenter|grundsicherung|sozialamt|wohngeld|kindergeld|familienkasse|bürgergeld/i, 'ein', 'Sozialleistung'],
+  [/pflegekasse|pflegegeld/i, 'ein', 'Pflegegeld'],
+  [/erstattung|rückerstattung|rueckerstattung/i, 'ein', 'Erstattung'],
+  [/\blohn\b|gehalt|bezüge/i, 'ein', 'Gehalt'],
+  [/rewe|edeka|aldi|lidl|netto|penny|kaufland|norma|globus|bäcker|baecker|metzger|dm-drogerie|rossmann/i, 'aus', 'Lebensmittel'],
+  [/apotheke|arzt|praxis|klinik|krankenhaus|sanitätshaus|pflegedienst|zuzahlung|physio/i, 'aus', 'Gesundheit & Pflege'],
+  [/tankstelle|\baral\b|\bshell\b|\besso\b|\bjet\b|deutsche bahn|db vertrieb|\bbvg\b|\bmvg\b|\bhvv\b|fahrkarte|parkhaus/i, 'aus', 'Mobilität'],
+  [/miete|wohnungsbau|hausverwaltung|nebenkosten|stadtwerke|vattenfall|\be\.on\b|\beon\b|strom|energie/i, 'aus', 'Wohnen'],
+  [/versicherung|allianz|\bhuk\b|\bergo\b|\baxa\b|debeka|\baok\b|techniker|barmer|\bdak\b|\bikk\b/i, 'aus', 'Versicherungen'],
+  [/telekom|vodafone|\bo2\b|telefonica|1&1|netflix|spotify|prime|rundfunk|beitragsservice|disney|sky deutschland/i, 'aus', 'Verträge & Abos'],
+  [/geldautomat|bargeld|auszahlung|\batm\b/i, 'aus', 'Bargeld'],
+  [/finanzamt|stadtkasse|gemeindekasse|gebühr|landratsamt|bürgeramt|amtsgericht/i, 'aus', 'Behörden & Gebühren'],
+  [/h&m|c&a|zalando|primark|deichmann|kik\b|takko/i, 'aus', 'Kleidung'],
+  [/kino|restaurant|café|cafe|lieferando|urlaub|hotel|reise/i, 'aus', 'Freizeit']
+];
+const normParty = s => String(s || '').toLowerCase().replace(/[^a-zäöüß]/g, '').slice(0, 24);
+function autoCategory(party, text, type){
+  const key = normParty(party);
+  if (key) { const prev = [...S.bookings].reverse().find(b => b.catManual && b.type === type && normParty(b.counterparty) === key); if (prev) return prev.category; }
+  const hay = (party + ' ' + text).toLowerCase();
+  for (const [re, ty, cat] of AUTO_RULES) if (ty === type && re.test(hay)) return cat;
+  return 'Sonstiges';
+}
+const monFirst = ym => ym + '-01';
+const monLast = ym => isoDate(new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0));
+const bkInPerson = b => UI.person === 'all' || !b.personId || b.personId === UI.person;
+const bkNet = b => (b.type === 'ein' ? 1 : -1) * (Number(b.amount) || 0);
+const sumBk = (list, type) => list.filter(b => b.type === type).reduce((s, b) => s + (Number(b.amount) || 0), 0);
+// Vertragszahlungen als automatische Ausgaben (nur wenn im Monat keine echte, zugeordnete Buchung existiert)
+function contractVirtual(from, to){
+  if (S.settings.autoContracts === false || from > to) return [];
+  const out = [];
+  for (const c of S.contracts) {
+    const amt = Number(c.amount) || 0; if (!amt) continue;
+    const step = INTERVALS[c.interval] || 1, start = c.start || '2020-01-01', stop = c.ended ? (c.end || '') : '9999-12-31'; if (!stop) continue;
+    const day = String(Math.min(28, Number(start.slice(8)) || 1)).padStart(2, '0');
+    let ym = start.slice(0, 7), guard = 0;
+    while (mshift(ym, step) <= from.slice(0, 7) && guard++ < 3000) ym = mshift(ym, step);
+    for (; guard++ < 4000; ym = mshift(ym, step)) {
+      const d = ym + '-' + day; if (d > to || d > stop) break; if (d < from || d < start) continue;
+      if (S.bookings.some(b => b.contractId === c.id && (b.date || '').slice(0, 7) === ym)) continue;
+      out.push({id:'v_' + c.id + '_' + ym, date:d, type:'aus', amount:amt, category:bkCatOfContract(c), personId:c.personId || '', counterparty:c.provider, text:c.provider + ' (Vertrag)', source:'vertrag', contractId:c.id, virtual:true});
+    }
+  }
+  return out;
+}
+function bookingsIn(from, to, allPersons){ return [...S.bookings.filter(b => b.date >= from && b.date <= to), ...contractVirtual(from, to)].filter(b => allPersons || bkInPerson(b)); }
+const bankAccounts = (allPersons) => (allPersons ? S.assets : byPerson(S.assets)).filter(a => a.type === 'Bankkonto');
+function accountBalance(a, at){
+  const base = Number(a.value) || 0, vd = a.valueDate || '0000-00-00', flows = S.bookings.filter(b => b.accountId === a.id);
+  if (at >= vd) return base + flows.filter(b => b.date > vd && b.date <= at).reduce((s, b) => s + bkNet(b), 0);
+  return base - flows.filter(b => b.date > at && b.date <= vd).reduce((s, b) => s + bkNet(b), 0);
+}
+const balanceAt = at => bankAccounts().reduce((s, a) => s + accountBalance(a, at), 0);
+function forecastMonthEnd(){
+  const t = today(), end = monLast(t.slice(0, 7));
+  const rest = contractVirtual(dshift(t, 1), end).filter(bkInPerson);
+  const restSum = rest.reduce((s, b) => s + b.amount, 0);
+  const first = S.bookings.map(b => b.date).sort()[0] || t; const span = Math.max(1, Math.min(90, -daysUntil(first) + 1));
+  const varOut = S.bookings.filter(b => bkInPerson(b) && b.type === 'aus' && !b.contractId && b.date >= dshift(t, -span + 1) && b.date <= t).reduce((s, b) => s + (Number(b.amount) || 0), 0);
+  const perDay = varOut / span, days = Math.max(0, daysUntil(end)), now = balanceAt(t);
+  return {now, end: now - restSum - perDay * days, rest, restSum, perDay, days};
+}
+function editBooking(b){
+  const accs = [{v:'', l:'—'}, ...S.assets.filter(a => a.type === 'Bankkonto').map(a => ({v:a.id, l:a.name}))];
+  const fields = [{k:'type', l:'Art', t:'select', o:[{v:'aus', l:'Ausgabe'}, {v:'ein', l:'Einnahme'}]}, {k:'amount', l:'Betrag (€)', t:'number', step:'0.01', req:1},
+    {k:'date', l:'Datum', t:'date', req:1}, {k:'category', l:'Kategorie', t:'select', o:BK_ALL}, {k:'personId', l:'Person', t:'person'}, {k:'accountId', l:'Konto', t:'select', o:accs},
+    {k:'counterparty', l:'Empfänger / Auftraggeber'}, {k:'text', l:'Beschreibung / Verwendungszweck'}];
+  openForm({title: b ? 'Buchung bearbeiten' : 'Neue Buchung', fields, data: b || {type:'aus', date:today(), personId:prefillPerson(), category:'Lebensmittel'},
+    onSave: v => {
+      if (v.amount < 0) { v.amount = -v.amount; v.type = v.type === 'aus' ? 'ein' : 'aus'; }
+      if (!(v.amount > 0)) { alert('Bitte einen Betrag größer als 0 eingeben.'); return false; }
+      const o = Object.assign(b || {id:uid(), source:'manuell'}, v); if (!b || b.category !== v.category) o.catManual = true;
+      upsert('bookings', o); render();
+    },
+    onDelete: b ? () => { remove('bookings', b.id); render(); } : null});
+}
+
+// ---------- CSV-Import (Kontoauszug) ----------
+function csvRows(text){
+  const sample = text.slice(0, 6000), cnt = ch => sample.split(ch).length - 1;
+  const delim = [';', '\t', ','].sort((a, b) => cnt(b) - cnt(a))[0];
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; continue; }
+    if (ch === '"') q = true; else if (ch === delim) { row.push(f); f = ''; } else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; } else f += ch;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
+}
+function parseAmount(s){
+  let t = String(s || '').replace(/\s|€|EUR/gi, ''); if (!t) return NaN;
+  let neg = false; if (/-$/.test(t)) { neg = true; t = t.slice(0, -1); }
+  if (t.includes(',') && t.includes('.')) t = t.lastIndexOf(',') > t.lastIndexOf('.') ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
+  else if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(t); return neg ? -n : n;
+}
+function parseDateDE(s){
+  const t = String(s || '').trim(); let m;
+  if ((m = t.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/))) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
+  if ((m = t.match(/^(\d{4})-(\d{2})-(\d{2})/))) return `${m[1]}-${m[2]}-${m[3]}`;
+  return '';
+}
+const CSV_GUESS = {
+  date: [/^buchungstag/i, /^buchungsdatum/i, /^datum/i, /buchung/i, /valuta|wertstellung/i],
+  amount: [/^betrag/i, /umsatz/i, /amount/i],
+  soll: [/^soll/i, /lastschrift|ausgang/i], haben: [/^haben/i, /gutschrift|eingang/i],
+  party: [/zahlungsempf|empfänger|empfaenger|auftraggeber|begünstigt|beguenstigt|^name/i, /gegenkonto.*name|partner/i],
+  text: [/verwendungszweck/i, /buchungstext|beschreibung|vorgang|details/i]
+};
+function csvGuess(head){
+  const g = {}; for (const k in CSV_GUESS) { g[k] = -1; for (const re of CSV_GUESS[k]) { const i = head.findIndex(h => re.test(h.trim())); if (i >= 0 && !Object.values(g).includes(i)) { g[k] = i; break; } } }
+  return g;
+}
+async function csvImport(){
+  const file = await pickFile('.csv,.txt,text/csv'); if (!file) return;
+  const buf = await file.arrayBuffer(); let text;
+  try { text = new TextDecoder('utf-8', {fatal:true}).decode(buf); } catch (e) { text = new TextDecoder('windows-1252').decode(buf); }
+  const rows = csvRows(text.replace(/^﻿/, ''));
+  let hi = rows.findIndex((r, i) => i < 40 && r.some(c => /datum|buchungstag|buchung/i.test(c)) && r.some(c => /betrag|umsatz|soll|haben/i.test(c)));
+  if (hi < 0) hi = 0;
+  const head = rows[hi].map(c => c.trim()), body = rows.slice(hi + 1).filter(r => r.length >= Math.min(3, head.length));
+  const map = csvGuess(head);
+  const colOpts = [{v:'-1', l:'—'}, ...head.map((h, i) => ({v:String(i), l:h || 'Spalte ' + (i + 1)}))];
+  const accs = [{v:'', l:'— kein Konto —'}, ...S.assets.filter(a => a.type === 'Bankkonto').map(a => ({v:a.id, l:a.name}))];
+  closeModal();
+  const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
+  const sel = (k, l) => `<div class="fld"><label>${l}</label><select data-map="${k}">${optHTML(colOpts, String(map[k]))}</select></div>`;
+  bg.innerHTML = `<div class="modal" style="width:min(980px,96vw)"><h3>Kontoauszug importieren – ${esc(file.name)}</h3>
+    <form onsubmit="return false" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      ${sel('date', 'Spalte Datum')}${sel('amount', 'Spalte Betrag')}${sel('party', 'Spalte Empfänger / Auftraggeber')}
+      ${sel('text', 'Spalte Verwendungszweck')}${sel('soll', 'Spalte Soll (falls kein Betrag)')}${sel('haben', 'Spalte Haben (falls kein Betrag)')}
+      <div class="fld"><label>Person</label><select id="csvPerson">${optHTML(personOpts(true), prefillPerson())}</select></div>
+      <div class="fld"><label>Konto</label><select id="csvAcc">${optHTML(accs, '')}</select></div><div></div>
+    </form>
+    <div id="csvPrev" style="max-height:330px;overflow:auto;margin:0 18px"></div>
+    <div class="acts"><span class="small muted" id="csvInfo"></span><span class="sp"></span><button class="btn" data-m="cancel">Abbrechen</button><button class="btn pri" data-m="ok">Importieren</button></div></div>`;
+  document.body.appendChild(bg);
+  const build = () => {
+    const m = {}; bg.querySelectorAll('[data-map]').forEach(s => m[s.dataset.map] = Number(s.value));
+    const pid = $('#csvPerson', bg).value, acc = $('#csvAcc', bg).value; const out = [];
+    for (const r of body) {
+      const date = parseDateDE(r[m.date]); if (!date) continue;
+      let amt = m.amount >= 0 ? parseAmount(r[m.amount]) : ((parseAmount(r[m.haben]) || 0) - Math.abs(parseAmount(r[m.soll]) || 0));
+      if (!amt || isNaN(amt)) continue;
+      const party = m.party >= 0 ? (r[m.party] || '').trim() : '', txt = m.text >= 0 ? (r[m.text] || '').trim().replace(/\s+/g, ' ') : '';
+      const type = amt < 0 ? 'aus' : 'ein', amount = Math.round(Math.abs(amt) * 100) / 100;
+      const hay = (party + ' ' + txt).toLowerCase();
+      const ct = type === 'aus' ? S.contracts.find(c => Math.abs((Number(c.amount) || 0) - amount) < 0.01 && String(c.provider || '').toLowerCase().split(/[^a-zäöüß0-9]+/).some(wd => wd.length >= 4 && hay.includes(wd))) : null;
+      const hash = [date, amount, type, normParty(party), txt.slice(0, 40)].join('|');
+      out.push({id:uid(), date, type, amount, counterparty:party, text:txt, category: ct ? bkCatOfContract(ct) : autoCategory(party, txt, type),
+        personId: ct && ct.personId ? ct.personId : pid, accountId:acc, source:'csv', contractId: ct ? ct.id : '', hash, dup: S.bookings.some(b => b.hash === hash)});
+    }
+    return out;
+  };
+  const preview = () => {
+    const L = build(), nd = L.filter(b => !b.dup).length;
+    $('#csvInfo', bg).textContent = `${L.length} Buchungen erkannt · ${nd} neu · ${L.length - nd} schon vorhanden`;
+    $('#csvPrev', bg).innerHTML = L.length ? `<table class="t"><tr><th>Datum</th><th>Empfänger / Auftraggeber</th><th>Verwendungszweck</th><th>Kategorie</th><th style="text-align:right">Betrag</th></tr>${L.slice(0, 60).map(b => `<tr style="${b.dup ? 'opacity:.45' : ''}"><td class="small">${fmtDate(b.date)}</td><td class="small">${esc(b.counterparty)}</td><td class="small trunc" style="max-width:280px">${esc(b.text)}</td><td class="small">${esc(b.category)}${b.contractId ? ' <span class="badge blue">Vertrag</span>' : ''}${b.dup ? ' <span class="badge">doppelt</span>' : ''}</td><td class="num ${b.type}">${b.type === 'aus' ? '−' : '+'}${eur(b.amount)}</td></tr>`).join('')}</table>` : '<div class="empty">Keine Buchungen erkannt – bitte die Spalten oben zuordnen.</div>';
+  };
+  bg.addEventListener('change', preview); preview();
+  bg.addEventListener('click', e => {
+    const b = e.target.closest('[data-m]'); if (e.target === bg) return closeModal(); if (!b) return;
+    if (b.dataset.m === 'cancel') return closeModal();
+    const L = build().filter(x => !x.dup); L.forEach(x => { delete x.dup; S.bookings.push(x); }); save(); closeModal(); render();
+    toast(L.length + ' Buchungen importiert');
+  });
+}
+
+// ---------- Seite: Finanzen ----------
+VIEWS.finance = () => {
+  const t = today(), ym = UI.finMonth, from = monFirst(ym), to = monLast(ym), isCur = ym === t.slice(0, 7);
+  const cur = bookingsIn(from, to), prev = bookingsIn(monFirst(mshift(ym, -1)), monLast(mshift(ym, -1)));
+  const ein = sumBk(cur, 'ein'), aus = sumBk(cur, 'aus'), pein = sumBk(prev, 'ein'), paus = sumBk(prev, 'aus');
+  const hasAcc = bankAccounts().length > 0, fc = forecastMonthEnd();
+  const months = Array.from({length:6}, (_, i) => mshift(ym, i - 5)), ml = m => MON_SHORT[Number(m.slice(5)) - 1];
+  const per = months.map(m => { const L = bookingsIn(monFirst(m), monLast(m)); return {m, ein:sumBk(L, 'ein'), aus:sumBk(L, 'aus')}; });
+  // Saldo-Verlauf (Kontostand) oder kumulierter Überschuss
+  let series, labels = months.map(ml), lineTitle;
+  if (hasAcc) {
+    // Kontostand ist erst ab dem frühesten bekannten Datum (Stand-Datum oder erste Buchung) sinnvoll
+    const knownFrom = bankAccounts().map(a => [a.valueDate || t, ...S.bookings.filter(b => b.accountId === a.id).map(b => b.date)].sort()[0]).sort()[0] || t;
+    const vals = months.map(m => { const at = m === t.slice(0, 7) ? t : monLast(m); return m > t.slice(0, 7) || at < dshift(knownFrom, -1) ? null : balanceAt(at); });
+    series = [{label:'Kontostand', color:'#0d9488', values:[...vals, null]}];
+    if (isCur) series.push({label:'Prognose', color:'#2563eb', dash:1, dots:1, area:false, values:[...vals.map((v, i) => i === 5 ? v : null), fc.end]});
+    labels = [...labels, isCur ? 'Ende' : '']; lineTitle = 'Kontostand & Prognose';
+  } else {
+    let acc = 0; series = [{label:'Überschuss (kumuliert)', color:'#0d9488', values:per.map(p => (acc += p.ein - p.aus))}]; lineTitle = 'Überschuss (kumuliert)';
+  }
+  // Kategorien (Ausgaben im Monat)
+  const byCat = {}; cur.filter(b => b.type === 'aus').forEach(b => byCat[b.category || 'Sonstiges'] = (byCat[b.category || 'Sonstiges'] || 0) + (Number(b.amount) || 0));
+  const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  const wk = sumBk(bookingsIn(dshift(isCur ? t : to, -6), isCur ? t : to), 'aus'), yr = sumBk(bookingsIn(ym.slice(0, 4) + '-01-01', isCur ? t : to), 'aus');
+  const tree = cats.length ? `<div class="tree">${cats.map(([k, v], i) => `<div class="tb" style="flex-grow:${v};background:${TREE_COL[i % TREE_COL.length]}" title="${esc(k)}: ${eur(v)}"><span class="tn">${esc(k)}</span><span class="tv">${eur(v)}</span><span class="tp">${(v / aus * 100).toFixed(1)} %</span></div>`).join('')}</div>` : '<div class="empty">Keine Ausgaben in diesem Monat</div>';
+  // Jahreslauf Ausgaben
+  const fy = String(UI.finYear), yv = Array.from({length:12}, (_, i) => { const m = fy + '-' + String(i + 1).padStart(2, '0'); return Math.round(sumBk(bookingsIn(monFirst(m), monLast(m) > t ? t : monLast(m)), 'aus')); });
+  const curY = new Date().getFullYear(), gone = Number(fy) === curY ? new Date().getMonth() + 1 : 12, ysum = yv.reduce((s, v) => s + v, 0);
+  // Personenvergleich (immer alle Personen)
+  const allM = bookingsIn(from, to, true);
+  const pg = [...S.persons.map(p => ({label:p.role, id:p.id})), ...(allM.some(b => !b.personId) ? [{label:'Allgemein', id:''}] : [])]
+    .map(p => { const L = allM.filter(b => (b.personId || '') === p.id); return {label:p.label, vals:[sumBk(L, 'ein'), sumBk(L, 'aus')]}; });
+  const list = cur.filter(b => !UI.finType || b.type === UI.finType).sort((a, b) => b.date.localeCompare(a.date));
+  const seg = (k, v, l) => `<button class="seg ${String(UI[k]) === String(v) ? 'on' : ''}" data-act="stat" data-id="${k}:${v}">${l}</button>`;
+  return `<div class="head"><div class="grow"><h1>Finanzen</h1><p class="sub" style="margin:0">Einnahmen, Ausgaben, Kontostand und Prognose – Verträge werden automatisch als Ausgabe gezählt.</p></div>
+    <button class="btn" data-act="finMonth" data-id="-1">‹</button><input type="month" data-chg="finMonth" value="${esc(ym)}" class="btn" style="padding:6px 10px"><button class="btn" data-act="finMonth" data-id="1">›</button>
+    <button class="btn" data-act="csvImport">${icon('upload')}Kontoauszug (CSV)</button><button class="btn pri" data-act="newBooking">${icon('plus')}Buchung</button></div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">Einnahmen ${esc(monthLabel(ym))}</div><div class="v" style="color:var(--ok)">${eur(ein)}</div><div class="l">${trendChip(ein, pein)} vs Vormonat</div></div>
+    <div class="kpi"><div class="l">Ausgaben ${esc(monthLabel(ym))}</div><div class="v" style="color:var(--danger)">${eur(aus)}</div><div class="l">${trendChip(aus, paus)} vs Vormonat</div></div>
+    <div class="kpi"><div class="l">Saldo des Monats</div><div class="v">${eur(ein - aus)}</div><div class="l">Einnahmen minus Ausgaben</div></div>
+    ${hasAcc ? `<div class="kpi" style="${fc.end < 0 ? 'background:var(--danger-soft)' : 'background:var(--ok-soft)'}"><div class="l">Prognose Monatsende</div><div class="v">${eur(fc.end)}</div><div class="l">heute ${eur(fc.now)} · noch ${eur(fc.restSum)} Fixkosten · Ø ${eur(fc.perDay)}/Tag</div></div>`
+      : `<div class="kpi" data-go="#/assets"><div class="l">Kontostand</div><div class="v" style="font-size:15px;margin-top:8px">Bankkonto anlegen</div><div class="l">unter „Konten & Vermögen“ mit Stand-Datum</div></div>`}
+  </div>
+  <div class="grid g2 stats">
+    <div class="card"><h3>${icon('trend')}${lineTitle} <span class="r muted small">6 Monate</span></h3><div class="legend">${series.map(s => `<span><i style="background:${s.color}"></i>${s.label}</span>`).join('')}</div>${svgLines(series, labels, {fmt:v => Math.round(v) + ' €'})}</div>
+    <div class="card"><h3>${icon('chart')}Einnahmen & Ausgaben <span class="r muted small">6 Monate</span></h3><div class="legend"><span><i style="background:#0d9488"></i>Einnahmen</span><span><i style="background:#f43f5e"></i>Ausgaben</span></div>
+      ${svgGroupBars(per.map(p => ({label:ml(p.m), vals:[p.ein, p.aus]})), [{l:'Einnahmen', c:'#0d9488'}, {l:'Ausgaben', c:'#f43f5e'}], {fmt:v => eur(v)})}</div>
+    <div class="card"><h3>${icon('receipt')}Ausgaben nach Kategorie</h3>
+      <div class="tiles"><div class="tile"><div class="l">Woche</div><div class="v">${eur(wk)}</div></div><div class="tile on"><div class="l">Monat</div><div class="v">${eur(aus)}</div></div><div class="tile"><div class="l">Jahr ${ym.slice(0, 4)}</div><div class="v">${eur(yr)}</div></div></div>${tree}</div>
+    <div class="card"><h3>${icon('cal')}Jahreslauf · Ausgaben <span class="r segs">${seg('finYear', curY, curY)}${seg('finYear', curY - 1, curY - 1)}</span></h3>${svgRadial(yv, Number(fy) === curY ? new Date().getMonth() : yv.indexOf(Math.max(...yv)), {unit:' €', year:fy})}
+      <div class="tiles"><div class="tile"><div class="l">Monatsschnitt</div><div class="v">${eur(ysum / gone)}</div></div><div class="tile"><div class="l">Jahr gesamt</div><div class="v">${eur(ysum)}</div></div><div class="tile"><div class="l">Teuerster Monat</div><div class="v">${ysum ? MON_SHORT[yv.indexOf(Math.max(...yv))] : '–'}</div></div></div></div>
+    <div class="card"><h3>${icon('users')}Vergleich der Personen <span class="r muted small">${esc(monthLabel(ym))}</span></h3><div class="legend"><span><i style="background:#0d9488"></i>Einnahmen</span><span><i style="background:#f43f5e"></i>Ausgaben</span></div>
+      ${svgGroupBars(pg, [{l:'Einnahmen', c:'#0d9488'}, {l:'Ausgaben', c:'#f43f5e'}], {fmt:v => eur(v)})}</div>
+    <div class="card"><h3>${icon('clock')}Noch fällig bis Monatsende</h3>${isCur && fc.rest.length ? `<div class="list">${fc.rest.sort((a, b) => a.date.localeCompare(b.date)).map(b => `<div class="row"><div class="grow">${esc(b.counterparty)} <span class="small muted">${esc(b.category)}</span></div><span class="small muted">${fmtDate(b.date)}</span><b class="aus">−${eur(b.amount)}</b></div>`).join('')}</div>` : '<div class="empty">Keine Einträge</div>'}
+      <label class="small" style="display:flex;gap:6px;align-items:center;margin-top:10px"><input type="checkbox" data-act="toggleAutoContracts" ${S.settings.autoContracts !== false ? 'checked' : ''}> Verträge automatisch als Ausgabe zählen</label></div>
+  </div>
+  <div class="card" style="padding:6px 8px"><h3 style="padding:8px 10px 0">Buchungen ${esc(monthLabel(ym))} <span class="r segs">${seg('finType', '', 'Alle')}${seg('finType', 'ein', 'Einnahmen')}${seg('finType', 'aus', 'Ausgaben')}</span></h3>
+    ${list.length ? `<table class="t"><tr><th>Datum</th><th>Empfänger / Beschreibung</th><th>Kategorie</th><th>Person</th><th style="text-align:right">Betrag</th></tr>${list.map(b => `<tr class="click" data-act="${b.virtual ? 'editContract' : 'editBooking'}" data-id="${b.virtual ? b.contractId : b.id}"><td class="small">${fmtDate(b.date)}</td>
+      <td><b>${esc(b.counterparty || b.text || '—')}</b>${b.counterparty && b.text ? `<div class="small muted trunc" style="max-width:420px">${esc(b.text)}</div>` : ''}</td><td class="small">${esc(b.category)} ${b.virtual ? '<span class="badge blue">Vertrag</span>' : b.source === 'csv' ? '<span class="badge">Import</span>' : ''}</td>
+      <td>${personChip(b.personId)}</td><td class="num ${b.type}">${b.type === 'aus' ? '−' : '+'}${eur(b.amount)}</td></tr>`).join('')}</table>` : '<div class="empty">Keine Buchungen in diesem Monat.</div>'}</div>`;
+};
+
+// ---------- Seite: Statistik (Arbeit) ----------
+function caseSince(c, status){
+  if (c.status === status && c.statusSince) return c.statusSince;
+  const l = [...(c.log || [])].reverse().find(x => x.text === 'Status: ' + status); return l ? l.date : (c.start || '');
+}
+function workStats(){
+  const t = today(), ym = t.slice(0, 7), months = Array.from({length:6}, (_, i) => mshift(ym, i - 5));
+  const tasks = byPerson(S.tasks);
+  const doneIn = m => tasks.filter(x => (x.done && (x.doneAt || '').startsWith(m)) || (!x.done && (x.lastDone || '').startsWith(m))).length;
+  const createdIn = m => tasks.filter(x => (x.created || '').startsWith(m)).length;
+  const punct = m => { const L = tasks.filter(x => x.done && x.due && (x.doneAt || '').startsWith(m)); const on = L.filter(x => x.doneAt <= x.due).length; return [on, L.length - on]; };
+  const pm = months.map(punct), on = pm.reduce((s, p) => s + p[0], 0), late = pm.reduce((s, p) => s + p[1], 0);
+  const overdueOpen = tasks.filter(x => !x.done && x.due && x.due < t).length;
+  const cases = byPerson(S.cases);
+  const closed = cases.filter(c => c.status === 'erledigt').map(c => { const e = c.closedAt || caseSince(c, 'erledigt'), s = c.start || (c.log && c.log[0] && c.log[0].date) || e; return {c, days: Math.max(0, Math.round((new Date(e) - new Date(s)) / 864e5))}; });
+  const waiting = cases.filter(c => c.status === 'wartet auf Antwort').map(c => ({c, days: Math.max(0, -daysUntil(caseSince(c, 'wartet auf Antwort') || t))}));
+  const avg = L => L.length ? Math.round(L.reduce((s, x) => s + x.days, 0) / L.length) : null;
+  const byOrg = {}; for (const x of [...waiting.map(w => ({...w, k:'w'})), ...closed.map(w => ({...w, k:'c'}))]) { const n = getContact(x.c.contactId)?.name || 'ohne Behörde'; (byOrg[n] = byOrg[n] || {w:[], c:[]})[x.k].push(x.days); }
+  return {months, doneM: months.map(doneIn), createdM: months.map(createdIn), pm, on, late, overdueOpen, closed, waiting, avgClosed:avg(closed), avgWait:avg(waiting), byOrg, openTasks: tasks.filter(x => !x.done).length};
+}
+VIEWS.stats = () => {
+  const W = workStats(), ml = m => MON_SHORT[Number(m.slice(5)) - 1], ym = today().slice(0, 7);
+  const range = UI.statRange, B = statBuckets(range), ev = activityEvents();
+  const series = ['done', 'letter', 'doc'].map(k => { const m = {}; ev.filter(e => e.k === k && B.inCur(e.d)).forEach(e => m[B.key(e.d)] = (m[B.key(e.d)] || 0) + 1); return {k, label:ST_LAB[k], color:ST_COL[k], values:B.keys.map(x => m[x] || 0)}; });
+  const curA = ev.filter(e => B.inCur(e.d)).length, prevA = ev.filter(e => B.inPrev(e.d)).length;
+  const yr = String(UI.statYear), yv = Array.from({length:12}, (_, i) => ev.filter(e => e.d.startsWith(yr + '-' + String(i + 1).padStart(2, '0'))).length), curY = new Date().getFullYear();
+  const lettersM = W.months.map(m => byPerson(S.letters).filter(l => (l.date || '').startsWith(m)).length), docsM = W.months.map(m => byPerson(S.documents).filter(d => (d.added || d.date || '').startsWith(m)).length);
+  const quote = W.on + W.late ? Math.round(W.on / (W.on + W.late) * 100) : null;
+  const cs = byPerson(S.cases), stC = {'offen':'#2563eb', 'in Bearbeitung':'#f59e0b', 'wartet auf Antwort':'#db2777', 'erledigt':'#16a34a'};
+  const orgRows = Object.entries(W.byOrg).map(([n, o]) => ({l:n, v: o.w.length ? Math.round(o.w.reduce((a, b) => a + b, 0) / o.w.length) : Math.round(o.c.reduce((a, b) => a + b, 0) / Math.max(1, o.c.length)),
+    c: o.w.length ? '#db2777' : '#16a34a', sub: (o.w.length ? o.w.length + ' wartet · ' : '') + (o.c.length ? o.c.length + ' erledigt' : '')})).sort((a, b) => b.v - a.v).slice(0, 8);
+  const pc = S.persons.map(p => ({label:p.role, vals:[S.tasks.filter(x => x.personId === p.id && ((x.done && (x.doneAt || '').startsWith(ym)) || (x.lastDone || '').startsWith(ym))).length,
+    S.cases.filter(c => c.personId === p.id && c.status !== 'erledigt').length, S.letters.filter(l => l.personId === p.id && (l.date || '').startsWith(ym)).length]}));
+  const seg = (k, v, l) => `<button class="seg ${String(UI[k]) === String(v) ? 'on' : ''}" data-act="stat" data-id="${k}:${v}">${l}</button>`;
+  const dM = W.doneM[5], dP = W.doneM[4];
+  return `<div class="head"><div class="grow"><h1>Statistik</h1><p class="sub" style="margin:0">Wie läuft die Arbeit? Erledigtes, Pünktlichkeit, Dauer der Vorgänge und Wartezeiten – die Auswahl oben (Alle / Personen) gilt auch hier.</p></div><a class="btn" href="#/finance">${icon('wallet')}Finanzen</a><a class="btn" href="#/report">${icon('print')}Monatsbericht</a></div>
+  <div class="kpis">
+    <div class="kpi" data-go="#/tasks"><div class="l">Erledigt im ${esc(monthLabel(ym))}</div><div class="v">${dM}</div><div class="l">${trendChip(dM, dP)} vs Vormonat</div></div>
+    <div class="kpi" data-go="#/tasks"><div class="l">Offene Aufgaben</div><div class="v">${W.openTasks}</div><div class="l">${W.overdueOpen} überfällig</div></div>
+    <div class="kpi"><div class="l">Fristen pünktlich (6 Monate)</div><div class="v" style="color:${quote == null ? 'inherit' : quote >= 90 ? 'var(--ok)' : quote >= 70 ? 'var(--warn)' : 'var(--danger)'}">${quote == null ? '–' : quote + ' %'}</div><div class="l">${W.on} pünktlich · ${W.late} verspätet</div></div>
+    <div class="kpi" data-go="#/cases"><div class="l">Ø Dauer eines Vorgangs</div><div class="v">${W.avgClosed == null ? '–' : W.avgClosed + ' T.'}</div><div class="l">${W.closed.length} erledigte Vorgänge</div></div>
+    <div class="kpi" data-go="#/cases"><div class="l">Ø Wartezeit auf Antwort</div><div class="v">${W.avgWait == null ? '–' : W.avgWait + ' T.'}</div><div class="l">${W.waiting.length} Vorgänge warten</div></div>
+  </div>
+  <div class="grid g2 stats">
+    <div class="card"><h3>${icon('chart')}Aufgaben: erledigt und neu <span class="r muted small">6 Monate</span></h3><div class="legend"><span><i style="background:#0d9488"></i>erledigt</span><span><i style="background:#94a3b8"></i>neu angelegt</span></div>
+      ${svgGroupBars(W.months.map((m, i) => ({label:ml(m), vals:[W.doneM[i], W.createdM[i]]})), [{l:'erledigt', c:'#0d9488'}, {l:'neu angelegt', c:'#94a3b8'}])}</div>
+    <div class="card"><h3>${icon('clock')}Fristen: pünktlich oder verspätet <span class="r muted small">6 Monate</span></h3><div class="legend"><span><i style="background:#16a34a"></i>pünktlich</span><span><i style="background:#dc2626"></i>verspätet</span></div>
+      ${svgGroupBars(W.months.map((m, i) => ({label:ml(m), vals:W.pm[i]})), [{l:'pünktlich', c:'#16a34a'}, {l:'verspätet', c:'#dc2626'}])}</div>
+    <div class="card"><h3>${icon('trend')}Aktivität <span class="r segs">${seg('statRange', 'woche', 'Woche')}${seg('statRange', 'monat', 'Monat')}${seg('statRange', 'jahr', 'Jahr')}</span></h3>
+      <div class="bignum">${curA} <small>Aktivitäten</small> ${trendChip(curA, prevA)}</div><div class="small muted">vs ${prevA} ${B.prevLabel}</div>
+      <div class="legend">${series.map(s => `<span><i style="background:${s.color}"></i>${s.label} <b>${s.values.reduce((a, b) => a + b, 0)}</b></span>`).join('')}</div>${svgLines(series, B.labels)}</div>
+    <div class="card"><h3>${icon('cal')}Jahreslauf · Aktivität <span class="r segs">${seg('statYear', curY, curY)}${seg('statYear', curY - 1, curY - 1)}</span></h3>${svgRadial(yv, Number(yr) === curY ? new Date().getMonth() : yv.indexOf(Math.max(...yv)), {unit:' Aktivitäten', year:yr})}</div>
+    <div class="card"><h3>${icon('folder')}Vorgänge nach Status</h3>${svgDonut(CASE_STATUS.map(s => ({l:s, v:cs.filter(c => (c.status || 'offen') === s).length, c:stC[s]})))}</div>
+    <div class="card"><h3>${icon('book')}Wartezeit / Dauer nach Behörde <span class="r muted small">Tage</span></h3><div class="small muted" style="margin:-4px 0 8px">rosa = wartet gerade (Tage seit Status „wartet auf Antwort“), grün = Ø Dauer erledigter Vorgänge</div>${hBars(orgRows, v => v + ' T.')}</div>
+    <div class="card"><h3>${icon('mail')}Briefe und Dokumente <span class="r muted small">6 Monate</span></h3><div class="legend"><span><i style="background:#2563eb"></i>Briefe</span><span><i style="background:#f59e0b"></i>Dokumente</span></div>
+      ${svgGroupBars(W.months.map((m, i) => ({label:ml(m), vals:[lettersM[i], docsM[i]]})), [{l:'Briefe', c:'#2563eb'}, {l:'Dokumente', c:'#f59e0b'}])}</div>
+    <div class="card"><h3>${icon('users')}Vergleich der Personen <span class="r muted small">${esc(monthLabel(ym))}</span></h3><div class="legend"><span><i style="background:#0d9488"></i>erledigt</span><span><i style="background:#db2777"></i>offene Vorgänge</span><span><i style="background:#2563eb"></i>Briefe</span></div>
+      ${svgGroupBars(pc, [{l:'erledigt', c:'#0d9488'}, {l:'offene Vorgänge', c:'#db2777'}, {l:'Briefe', c:'#2563eb'}])}</div>
+  </div>`;
+};
+
+// ---------- Kurzfassung auf der Übersicht ----------
+function dashStatsHTML(){
+  const t = today(), ym = t.slice(0, 7), B = statBuckets('monat'), ev = activityEvents();
+  const series = ['done', 'letter', 'doc'].map(k => { const m = {}; ev.filter(e => e.k === k && B.inCur(e.d)).forEach(e => m[B.key(e.d)] = (m[B.key(e.d)] || 0) + 1); return {k, label:ST_LAB[k], color:ST_COL[k], values:B.keys.map(x => m[x] || 0)}; });
+  const cur = ev.filter(e => B.inCur(e.d)).length, prev = ev.filter(e => B.inPrev(e.d)).length;
+  const L = bookingsIn(monFirst(ym), monLast(ym)), ein = sumBk(L, 'ein'), aus = sumBk(L, 'aus');
+  const months = Array.from({length:6}, (_, i) => mshift(ym, i - 5)), per = months.map(m => { const X = bookingsIn(monFirst(m), monLast(m)); return {label:MON_SHORT[Number(m.slice(5)) - 1], vals:[sumBk(X, 'ein'), sumBk(X, 'aus')]}; });
+  const items = deadlineItems(), bars = [{l:'überf.', v:items.filter(i => daysUntil(i.date) < 0).length, c:'#dc2626'}];
+  for (let w = 0; w < 6; w++) bars.push({l: w ? '+' + w + ' W.' : 'diese W.', v:items.filter(i => { const d = daysUntil(i.date); return d >= w * 7 && d <= w * 7 + 6; }).length, c: w ? '#2563eb' : '#f59e0b'});
+  return `<div class="grid g3 stats">
+    <div class="card"><h3>${icon('trend')}Aktivität <span class="r muted small">30 Tage</span></h3><div class="bignum">${cur} ${trendChip(cur, prev)}</div>${svgLines(series, B.labels, {h:150})}</div>
+    <div class="card" data-go="#/finance" style="cursor:pointer"><h3>${icon('wallet')}Geldfluss ${esc(MON_SHORT[Number(ym.slice(5)) - 1])} <span class="r muted small">Finanzen →</span></h3>
+      <div class="bignum" style="color:${ein - aus < 0 ? 'var(--danger)' : 'var(--ok)'}">${eur(ein - aus)}</div><div class="small muted">+${eur(ein)} · −${eur(aus)}</div>
+      ${svgGroupBars(per, [{l:'Einnahmen', c:'#0d9488'}, {l:'Ausgaben', c:'#f43f5e'}], {h:150, fmt:v => eur(v)})}</div>
+    <div class="card"><h3>${icon('clock')}Fristen-Ausblick <a class="r small" href="#/stats">Alle Statistiken →</a></h3><div class="bignum">${items.filter(i => { const d = daysUntil(i.date); return d >= 0 && d <= 30; }).length} <small>in 30 Tagen</small></div>${svgBars(bars, {h:150})}</div>
+  </div>`;
+}
 function statusBadge(s){ const m = {'offen':'blue', 'in Bearbeitung':'amber', 'wartet auf Antwort':'amber', 'erledigt':'green'}; return `<span class="badge ${m[s] || ''}">${esc(s || 'offen')}</span>`; }
 
 // Vorgänge
@@ -1167,6 +1606,15 @@ function reportHTML(ym){
   const mon = contracts.reduce((s, c) => s + monthly(c), 0);
   const assets = byPerson(S.assets); const saldo = assets.reduce((s, a) => s + (Number(a.value) || 0), 0);
   const me = S.settings.me;
+  // Finanzen und Kennzahlen des Monats
+  const bk = bookingsIn(first, last), bEin = sumBk(bk, 'ein'), bAus = sumBk(bk, 'aus');
+  const catSum = type => { const o = {}; bk.filter(b => b.type === type).forEach(b => o[b.category || 'Sonstiges'] = (o[b.category || 'Sonstiges'] || 0) + (Number(b.amount) || 0)); return Object.entries(o).sort((a, b) => b[1] - a[1]); };
+  const rMonths = Array.from({length:6}, (_, i) => mshift(ym, i - 5));
+  const rPer = rMonths.map(m => { const X = bookingsIn(monFirst(m), monLast(m)); return {label:MON_SHORT[Number(m.slice(5)) - 1], vals:[sumBk(X, 'ein'), sumBk(X, 'aus')]}; });
+  const onTime = byPerson(S.tasks).filter(t => t.done && t.due && inM(t.doneAt)); const onOk = onTime.filter(t => t.doneAt <= t.due).length;
+  const W = workStats();
+  const pRows = [...S.persons.filter(p => UI.person === 'all' || p.id === UI.person).map(p => ({n:p.role, id:p.id})), ...(UI.person === 'all' && bk.some(b => !b.personId) ? [{n:'Allgemein', id:''}] : [])]
+    .map(p => { const X = bk.filter(b => (b.personId || '') === p.id); return `<tr>${td(esc(p.n))}${td(eur(sumBk(X, 'ein')), 1)}${td(eur(sumBk(X, 'aus')), 1)}${td(eur(sumBk(X, 'ein') - sumBk(X, 'aus')), 1)}</tr>`; });
 
   return `<div class="report">
     <h1>Monatsbericht ${esc(monthLabel(ym))}</h1>
@@ -1174,6 +1622,8 @@ function reportHTML(ym){
     <div class="sums">
       <div>Erledigt<b>${done.length}</b></div><div>Briefe / Dokumente<b>${letters.length} / ${docs.length}</b></div>
       <div>Offene Vorgänge<b>${openCases.length}</b></div><div>Fixkosten / Monat<b>${eur(mon)}</b></div>
+      <div>Einnahmen<b>${eur(bEin)}</b></div><div>Ausgaben<b>${eur(bAus)}</b></div>
+      <div>Saldo des Monats<b>${eur(bEin - bAus)}</b></div><div>Fristen pünktlich<b>${onTime.length ? Math.round(onOk / onTime.length * 100) + ' %' : '–'}</b></div>
     </div>
 
     <h2>1. Erledigte Aufgaben und Fristen</h2>
@@ -1202,6 +1652,21 @@ function reportHTML(ym){
     <h2>8. Konten und Vermögen</h2>
     ${tbl(['Bezeichnung', 'Art', 'Person', 'Stand vom', '#Wert'], assets.map(a => `<tr>${td(esc(a.name))}${td(esc(a.type || ''))}${td(esc(pName(a.personId)))}${td(fmtDate(a.valueDate))}${td(a.value === '' || a.value == null ? '' : eur(a.value), 1)}</tr>`)
       .concat(assets.length ? [`<tr><td colspan="4"><b>Saldo</b></td><td class="num"><b>${eur(saldo)}</b></td></tr>`] : []), 'Keine Konten erfasst.')}
+
+    <h2>9. Einnahmen und Ausgaben</h2>
+    ${bk.length ? `<div class="rchart">${svgGroupBars(rPer, [{l:'Einnahmen', c:'#0d9488'}, {l:'Ausgaben', c:'#f43f5e'}], {h:150, fmt:v => eur(v)})}<div class="rleg"><span style="background:#0d9488"></span>Einnahmen <span style="background:#f43f5e"></span>Ausgaben (letzte 6 Monate)</div></div>` : ''}
+    ${tbl(['Kategorie', 'Art', '#Betrag'], [...catSum('ein').map(([k, v]) => `<tr>${td(esc(k))}${td('Einnahme')}${td(eur(v), 1)}</tr>`), ...catSum('aus').map(([k, v]) => `<tr>${td(esc(k))}${td('Ausgabe')}${td(eur(v), 1)}</tr>`)]
+      .concat(bk.length ? [`<tr><td colspan="2"><b>Saldo des Monats</b></td><td class="num"><b>${eur(bEin - bAus)}</b></td></tr>`] : []), 'Keine Buchungen in diesem Monat.')}
+    ${pRows.length > 1 && bk.length ? tbl(['Person', '#Einnahmen', '#Ausgaben', '#Saldo'], pRows, '') : ''}
+
+    <h2>10. Kennzahlen</h2>
+    ${tbl(['Kennzahl', '#Wert'], [
+      `<tr>${td('Erledigte Aufgaben im Monat')}${td(done.length, 1)}</tr>`,
+      `<tr>${td('Davon mit Frist: pünktlich / verspätet')}${td(onOk + ' / ' + (onTime.length - onOk), 1)}</tr>`,
+      `<tr>${td('Offene Aufgaben (davon überfällig)')}${td(W.openTasks + ' (' + W.overdueOpen + ')', 1)}</tr>`,
+      `<tr>${td('Ø Dauer erledigter Vorgänge')}${td(W.avgClosed == null ? '–' : W.avgClosed + ' Tage', 1)}</tr>`,
+      `<tr>${td('Ø Wartezeit auf Antwort (laufend)')}${td(W.avgWait == null ? '–' : W.avgWait + ' Tage', 1)}</tr>`,
+      `<tr>${td('Geschriebene Briefe / eingegangene Dokumente')}${td(letters.length + ' / ' + docs.length, 1)}</tr>`], '')}
 
     <div class="rsig"><div>Ort, Datum</div><div>Unterschrift ${me.name ? '(' + esc(me.name) + ')' : ''}</div></div>
   </div>`;
@@ -1339,6 +1804,10 @@ const ACT = {
   briefNewContact: () => editContact(null, c => { LD.contactId = c.id; LD.recipient = contactAddress(c); render(); }),
   briefNewSender: () => editContact(null, c => { LD.senderId = isPrivate(c) ? 'c:' + c.id : LD.senderId; render(); }, {kind:'Privatperson'}),
   ckind: d => { UI.contactKind = d.id; render(); },
+  stat: d => { const [k, v] = d.id.split(':'); UI[k] = /Year$/.test(k) ? Number(v) : v; render(); },
+  newBooking: () => editBooking(null), editBooking: d => editBooking(S.bookings.find(b => b.id === d.id)), csvImport: () => csvImport(),
+  finMonth: d => { UI.finMonth = mshift(UI.finMonth, Number(d.id)); render(); },
+  toggleAutoContracts: () => { S.settings.autoContracts = S.settings.autoContracts === false; save(); render(); },
   insPh: d => { const ta = $('#briefBody'); const ins = '{' + d.id + '}'; const s = ta.selectionStart, e = ta.selectionEnd; ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e); ta.selectionStart = ta.selectionEnd = s + ins.length; ta.focus(); ta.dispatchEvent(new Event('input')); },
   saveLetter: () => saveLetter(false), printLetter: () => printLetter(false), pdfLetter: () => printLetter(true),
   saveTpl: () => { const n = prompt('Name der Vorlage:', LD.subject ? LD.subject.slice(0, 50) : ''); if (!n) return; const t = {id:'c_' + uid(), name:n, subject:LD.subject, body:LD.body, custom:true}; S.templates.push(t); LD.templateId = t.id; save(); toast('Vorlage gespeichert'); render(); },
@@ -1369,9 +1838,10 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   const el = e.target.closest('[data-chg]'); if (!el) return;
-  if (el.dataset.chg === 'caseStatus') { const c = getCase(el.dataset.id); c.status = el.value; c.log.push({id:uid(), date:today(), text:'Status: ' + el.value}); save(); render(); }
+  if (el.dataset.chg === 'caseStatus') { const c = getCase(el.dataset.id); c.status = el.value; c.statusSince = today(); if (el.value === 'erledigt') c.closedAt = today(); c.log.push({id:uid(), date:today(), text:'Status: ' + el.value}); save(); render(); }
   if (el.dataset.chg === 'docCat') { UI.docCat = el.value; render(); }
   if (el.dataset.chg === 'reportMonth' && /^\d{4}-\d{2}$/.test(el.value)) { UI.reportMonth = el.value; render(); }
+  if (el.dataset.chg === 'finMonth' && /^\d{4}-\d{2}$/.test(el.value)) { UI.finMonth = el.value; render(); }
 });
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { location.hash = '#/search?q=' + encodeURIComponent(e.target.value); } });
 window.addEventListener('hashchange', render);
