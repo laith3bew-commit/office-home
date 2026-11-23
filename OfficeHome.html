@@ -398,6 +398,7 @@ function migrate(st){
   st.settings.letter = Object.assign({}, d.settings.letter, st.settings.letter);
   st.settings.memory = Object.assign({}, d.settings.memory, st.settings.memory);
   st.settings.memory.map = Object.assign({}, st.settings.memory.map);
+  normStoredDigits(st);
   return st;
 }
 
@@ -502,6 +503,23 @@ function openForm({title, fields, data = {}, onSave, onDelete, saveLabel}){
 }
 function closeModal(){ const m = $('#modal'); if (m) m.remove(); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+// Arabische/persische Ziffern (z. B. von einer arabischen Tastatur) beim Tippen und Einfügen in 0–9 umwandeln.
+const AR_DIGITS = /[٠-٩۰-۹]/g;
+const normDigits = s => String(s).replace(AR_DIGITS, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d) >= 0 ? '٠١٢٣٤٥٦٧٨٩'.indexOf(d) : '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+document.addEventListener('keydown', e => {
+  const t = e.target; if (!t || !/^(INPUT|TEXTAREA)$/.test(t.tagName) || e.ctrlKey || e.altKey || e.key.length !== 1 || !AR_DIGITS.test(e.key)) { AR_DIGITS.lastIndex = 0; return; }
+  AR_DIGITS.lastIndex = 0; e.preventDefault(); document.execCommand('insertText', false, normDigits(e.key));
+}, true);
+document.addEventListener('paste', e => {
+  const t = e.target, txt = e.clipboardData && e.clipboardData.getData('text'); if (!t || !/^(INPUT|TEXTAREA)$/.test(t.tagName) || !txt || !/[٠-٩۰-۹]/.test(txt)) return;
+  e.preventDefault(); document.execCommand('insertText', false, normDigits(txt));
+}, true);
+// Gespeicherte Werte, die nur aus Ziffern/Datumszeichen bestehen, beim Laden bereinigen (z. B. „١٤“ → „14“).
+function normStoredDigits(o){
+  if (Array.isArray(o)) { o.forEach((v, i) => { if (typeof v === 'string') o[i] = /^[\d٠-٩۰-۹.,:\/\-\s]+$/.test(v) ? normDigits(v) : v; else if (v && typeof v === 'object') normStoredDigits(v); }); return o; }
+  for (const k in o) { const v = o[k]; if (typeof v === 'string') { if (/[٠-٩۰-۹]/.test(v) && /^[\d٠-٩۰-۹.,:\/\-\s]+$/.test(v)) { const n = normDigits(v); o[k] = typeof S !== 'undefined' && /Days$|size$|amount$|value$/.test(k) && n.trim() !== '' && !isNaN(Number(n)) ? Number(n) : n; } } else if (v && typeof v === 'object') normStoredDigits(v); }
+  return o;
+}
 
 // ---------- Feld-Definitionen ----------
 const CONTACT_KINDS = ['Behörde / Firma', 'Privatperson'];

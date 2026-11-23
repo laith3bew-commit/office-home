@@ -5,6 +5,10 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+// Programmsprache fest auf Deutsch: Datums- und Zahlenfelder zeigen sonst je nach Windows-Sprache
+// z. B. arabische Ziffern oder ein fremdes Datumsformat.
+app.commandLine.appendSwitch('lang', 'de-DE');
+
 // Nur eine Instanz erlauben (sonst greifen zwei Fenster gleichzeitig auf die Datenbank zu).
 if (!app.requestSingleInstanceLock()) { app.quit(); }
 
