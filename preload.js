@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('officeHome', {
   // Öffnet ein gespeichertes Dokument mit dem Standardprogramm von Windows.
   openFile: (name, buffer) => ipcRenderer.invoke('oh:openFile', name, buffer),
   version: () => ipcRenderer.invoke('oh:version'),
+  setTheme: (v) => ipcRenderer.invoke('oh:setTheme', v),
   // Programm-Update (GitHub Releases)
   updateCheck: () => ipcRenderer.invoke('oh:updateCheck'),
   updateDownload: () => ipcRenderer.invoke('oh:updateDownload'),

@@ -1,6 +1,6 @@
 // Office Home – Desktop-Programm (Electron-Hauptprozess)
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -18,7 +18,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1400, height: 900, minWidth: 900, minHeight: 600,
     title: 'Office Home',
-    backgroundColor: '#f3f5f9',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -80,6 +80,8 @@ ipcMain.handle('oh:openFile', async (e, name, buffer) => {
 });
 
 ipcMain.handle('oh:version', () => app.getVersion());
+// Darstellung: Fensterrahmen und Systemdialoge folgen der Wahl in Office Home (hell / dunkel / System)
+ipcMain.handle('oh:setTheme', (e, v) => { nativeTheme.themeSource = v === 'dunkel' ? 'dark' : v === 'hell' ? 'light' : 'system'; return true; });
 
 // ---------- Programm-Update über GitHub Releases ----------
 // Ablauf: suchen → (Nutzer klickt) herunterladen → installieren und neu starten (still, ohne Installationsassistent).
