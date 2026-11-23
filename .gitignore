@@ -4,3 +4,6 @@ dist/
 CLAUDE.md
 PLAN_PHASE3.md
 OfficeHome.original.html
+
+# Interne Plugin-Zustandsdateien
+.omc/
