@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# Persönliche Projektnotizen bleiben nur lokal
+CLAUDE.md
+PLAN_PHASE3.md
+OfficeHome.original.html

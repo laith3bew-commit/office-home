@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Office Home</title>
+<style>
+:root{
+  --bg:#f3f5f9; --panel:#fff; --ink:#1c2533; --muted:#6b7280; --line:#e3e7ee;
+  --brand:#16324f; --brand2:#21486f; --accent:#2563eb; --accent-soft:#e8f0fe;
+  --danger:#dc2626; --danger-soft:#fdecec; --warn:#b45309; --warn-soft:#fef3c7;
+  --ok:#15803d; --ok-soft:#e7f6ec; --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:14px;color:var(--ink);background:var(--bg)}
+a{color:var(--accent);text-decoration:none}
+button{font:inherit}
+.app{display:grid;grid-template-columns:232px 1fr;height:100vh}
+/* Sidebar */
+.side{background:var(--brand);color:#cdd9e6;display:flex;flex-direction:column;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;color:#fff;font-weight:700;font-size:18px;letter-spacing:.2px}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#1e40af);display:grid;place-items:center}
+.nav{padding:6px 10px;flex:1}
+.nav .grp{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#8ea6c0;padding:14px 10px 6px}
+.nav a{display:flex;align-items:center;gap:10px;color:#d6e1ec;padding:8px 10px;border-radius:8px;margin:1px 0}
+.nav a:hover{background:rgba(255,255,255,.07)}
+.nav a.on{background:var(--brand2);color:#fff;box-shadow:inset 3px 0 0 #60a5fa}
+.nav a .cnt{margin-left:auto;background:#dc2626;color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:600}
+.side .foot{padding:12px 18px;font-size:11px;color:#8ea6c0;border-top:1px solid rgba(255,255,255,.08)}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* Main */
+.mainwrap{display:flex;flex-direction:column;min-width:0;height:100vh}
+.top{display:flex;align-items:center;gap:12px;padding:12px 26px;background:var(--panel);border-bottom:1px solid var(--line)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--ink)}
+.pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.search{margin-left:auto;position:relative}
+.search input{width:280px;padding:8px 12px 8px 34px;border:1px solid var(--line);border-radius:8px;background:#f8fafc}
+.search svg{position:absolute;left:10px;top:9px;width:16px;height:16px;color:var(--muted)}
+main{flex:1;overflow-y:auto;padding:24px 26px 60px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.head{display:flex;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.head .grow{flex:1}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.card h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px}
+.card h3 .r{margin-left:auto;font-weight:400;font-size:13px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:pointer}
+.kpi .v{font-size:26px;font-weight:700;margin-top:4px}
+.kpi .l{color:var(--muted);font-size:12.5px}
+.kpi.red .v{color:var(--danger)} .kpi.amber .v{color:var(--warn)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 13px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#f6f8fb}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{background:#1d4ed8}
+.btn.dan{color:var(--danger)}
+.btn.sm{padding:4px 9px;font-size:12.5px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:#eef2f7}
+table.t{width:100%;border-collapse:collapse}
+.t th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t td{padding:9px 10px;border-bottom:1px solid #f0f2f6;vertical-align:middle}
+.t tr:last-child td{border-bottom:none}
+.t tr.click{cursor:pointer} .t tr.click:hover td{background:#f8fafc}
+.t td.act{text-align:right;white-space:nowrap}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:#eef1f5;color:#374151;white-space:nowrap}
+.badge.red{background:var(--danger-soft);color:var(--danger)}
+.badge.amber{background:var(--warn-soft);color:var(--warn)}
+.badge.green{background:var(--ok-soft);color:var(--ok)}
+.badge.blue{background:var(--accent-soft);color:var(--accent)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:#374151}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+.list .row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid #f0f2f6}
+.list .row:last-child{border-bottom:none}
+.list .row .grow{flex:1;min-width:0}
+.ttl{font-weight:600}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.banner{border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center}
+.banner.red{background:var(--danger-soft);color:#991b1b}
+.banner.amber{background:var(--warn-soft);color:#92400e}
+.banner.blue{background:var(--accent-soft);color:#1e3a8a}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tabs a{padding:8px 14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
+.tabs a.on{color:var(--ink);border-color:var(--accent);font-weight:600}
+.bar{height:8px;background:#eef1f5;border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--accent);border-radius:99px}
+.chk-row input{width:17px;height:17px;cursor:pointer;accent-color:var(--accent)}
+.done .ttl{text-decoration:line-through;color:var(--muted)}
+.pcard{border-top:4px solid var(--accent)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13.5px}
+.kv div:nth-child(odd){color:var(--muted)}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.note{background:#fffbea;border:1px solid #f3e3a1;border-radius:var(--radius);padding:14px;cursor:pointer;min-height:120px}
+.note h4{margin:0 0 6px}
+.note p{margin:0;white-space:pre-wrap;color:#4b5563;font-size:13px;max-height:160px;overflow:hidden}
+.drop{border:2px dashed #c7d2e0;border-radius:var(--radius);padding:18px;text-align:center;color:var(--muted);margin-bottom:16px;background:#fafcff}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input,textarea{font:inherit;color:var(--ink)}
+.filters select,.filters input{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:50;padding:20px}
+.modal{background:#fff;border-radius:12px;width:min(720px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{margin:0;padding:16px 20px;border-bottom:1px solid var(--line);font-size:16px}
+.modal form{padding:16px 20px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.modal .acts{display:flex;gap:8px;padding:12px 20px;border-top:1px solid var(--line)}
+.modal .acts .sp{flex:1}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld.full{grid-column:1/-1}
+.fld label{font-size:12.5px;color:#4b5563;font-weight:600}
+.fld input,.fld select,.fld textarea{padding:8px 10px;border:1px solid #d5dbe4;border-radius:8px;background:#fff;width:100%}
+.fld textarea{resize:vertical}
+.fld .hint{font-size:11.5px;color:var(--muted)}
+.fld.cb{flex-direction:row;align-items:center;gap:8px}
+.fld.cb label{font-weight:400;color:var(--ink);font-size:13.5px}
+.fld.cb input{width:17px;height:17px}
+input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#93c5fd}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 18px;border-radius:8px;z-index:90;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+/* Brief editor */
+.brief{display:grid;grid-template-columns:minmax(360px,440px) minmax(0,1fr);gap:18px;align-items:start}
+.brief>*{min-width:0}
+.brief .ed .card{padding:14px 16px}
+.brief .ed .fld{margin-bottom:10px}
+.brief .ed .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.brief .ed .two .fld{margin-bottom:10px}
+.ph{display:flex;flex-wrap:wrap;gap:5px;margin:2px 0 8px}
+.ph button{border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:6px;font-size:11.5px;padding:2px 7px;cursor:pointer}
+.pv{position:sticky;top:0}
+.pv .tool{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.pvbox{background:#d9dee7;border-radius:var(--radius);padding:18px;overflow:hidden;width:100%}
+.pvscale{transform-origin:top left}
+.pvwarn{font-size:12.5px;color:var(--warn);margin-left:auto}
+.imgprev{max-height:60px;max-width:200px;border:1px dashed #cbd5e1;padding:4px;background:#fff;border-radius:6px;display:block;margin:6px 0}
+/* Letter (DIN 5008 Form B) */
+.letter{position:relative;width:210mm;min-height:297mm;background:#fff;color:#000;padding:0 20mm 0 25mm;
+  font-family:var(--lf,Arial),Arial,sans-serif;font-size:var(--ls,11pt);line-height:1.38;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.letter .pgend{position:absolute;left:0;right:0;top:279mm;border-top:1px dashed #f87171}
+.letter .l-head{position:absolute;left:25mm;right:20mm;top:14mm}
+.letter .l-head .n{font-size:15pt;font-weight:700;letter-spacing:.2px}
+.letter .l-head .a{font-size:8.5pt;color:#333;margin-top:1mm}
+.letter .l-field{position:absolute;left:20mm;top:45mm;width:85mm;height:45mm}
+.letter .l-zone{height:17.7mm;padding-left:5mm;position:relative}
+.letter .l-ret{font-size:7pt;padding-top:1.5mm;color:#222;max-width:80mm}
+.letter .l-field.hasm .l-ret{max-width:38mm}
+.letter .l-verm{font-size:9pt;font-weight:700;margin-top:1.5mm}
+.letter .l-marke{position:absolute;right:0;top:0;max-width:42mm;max-height:17.5mm}
+.letter .l-addr{height:27.3mm;padding-left:5mm;overflow:hidden}
+.letter .l-info{position:absolute;left:125mm;top:50mm;width:75mm;font-size:8.5pt;border-collapse:collapse}
+.letter .l-info td{padding:0 2mm .7mm 0;vertical-align:top}
+.letter .l-info td:first-child{color:#444;white-space:nowrap}
+.letter .l-body{padding-top:98.5mm;padding-bottom:10mm}
+.letter .l-subj{font-weight:700;margin-bottom:7mm}
+.letter .l-body p{margin:0 0 3.6mm}
+.letter .l-sigwrap{position:relative;margin-top:1mm}
+.letter .l-sig{height:16mm;display:flex;align-items:flex-end}
+.letter .l-sig img{max-height:16mm;max-width:60mm}
+.letter .l-stamp{position:absolute;left:58mm;top:-6mm;max-height:28mm;max-width:42mm;opacity:.92}
+.letter .l-anl{margin-top:7mm}
+.letter .l-anl b{display:block}
+.letter .fold{position:absolute;left:4mm;width:5mm;border-top:.3pt solid #888}
+.letter .hole{position:absolute;left:4mm;width:8mm;border-top:.3pt solid #888}
+.letter mark{background:#fde68a;color:inherit;padding:0 1px;border-radius:2px}
+.letter{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.letter.d-modern .l-head{border-bottom:1.2pt solid var(--acc);padding-bottom:2.5mm}
+.letter.d-modern .l-head .n{color:var(--acc);font-size:17pt}
+.letter.d-modern .l-subj{color:var(--acc)}
+.letter.d-elegant .l-head{left:20mm;right:20mm;text-align:center}
+.letter.d-elegant .l-head .n{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:18pt;letter-spacing:2.5px;text-transform:uppercase}
+.letter.d-elegant .l-head .a{border-top:.5pt solid #555;border-bottom:.5pt solid #555;padding:1mm 0;margin-top:2mm;letter-spacing:.6px}
+.letter.d-elegant .l-subj{font-weight:400;font-variant:small-caps;letter-spacing:.5px;font-size:1.08em}
+.letter.d-sachlich .l-head{text-align:right}
+.letter.d-sachlich .l-head .n{font-size:12pt}
+.letter.d-sachlich .l-info td:first-child{font-weight:700;color:#000}
+.letter.d-sachlich .l-subj{border-bottom:.5pt solid #000;padding-bottom:1.5mm}
+.letter.d-band .l-head{left:0;right:0;top:0;height:30mm;box-sizing:border-box;padding:9mm 20mm 0 25mm;background:var(--acc);color:#fff}
+.letter.d-band .l-head .a{color:#fff;opacity:.9}
+.letter.d-band .l-subj{color:var(--acc)}
+.letter.d-linie::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3mm;background:var(--acc)}
+.letter.d-linie .l-head .n{color:var(--acc)}
+.letter.d-linie .l-head .a{color:#555}
+.letter.d-linie .l-subj{border-left:1mm solid var(--acc);padding-left:2.5mm;margin-left:-3.5mm}
+.updchip{display:block;margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#f59e0b;color:#1f2937;font-size:12.5px;font-weight:600;text-decoration:none;text-align:center}
+.dsgrid{display:flex;flex-wrap:wrap;gap:14px}
+.dstile{border:2px solid var(--line,#d9dee7);border-radius:10px;padding:8px;background:transparent;cursor:pointer;text-align:center;font:inherit;color:inherit}
+.dstile.on{border-color:var(--pri,#2563eb);background:rgba(37,99,235,.06)}
+.dstile .pv{width:168px;height:238px;overflow:hidden;text-align:left;margin-bottom:6px;border:1px solid #e5e7eb;background:#fff}
+.dstile .pv .letter{transform:scale(.21);transform-origin:top left;box-shadow:none;pointer-events:none}
+/* Monatsbericht */
+.rpwrap{background:#d9dee7;border-radius:var(--radius);padding:18px;overflow-x:auto}
+.report{background:#fff;color:#000;width:210mm;margin:0 auto;padding:15mm 18mm;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.4;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.report h1{font-size:16pt;margin:0 0 1mm}
+.report .rsub{color:#444;font-size:9pt;margin-bottom:6mm}
+.report h2{font-size:11.5pt;margin:6mm 0 2mm;padding-bottom:1mm;border-bottom:1.2pt solid #16324f;color:#16324f;break-after:avoid}
+.report table{width:100%;border-collapse:collapse;font-size:9.5pt}
+.report th{text-align:left;font-weight:700;padding:1.2mm 2mm;border-bottom:.6pt solid #888;background:#f1f4f8}
+.report td{padding:1.2mm 2mm;border-bottom:.3pt solid #ccc;vertical-align:top}
+.report tr{break-inside:avoid}
+.report .num{text-align:right;white-space:nowrap}
+.report .none{color:#666;font-style:italic;margin:1mm 0}
+.report .over{color:#b91c1c;font-weight:700}
+.report .sums{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:2mm}
+.report .sums div{border:.6pt solid #bbb;border-radius:2mm;padding:2mm 3mm}
+.report .sums b{display:block;font-size:13pt}
+.report .rsig{margin-top:14mm;display:grid;grid-template-columns:1fr 1fr;gap:20mm;font-size:9pt;break-inside:avoid}
+.report .rsig div{border-top:.6pt solid #000;padding-top:1.5mm}
+#print-root{display:none}
+@media print{
+  @page{size:A4;margin:15mm 0 18mm 0}
+  @page :first{margin:0 0 18mm 0}
+  body{background:#fff}
+  body>*:not(#print-root){display:none!important}
+  #print-root{display:block}
+  #print-root .letter{box-shadow:none;min-height:0}
+  #print-root .pgend{display:none}
+  #print-root mark{background:none}
+  #print-root .report{box-shadow:none;width:auto;padding:15mm 18mm 0}
+}
+@media (max-width:1100px){.brief{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+@media (max-width:800px){.app{grid-template-columns:1fr}.side{display:none}.g2,.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><div class="mark"><svg class="i" viewBox="0 0 24 24" style="color:#fff"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>Office Home</div>
+    <nav class="nav" id="nav"></nav>
+    <div id="updChip"></div>
+    <div class="foot">Daten nur auf diesem Computer.<br><a href="#/settings" style="color:#93c5fd">Datensicherung</a></div>
+  </aside>
+  <div class="mainwrap">
+    <div class="top">
+      <div class="pills" id="pills"></div>
+      <div class="search">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" placeholder="Alles durchsuchen … (Enter)" autocomplete="off">
+      </div>
+    </div>
+    <main id="main"></main>
+  </div>
+</div>
+<div id="print-root"></div>
+<input type="file" id="hiddenFile" style="display:none">
+
+<script>
+'use strict';
+/* =========================================================
+   Office Home – Familienbüro (offline, lokale Datenhaltung)
+   ========================================================= */
+
+// ---------- Hilfsfunktionen ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const z2 = n => String(n).padStart(2, '0');
+const isoDate = d => d.getFullYear() + '-' + z2(d.getMonth() + 1) + '-' + z2(d.getDate());
+const today = () => isoDate(new Date());
+const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+function fmtDate(iso){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}.${m}.${y}`; }
+function fmtDateLong(iso){ if(!iso) return ''; const [y,m,d] = iso.split('-').map(Number); return `${d}. ${MONATE[m-1]} ${y}`; }
+function daysUntil(iso){ return Math.round((new Date(iso + 'T00:00') - new Date(today() + 'T00:00')) / 86400000); }
+function addMonths(iso, n){
+  const d = new Date(iso + 'T00:00'); const day = d.getDate();
+  d.setDate(1); d.setMonth(d.getMonth() + n);
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, last)); return isoDate(d);
+}
+const eur = n => (Number(n) || 0).toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+const clone = o => JSON.parse(JSON.stringify(o));
+function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+function readAsDataURL(file){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); }); }
+async function dataURLtoBlob(u){ return (await fetch(u)).blob(); }
+function blobToDataURL(b){ return readAsDataURL(b); }
+function pickFile(accept){ return new Promise(res => { const inp = $('#hiddenFile'); inp.value = ''; inp.accept = accept || ''; inp.onchange = () => res(inp.files[0] || null); inp.click(); }); }
+async function imageToDataURL(file, maxW = 900){
+  const url = await readAsDataURL(file);
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+  if (img.width <= maxW) return url;
+  const c = document.createElement('canvas'); c.width = maxW; c.height = Math.round(img.height * maxW / img.width);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c.toDataURL('image/png');
+}
+
+const ICONS = {
+  home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+  folder:'<path d="M3 6h6l2 2h10v11H3z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h7M9 17h7"/>',
+  receipt:'<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
+  wallet:'<path d="M3 7h18v13H3z"/><path d="M16 13h2"/><path d="M3 7l3-4h12l3 4"/>',
+  note:'<path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4"/>',
+  book:'<path d="M4 4h14a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2z"/><path d="M8 4v16"/>',
+  mail:'<path d="M3 5h18v14H3z"/><path d="M3 5l9 7 9-7"/>',
+  pen:'<path d="M4 20h4L20 8l-4-4L4 16z"/>',
+  users:'<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M17 3.5a4 4 0 0 1 0 7M22 21v-2a4 4 0 0 0-3-3.8"/>',
+  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  print:'<path d="M6 9V2h12v7"/><path d="M6 18H4v-7h16v7h-2"/><path d="M6 14h12v8H6z"/>',
+  save:'<path d="M5 3h11l5 5v13H5z"/><path d="M8 3v5h8M8 21v-7h8v7"/>',
+  cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>'
+};
+const icon = n => `<svg class="i" viewBox="0 0 24 24">${ICONS[n] || ''}</svg>`;
+
+// ---------- Datenbank (IndexedDB, lokal) ----------
+const DB = {
+  db: null,
+  open(){ return new Promise((res, rej) => {
+    const r = indexedDB.open('officehome', 1);
+    r.onupgradeneeded = () => { const db = r.result; db.createObjectStore('kv'); db.createObjectStore('files'); };
+    r.onsuccess = () => { DB.db = r.result; res(); }; r.onerror = () => rej(r.error);
+  }); },
+  tx(store, mode, fn){ return new Promise((res, rej) => {
+    if (!DB.db) return res(undefined);
+    const t = DB.db.transaction(store, mode); const req = fn(t.objectStore(store));
+    t.oncomplete = () => res(req ? req.result : undefined); t.onerror = () => rej(t.error);
+  }); },
+  get:(s, k) => DB.tx(s, 'readonly', st => st.get(k)),
+  put:(s, k, v) => DB.tx(s, 'readwrite', st => st.put(v, k)),
+  del:(s, k) => DB.tx(s, 'readwrite', st => st.delete(k)),
+  clear:s => DB.tx(s, 'readwrite', st => st.clear())
+};
+const memFiles = {}; // Fallback ohne IndexedDB
+async function fileGet(id){ return DB.db ? DB.get('files', id) : memFiles[id]; }
+async function filePut(id, v){ if (DB.db) return DB.put('files', id, v); memFiles[id] = v; }
+async function fileDel(id){ if (DB.db) return DB.del('files', id); delete memFiles[id]; }
+
+function defaultState(){
+  const p = (id, role, sal, color) => ({id, role, salutation:sal, firstName:'', lastName:'', birth:'', street:'', zip:'', city:'', phone:'', email:'',
+    taxId:'', pensionNo:'', healthInsurance:'', poaDate:'', poaScope:'', color, notes:''});
+  return {
+    version: 1,
+    settings: {
+      me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
+      letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79'},
+      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:''
+    },
+    persons: [p('p_vater', 'Vater', 'Herr', '#2563eb'), p('p_mutter', 'Mutter', 'Frau', '#db2777')],
+    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[]
+  };
+}
+let S = defaultState();
+const UI = {person:'all', contactKind:'', contactQ:'',taskTab:'open', caseTab:'open', docCat:'', docQ:'', reportMonth: today().slice(0, 7)};
+let saveTimer = null;
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.db && DB.put('kv', 'state', S).catch(e => alert('Speichern fehlgeschlagen: ' + e)), 250); }
+function migrate(st){
+  const d = defaultState();
+  for (const k in d) if (st[k] === undefined) st[k] = d[k];
+  st.settings = Object.assign({}, d.settings, st.settings);
+  st.settings.me = Object.assign({}, d.settings.me, st.settings.me);
+  st.settings.letter = Object.assign({}, d.settings.letter, st.settings.letter);
+  return st;
+}
+
+// ---------- Personen ----------
+const getPerson = id => S.persons.find(p => p.id === id);
+const personName = p => p ? ((p.firstName + ' ' + p.lastName).trim() || p.role) : '';
+function anredeName(p){ const n = personName(p); if (!p) return ''; return p.salutation === 'Herr' ? 'Herrn ' + n : p.salutation === 'Frau' ? 'Frau ' + n : n; }
+const addrOneLine = o => [o.street, ((o.zip || '') + ' ' + (o.city || '')).trim()].filter(Boolean).join(', ');
+function personChip(id){
+  const p = getPerson(id);
+  if (!p) return `<span class="chip"><span class="dot" style="background:#9ca3af"></span>Allgemein</span>`;
+  return `<span class="chip"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}</span>`;
+}
+const byPerson = list => UI.person === 'all' ? list : list.filter(x => !x.personId || x.personId === UI.person);
+const getContact = id => S.contacts.find(c => c.id === id);
+const getCase = id => S.cases.find(c => c.id === id);
+
+// ---------- Verträge ----------
+const INTERVALS = {monatlich:1, vierteljährlich:3, halbjährlich:6, jährlich:12};
+function monthly(c){ return (Number(c.amount) || 0) / (INTERVALS[c.interval] || 1); }
+function contractInfo(c){
+  if (c.ended) return {state:'beendet'};
+  if (!c.end) return {state:'unbefristet', cancelBy:null};
+  let end = c.end; const ren = Number(c.renewalMonths) || 0;
+  if (ren > 0) { let guard = 0; while (end < today() && guard++ < 600) end = addMonths(end, ren); }
+  else if (end < today()) return {state:'abgelaufen', end};
+  const notice = Number(c.noticeMonths) || 0;
+  return {state:'laufend', end, cancelBy: notice ? addMonths(end, -notice) : end};
+}
+
+// ---------- Fristen-Badges ----------
+function dueBadge(iso){
+  if (!iso) return '<span class="badge">ohne Datum</span>';
+  const d = daysUntil(iso);
+  if (d < 0) return `<span class="badge red">überfällig (${fmtDate(iso)})</span>`;
+  if (d === 0) return `<span class="badge red">heute</span>`;
+  if (d === 1) return `<span class="badge amber">morgen</span>`;
+  if (d <= 7) return `<span class="badge amber">in ${d} Tagen · ${fmtDate(iso)}</span>`;
+  return `<span class="badge">${fmtDate(iso)}</span>`;
+}
+function deadlineItems(){
+  const items = [];
+  for (const t of byPerson(S.tasks)) if (!t.done && t.due) items.push({date:t.due, title:t.title, kind:'Aufgabe', personId:t.personId, href:t.caseId ? '#/case/' + t.caseId : '#/tasks', taskId:t.id});
+  for (const c of byPerson(S.contracts)) { const i = contractInfo(c); if (i.cancelBy && daysUntil(i.cancelBy) <= S.settings.contractDays) items.push({date:i.cancelBy, title:'Kündigungsfrist: ' + c.provider, kind:'Vertrag', personId:c.personId, href:'#/contracts'}); }
+  return items.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// ---------- Formular-Modal ----------
+const CATS_DOC = ['Behörde','Jobcenter / Sozialamt','Krankenkasse','Pflegekasse','Rente','Finanzamt / Steuer','Bank','Versicherung','Wohnen / Miete','Arzt / Medizin','Vertrag','Vollmacht','Ausweis / Urkunde','Sonstiges'];
+const CATS_CONTRACT = ['Strom','Gas','Wasser','Internet / Telefon','Mobilfunk','Versicherung','Miete','Rundfunkbeitrag','Abo / Streaming','Fitness / Verein','Kredit','Sonstiges'];
+const ASSET_TYPES = ['Bankkonto','Sparkonto / Depot','Versicherung','Rente / Altersvorsorge','Immobilie','Fahrzeug','Wertgegenstand','Schulden / Kredit','Sonstiges'];
+const CASE_STATUS = ['offen','in Bearbeitung','wartet auf Antwort','erledigt'];
+
+function optHTML(list, v){ return list.map(o => { const val = typeof o === 'object' ? o.v : o, lab = typeof o === 'object' ? o.l : o; return `<option value="${esc(val)}" ${String(val) === String(v ?? '') ? 'selected' : ''}>${esc(lab)}</option>`; }).join(''); }
+const personOpts = (withAll = true) => [...(withAll ? [{v:'', l:'Allgemein / beide'}] : []), ...S.persons.map(p => ({v:p.id, l:p.role + (personName(p) !== p.role ? ' – ' + personName(p) : '')}))];
+const contactOpts = () => [{v:'', l:'—'}, ...S.contacts.map(c => ({v:c.id, l:c.name}))];
+const caseOpts = () => [{v:'', l:'—'}, ...S.cases.map(c => ({v:c.id, l:c.title + (c.status === 'erledigt' ? ' (erledigt)' : '')}))];
+
+function fieldHTML(f, v){
+  const id = 'f_' + f.k;
+  if (f.t === 'checkbox') return `<div class="fld cb ${f.full ? 'full' : ''}"><input type="checkbox" id="${id}" name="${f.k}" ${v ? 'checked' : ''}><label for="${id}">${esc(f.l)}</label></div>`;
+  let inp;
+  switch (f.t) {
+    case 'textarea': inp = `<textarea id="${id}" name="${f.k}" rows="${f.rows || 4}">${esc(v)}</textarea>`; break;
+    case 'select': inp = `<select id="${id}" name="${f.k}">${optHTML(f.o, v)}</select>`; break;
+    case 'person': inp = `<select id="${id}" name="${f.k}">${optHTML(personOpts(!f.noAll), v)}</select>`; break;
+    case 'contact': inp = `<select id="${id}" name="${f.k}">${optHTML(contactOpts(), v)}</select>`; break;
+    case 'case': inp = `<select id="${id}" name="${f.k}">${optHTML(caseOpts(), v)}</select>`; break;
+    case 'file': inp = `<input type="file" id="${id}" name="${f.k}">`; break;
+    default: inp = `<input type="${f.t || 'text'}" id="${id}" name="${f.k}" value="${esc(v)}" ${f.step ? `step="${f.step}"` : ''}>`;
+  }
+  return `<div class="fld ${f.full ? 'full' : ''}"><label for="${id}">${esc(f.l)}${f.req ? ' *' : ''}</label>${inp}${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ''}</div>`;
+}
+function openForm({title, fields, data = {}, onSave, onDelete, saveLabel}){
+  closeModal();
+  const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
+  bg.innerHTML = `<div class="modal"><h3>${esc(title)}</h3><form id="mform" autocomplete="off">${fields.map(f => fieldHTML(f, data[f.k] ?? f.def ?? '')).join('')}</form>
+    <div class="acts">${onDelete ? '<button class="btn dan" data-m="del">Löschen</button>' : ''}<span class="sp"></span><button class="btn" data-m="cancel">Abbrechen</button><button class="btn pri" data-m="ok">${esc(saveLabel || 'Speichern')}</button></div></div>`;
+  document.body.appendChild(bg);
+  const form = $('#mform', bg);
+  const first = form.querySelector('input:not([type=checkbox]),textarea,select'); if (first) first.focus();
+  const submit = async () => {
+    const out = {};
+    for (const f of fields) {
+      const el = form.elements[f.k]; if (!el) continue;
+      if (f.t === 'checkbox') out[f.k] = el.checked;
+      else if (f.t === 'file') out[f.k] = el.files[0] || null;
+      else if (f.t === 'number') out[f.k] = el.value === '' ? '' : parseFloat(el.value);
+      else out[f.k] = el.value.trim();
+      if (f.req && !out[f.k]) { el.focus(); el.style.borderColor = '#dc2626'; return; }
+    }
+    const r = await onSave(out); if (r !== false) closeModal();
+  };
+  bg.addEventListener('click', e => {
+    const b = e.target.closest('[data-m]'); if (e.target === bg) return closeModal(); if (!b) return; e.preventDefault();
+    if (b.dataset.m === 'cancel') closeModal();
+    if (b.dataset.m === 'ok') submit();
+    if (b.dataset.m === 'del' && confirm('Wirklich löschen?')) { onDelete(); closeModal(); }
+  });
+  form.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'file') { e.preventDefault(); submit(); } });
+  return form;
+}
+function closeModal(){ const m = $('#modal'); if (m) m.remove(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ---------- Feld-Definitionen ----------
+const CONTACT_KINDS = ['Behörde / Firma', 'Privatperson'];
+const isPrivate = c => !!c && c.kind === 'Privatperson';
+const F = {
+  person: [
+    {k:'role', l:'Bezeichnung (z. B. Vater)', req:1}, {k:'salutation', l:'Anrede', t:'select', o:['Herr','Frau','—']},
+    {k:'firstName', l:'Vorname'}, {k:'lastName', l:'Nachname'}, {k:'birth', l:'Geburtsdatum', t:'date'}, {k:'phone', l:'Telefon'},
+    {k:'street', l:'Straße und Hausnummer'}, {k:'email', l:'E-Mail'}, {k:'zip', l:'PLZ'}, {k:'city', l:'Ort'},
+    {k:'taxId', l:'Steuer-ID'}, {k:'pensionNo', l:'Rentenversicherungsnummer'},
+    {k:'healthInsurance', l:'Krankenkasse & Versichertennummer', full:1},
+    {k:'poaDate', l:'Vollmacht vom', t:'date'}, {k:'poaScope', l:'Umfang der Vollmacht', hint:'z. B. Generalvollmacht, Behörden, Bank'},
+    {k:'color', l:'Farbe', t:'color'}, {k:'notes', l:'Notizen', t:'textarea', full:1, rows:3}
+  ],
+  contact: [
+    {k:'kind', l:'Art', t:'select', o:CONTACT_KINDS}, {k:'salutation', l:'Anrede (nur bei Privatperson)', t:'select', o:['—','Herr','Frau']},
+    {k:'name', l:'Name (Behörde / Firma oder Vor- und Nachname)', req:1, full:1}, {k:'department', l:'Abteilung / Stelle'}, {k:'contactPerson', l:'Ansprechpartner/in', hint:'erscheint als „z. Hd. …“'},
+    {k:'street', l:'Straße / Postfach'}, {k:'zip', l:'PLZ'}, {k:'city', l:'Ort'}, {k:'phone', l:'Telefon'}, {k:'email', l:'E-Mail'}, {k:'fax', l:'Fax'},
+    {k:'notes', l:'Notizen', t:'textarea', full:1, rows:3}
+  ],
+  case: [
+    {k:'title', l:'Titel des Vorgangs', req:1, full:1}, {k:'personId', l:'Person', t:'person'}, {k:'contactId', l:'Behörde / Stelle', t:'contact'},
+    {k:'ref', l:'Aktenzeichen / Geschäftszeichen'}, {k:'status', l:'Status', t:'select', o:CASE_STATUS},
+    {k:'priority', l:'Priorität', t:'select', o:['normal','hoch','niedrig']}, {k:'start', l:'Begonnen am', t:'date'},
+    {k:'description', l:'Beschreibung', t:'textarea', full:1}
+  ],
+  task: [
+    {k:'title', l:'Aufgabe / Frist', req:1, full:1}, {k:'personId', l:'Person', t:'person'}, {k:'due', l:'Fällig am', t:'date'},
+    {k:'caseId', l:'Vorgang', t:'case'}, {k:'priority', l:'Priorität', t:'select', o:['normal','hoch','niedrig']},
+    {k:'repeat', l:'Wiederholen', t:'select', o:[{v:'', l:'nein'}, {v:'1', l:'monatlich'}, {v:'3', l:'vierteljährlich'}, {v:'6', l:'halbjährlich'}, {v:'12', l:'jährlich'}]},
+    {k:'notes', l:'Notizen', t:'textarea', full:1, rows:3}
+  ],
+  contract: [
+    {k:'provider', l:'Anbieter', req:1}, {k:'category', l:'Kategorie', t:'select', o:CATS_CONTRACT},
+    {k:'personId', l:'Person', t:'person'}, {k:'contactId', l:'Kontakt (für Kündigung)', t:'contact'},
+    {k:'customerNo', l:'Kunden- / Vertragsnummer'}, {k:'payment', l:'Zahlungsart', t:'select', o:['Lastschrift','Überweisung','Dauerauftrag','Sonstiges']},
+    {k:'amount', l:'Betrag (€)', t:'number', step:'0.01'}, {k:'interval', l:'Zahlungsintervall', t:'select', o:Object.keys(INTERVALS)},
+    {k:'start', l:'Vertragsbeginn', t:'date'}, {k:'end', l:'Laufzeit bis', t:'date', hint:'leer = unbefristet / jederzeit kündbar'},
+    {k:'noticeMonths', l:'Kündigungsfrist (Monate)', t:'number', step:'1'}, {k:'renewalMonths', l:'Verlängert sich um (Monate)', t:'number', step:'1', hint:'0 = endet automatisch'},
+    {k:'ended', l:'Vertrag ist beendet / gekündigt', t:'checkbox', full:1},
+    {k:'notes', l:'Notizen', t:'textarea', full:1, rows:3}
+  ],
+  doc: [
+    {k:'file', l:'Datei (PDF, Bild …)', t:'file', full:1}, {k:'title', l:'Titel', req:1, full:1},
+    {k:'personId', l:'Person', t:'person'}, {k:'category', l:'Kategorie', t:'select', o:CATS_DOC},
+    {k:'sender', l:'Absender'}, {k:'date', l:'Datum des Schreibens', t:'date'},
+    {k:'caseId', l:'Vorgang', t:'case'}, {k:'deadline', l:'Frist im Schreiben', t:'date'},
+    {k:'mkTask', l:'Frist als Aufgabe anlegen', t:'checkbox', full:1, def:true},
+    {k:'tags', l:'Schlagwörter', full:1, hint:'durch Komma getrennt'}, {k:'notes', l:'Notizen / Inhalt in Kürze', t:'textarea', full:1, rows:3}
+  ],
+  asset: [
+    {k:'name', l:'Bezeichnung', req:1}, {k:'type', l:'Art', t:'select', o:ASSET_TYPES}, {k:'personId', l:'Person', t:'person'},
+    {k:'institution', l:'Bank / Institut / Gesellschaft'}, {k:'number', l:'IBAN / Nummer / Kennzeichen'}, {k:'value', l:'Wert (€)', t:'number', step:'0.01', hint:'Schulden als negativer Wert'},
+    {k:'contact', l:'Ansprechpartner / Telefon'}, {k:'valueDate', l:'Stand vom', t:'date'}, {k:'notes', l:'Notizen', t:'textarea', full:1, rows:3}
+  ],
+  note: [ {k:'title', l:'Titel', req:1}, {k:'personId', l:'Person', t:'person'}, {k:'content', l:'Inhalt', t:'textarea', full:1, rows:12}, {k:'pinned', l:'Oben anheften', t:'checkbox', full:1} ]
+};
+function upsert(listName, obj){ const L = S[listName]; const i = L.findIndex(x => x.id === obj.id); if (i >= 0) L[i] = obj; else L.push(obj); save(); }
+function remove(listName, id){ S[listName] = S[listName].filter(x => x.id !== id); save(); }
+function prefillPerson(){ return UI.person === 'all' ? '' : UI.person; }
+
+function editPerson(p){
+  openForm({title: p ? 'Person bearbeiten' : 'Person hinzufügen', fields:F.person, data: p || {salutation:'Herr', color:'#0d9488'},
+    onSave: v => { upsert('persons', Object.assign(p || {id:uid()}, v)); render(); },
+    onDelete: p && S.persons.length > 1 ? () => { remove('persons', p.id); if (UI.person === p.id) UI.person = 'all'; render(); } : null});
+}
+function editContact(c, after, preset = {}){
+  openForm({title: c ? 'Kontakt bearbeiten' : 'Neuer Kontakt', fields:F.contact, data: c || Object.assign({kind: UI.contactKind === 'priv' ? 'Privatperson' : 'Behörde / Firma', salutation:'—'}, preset),
+    onSave: v => { const o = Object.assign(c || {id:uid()}, v); upsert('contacts', o); after ? after(o) : render(); },
+    onDelete: c ? () => { remove('contacts', c.id); render(); } : null});
+}
+function editCase(c, preset = {}){
+  const fields = c ? F.case : [...F.case, {k:'tpl', l:'Schritte-Vorlage (optional)', t:'select', full:1, o:[{v:'', l:'keine'}, ...Object.keys(CASE_TEMPLATES).map(k => ({v:k, l:k}))]}];
+  openForm({title: c ? 'Vorgang bearbeiten' : 'Neuer Vorgang', fields, data: c || Object.assign({status:'offen', priority:'normal', start:today(), personId:prefillPerson()}, preset),
+    onSave: v => {
+      const tpl = v.tpl; delete v.tpl;
+      const o = Object.assign(c || {id:uid(), steps:[], log:[], created:today()}, v);
+      if (tpl && CASE_TEMPLATES[tpl]) { o.steps = CASE_TEMPLATES[tpl].map(t => ({id:uid(), text:t, done:false})); if (!o.title) o.title = tpl; }
+      if (!c) o.log.push({id:uid(), date:today(), text:'Vorgang angelegt'});
+      upsert('cases', o); if (!c) location.hash = '#/case/' + o.id; else render();
+    },
+    onDelete: c ? () => { remove('cases', c.id); S.tasks.forEach(t => { if (t.caseId === c.id) t.caseId = ''; }); location.hash = '#/cases'; } : null});
+}
+function editTask(t, preset = {}){
+  openForm({title: t ? 'Aufgabe bearbeiten' : 'Neue Aufgabe / Frist', fields:F.task, data: t || Object.assign({priority:'normal', personId:prefillPerson()}, preset),
+    onSave: v => { upsert('tasks', Object.assign(t || {id:uid(), done:false, created:today()}, v)); render(); },
+    onDelete: t ? () => { remove('tasks', t.id); render(); } : null});
+}
+function editContract(c){
+  openForm({title: c ? 'Vertrag bearbeiten' : 'Neuer Vertrag', fields:F.contract, data: c || {interval:'monatlich', payment:'Lastschrift', personId:prefillPerson(), category:'Sonstiges'},
+    onSave: v => { upsert('contracts', Object.assign(c || {id:uid()}, v)); render(); },
+    onDelete: c ? () => { remove('contracts', c.id); render(); } : null});
+}
+function editAsset(a){
+  openForm({title: a ? 'Eintrag bearbeiten' : 'Neuer Eintrag', fields:F.asset, data: a || {type:'Bankkonto', personId:prefillPerson()},
+    onSave: v => { upsert('assets', Object.assign(a || {id:uid()}, v)); render(); },
+    onDelete: a ? () => { remove('assets', a.id); render(); } : null});
+}
+function editNote(n){
+  openForm({title: n ? 'Notiz bearbeiten' : 'Neue Notiz', fields:F.note, data: n || {personId:prefillPerson()},
+    onSave: v => { upsert('notes', Object.assign(n || {id:uid(), created:today()}, v, {updated:today()})); render(); },
+    onDelete: n ? () => { remove('notes', n.id); render(); } : null});
+}
+function editDoc(d, preset = {}, presetFile = null){
+  const fields = F.doc.map(f => f.k === 'file' && d ? Object.assign({}, f, {l:'Datei ersetzen (optional)'}) : f).filter(f => !(presetFile && f.k === 'file'));
+  openForm({title: d ? 'Dokument bearbeiten' : 'Dokument hinzufügen' + (presetFile ? ': ' + presetFile.name : ''), fields,
+    data: d || Object.assign({date:today(), category:'Behörde', personId:prefillPerson(), title: presetFile ? presetFile.name.replace(/\.[^.]+$/, '') : ''}, preset),
+    onSave: async v => {
+      const file = presetFile || v.file; delete v.file; const mk = v.mkTask; delete v.mkTask;
+      const o = Object.assign(d || {id:uid(), added:today()}, v);
+      if (file) { if (o.fileId) await fileDel(o.fileId); o.fileId = uid(); o.fileName = file.name; o.fileType = file.type; o.fileSize = file.size; await filePut(o.fileId, {blob:file, name:file.name, type:file.type}); }
+      if (mk && o.deadline && !S.tasks.some(t => t.docId === o.id && t.due === o.deadline))
+        S.tasks.push({id:uid(), title:'Frist: ' + o.title, due:o.deadline, personId:o.personId, caseId:o.caseId, docId:o.id, priority:'hoch', done:false, created:today()});
+      if (o.caseId) { const c = getCase(o.caseId); if (c && !d) c.log.push({id:uid(), date:today(), text:'Dokument hinzugefügt: ' + o.title}); }
+      upsert('documents', o); render();
+    },
+    onDelete: d ? async () => { if (d.fileId) await fileDel(d.fileId); remove('documents', d.id); render(); } : null});
+}
+async function openDoc(d){
+  const f = d.fileId && await fileGet(d.fileId);
+  if (!f) return toast('Keine Datei hinterlegt');
+  if (DESKTOP) { const r = await window.officeHome.openFile(f.name, await f.blob.arrayBuffer()); if (!r.ok) toast('Datei konnte nicht geöffnet werden'); return; }
+  const url = URL.createObjectURL(f.blob); const w = window.open(url, '_blank');
+  if (!w) download(f.name, f.blob);
+}
+
+function toggleTask(t){
+  if (!t.done && t.repeat && t.due) {
+    t.lastDone = today(); t.due = addMonths(t.due, Number(t.repeat)); toast('Erledigt – nächster Termin: ' + fmtDate(t.due));
+  } else { t.done = !t.done; t.doneAt = t.done ? today() : ''; }
+  if (t.done && t.caseId) { const c = getCase(t.caseId); if (c) c.log.push({id:uid(), date:today(), text:'Erledigt: ' + t.title}); }
+  save(); render();
+}
+
+// ---------- Schritte-Vorlagen für Vorgänge ----------
+const CASE_TEMPLATES = {
+  'Pflegegrad beantragen': ['Antrag bei der Pflegekasse stellen (formlos möglich, Datum notieren)','Pflegetagebuch führen (ca. 2 Wochen)','Unterlagen sammeln: Arztberichte, Medikamentenplan, Hilfsmittel','Begutachtungstermin des Medizinischen Dienstes vorbereiten und begleiten','Bescheid prüfen – ggf. Widerspruch innerhalb eines Monats'],
+  'Rentenantrag': ['Versicherungsverlauf bei der Deutschen Rentenversicherung anfordern','Lücken im Versicherungsverlauf klären (Kontenklärung)','Rentenantrag stellen (ca. 3 Monate vor Rentenbeginn)','Krankenversicherung der Rentner klären','Rentenbescheid prüfen'],
+  'Wohngeld beantragen': ['Antragsformular bei der Wohngeldstelle besorgen','Einkommensnachweise sammeln','Mietvertrag / Mietbescheinigung beilegen','Antrag einreichen (Eingang bestätigen lassen)','Bescheid prüfen'],
+  'Schwerbehindertenausweis': ['Antrag beim Versorgungsamt stellen','Ärzte und Befunde auflisten, Schweigepflichtentbindung beifügen','Bescheid (GdB / Merkzeichen) prüfen','Ggf. Widerspruch innerhalb eines Monats','Nachteilsausgleiche beantragen'],
+  'Umzug / Ummeldung': ['Wohnungsgeberbestätigung vom Vermieter holen','Ummeldung beim Bürgeramt (innerhalb von 2 Wochen)','Adresse ändern: Bank, Krankenkasse, Rentenversicherung, Versicherungen','Rundfunkbeitrag ummelden','Nachsendeauftrag bei der Post'],
+  'Weiterbewilligung Bürgergeld': ['Ende des Bewilligungszeitraums notieren (Antrag ca. 6 Wochen vorher stellen)','Formular „Weiterbewilligungsantrag“ ausfüllen','Nachweise sammeln: Kontoauszüge, Mietbescheinigung, Nebenkosten, Einkommen','Antrag mit Begleitschreiben einreichen (Eingang bestätigen lassen)','Bescheid prüfen – ggf. Widerspruch innerhalb eines Monats'],
+  'Zuzahlungsbefreiung Krankenkasse': ['Quittungen über Zuzahlungen des Jahres sammeln','Einkommensnachweise (Rentenbescheid usw.) bereitlegen','Bei chronischer Erkrankung: ärztliche Bescheinigung einholen','Antrag bei der Krankenkasse stellen','Befreiungsausweis erhalten – zu viel Gezahltes erstatten lassen'],
+  'Vertrag kündigen': ['Vertragsnummer und Kündigungsfrist prüfen','Kündigungsschreiben erstellen und per Einschreiben senden','Kündigungsbestätigung abwarten','SEPA-Lastschrift prüfen / widerrufen']
+};
+
+// ---------- Brief-Vorlagen (DIN 5008) ----------
+const BUILTIN_TEMPLATES = [
+  {id:'vollmacht', name:'Anzeige der Bevollmächtigung', subject:'Anzeige der Bevollmächtigung – {Name}, geb. {Geburtsdatum}',
+   body:'hiermit zeige ich an, dass ich {NameMitAnrede}, geboren am {Geburtsdatum}, wohnhaft {Anschrift}, vertrete. Eine Kopie der Vollmacht füge ich bei.\n\nIch bitte Sie, Ihre Korrespondenz in dieser Angelegenheit künftig an mich zu richten und mich über alle laufenden Vorgänge zu informieren.\n\nBitte bestätigen Sie mir den Eingang dieses Schreibens.'},
+  {id:'kuendigung', name:'Kündigung eines Vertrags', subject:'Kündigung des Vertrags – Kundennummer {Kundennummer}',
+   body:'hiermit kündige ich{Vertretung} den oben genannten Vertrag fristgerecht zum nächstmöglichen Zeitpunkt.\n\nBitte bestätigen Sie mir die Kündigung sowie das genaue Vertragsende schriftlich.\n\nEiner Kontaktaufnahme zu Werbe- oder Rückgewinnungszwecken widerspreche ich. Das erteilte SEPA-Lastschriftmandat endet mit dem Vertragsende.{VollmachtAbsatz}'},
+  {id:'widerspruch', name:'Widerspruch gegen einen Bescheid', subject:'Widerspruch gegen Ihren Bescheid vom [Datum des Bescheids] – Aktenzeichen {Aktenzeichen}',
+   body:'hiermit lege ich{Vertretung} gegen Ihren Bescheid vom [Datum des Bescheids], Aktenzeichen {Aktenzeichen}, fristgerecht Widerspruch ein.\n\nDie Begründung reiche ich gesondert nach. Zu diesem Zweck bitte ich um Akteneinsicht bzw. um Übersendung einer Kopie der vollständigen Verwaltungsakte.\n\nBitte bestätigen Sie mir den Eingang dieses Widerspruchs.{VollmachtAbsatz}'},
+  {id:'frist', name:'Antrag auf Fristverlängerung', subject:'Antrag auf Fristverlängerung – Aktenzeichen {Aktenzeichen}',
+   body:'in der oben genannten Angelegenheit haben Sie eine Frist bis zum [Datum] gesetzt. Hiermit beantrage ich{Vertretung} die Verlängerung dieser Frist bis zum [neues Datum].\n\nBegründung: [z. B. Die angeforderten Unterlagen liegen noch nicht vollständig vor.]\n\nFür Ihr Verständnis bedanke ich mich.{VollmachtAbsatz}'},
+  {id:'unterlagen', name:'Unterlagen anfordern', subject:'Anforderung von Unterlagen – {Name}',
+   body:'hiermit bitte ich Sie{Vertretung}, mir folgende Unterlagen zu übersenden:\n\n– [Unterlage 1]\n– [Unterlage 2]\n\nFür Ihre Unterstützung bedanke ich mich im Voraus.{VollmachtAbsatz}'},
+  {id:'sachstand', name:'Sachstandsanfrage / Erinnerung', subject:'Sachstandsanfrage – Aktenzeichen {Aktenzeichen}',
+   body:'mit Schreiben vom [Datum] habe ich mich{Vertretung} an Sie gewandt. Leider liegt mir bis heute keine Antwort vor.\n\nIch bitte Sie, mir den aktuellen Bearbeitungsstand mitzuteilen und die Angelegenheit bis zum [Datum] abzuschließen.\n\nFür eine kurze Rückmeldung bedanke ich mich im Voraus.{VollmachtAbsatz}'},
+  {id:'aenderung', name:'Änderungsmitteilung (Adresse / Bank)', subject:'Änderungsmitteilung – Kundennummer {Kundennummer}',
+   body:'hiermit teile ich Ihnen{Vertretung} mit, dass sich ab dem [Datum] folgende Daten geändert haben:\n\n[neue Anschrift / neue Bankverbindung / neue Telefonnummer]\n\nBitte aktualisieren Sie Ihre Unterlagen entsprechend und bestätigen Sie mir die Änderung.{VollmachtAbsatz}'},
+  {id:'raten', name:'Bitte um Ratenzahlung', subject:'Bitte um Ratenzahlung – Rechnungs-/Aktenzeichen {Aktenzeichen}',
+   body:'bezüglich Ihrer Forderung vom [Datum] über [Betrag] € bitte ich{Vertretung} um die Gewährung einer Ratenzahlung. Aufgrund der derzeitigen finanziellen Situation ist eine Zahlung in einer Summe leider nicht möglich.\n\nIch schlage monatliche Raten in Höhe von [Betrag] € beginnend ab dem [Datum] vor.\n\nBitte bestätigen Sie mir die Ratenvereinbarung schriftlich.{VollmachtAbsatz}'},
+  {id:'sepa', name:'Widerruf SEPA-Lastschriftmandat', subject:'Widerruf des SEPA-Lastschriftmandats – Kundennummer {Kundennummer}',
+   body:'hiermit widerrufe ich{Vertretung} das Ihnen erteilte SEPA-Lastschriftmandat mit sofortiger Wirkung. Bitte ziehen Sie künftig keine Beträge mehr vom Konto ein.\n\nKünftige Zahlungen erfolgen per Überweisung. Bitte senden Sie Rechnungen an die oben genannte Anschrift.{VollmachtAbsatz}'},
+  {id:'dsgvo', name:'Auskunft nach Art. 15 DSGVO', subject:'Auskunftsersuchen nach Art. 15 DSGVO – {Name}',
+   body:'hiermit beantrage ich{Vertretung} Auskunft gemäß Art. 15 DSGVO darüber, ob und welche personenbezogenen Daten von {NameMitAnrede}, geboren am {Geburtsdatum}, bei Ihnen gespeichert sind und verarbeitet werden. Bitte stellen Sie zudem eine Kopie dieser Daten zur Verfügung (Art. 15 Abs. 3 DSGVO).\n\nIch bitte um Beantwortung innerhalb der gesetzlichen Frist von einem Monat.{VollmachtAbsatz}'},
+  {id:'antrag', name:'Antrag (allgemein)', subject:'Antrag auf [Leistung] – {Name}',
+   body:'hiermit beantrage ich{Vertretung} [Leistung, z. B. die Übernahme der Kosten für …].\n\nBegründung:\n[Begründung]\n\nDie erforderlichen Nachweise füge ich bei. Sollten weitere Unterlagen benötigt werden, bitte ich um kurze Mitteilung.{VollmachtAbsatz}'},
+  {id:'frei', name:'Freies Schreiben (leer)', subject:'', body:''},
+
+  // --- Jobcenter / Sozialamt ---
+  {id:'jc_weiter', cat:'Jobcenter / Sozialamt', name:'Weiterbewilligungsantrag (Begleitschreiben)', subject:'Weiterbewilligungsantrag – {Name}, geb. {Geburtsdatum} – BG-Nr. {Aktenzeichen}',
+   body:'der Bewilligungszeitraum für {NameMitAnrede} endet am [Datum]. Hiermit beantrage ich{Vertretung} die Weiterbewilligung der Leistungen ab dem [Datum].\n\nDen ausgefüllten Weiterbewilligungsantrag sowie die erforderlichen Nachweise füge ich bei. Sollten weitere Unterlagen benötigt werden, bitte ich um eine kurze schriftliche Mitteilung mit angemessener Frist.\n\nBitte bestätigen Sie mir den Eingang dieses Antrags.{VollmachtAbsatz}'},
+  {id:'jc_aenderung', cat:'Jobcenter / Sozialamt', name:'Veränderungsmitteilung', subject:'Veränderungsmitteilung – {Name}, geb. {Geburtsdatum} – Az. {Aktenzeichen}',
+   body:'hiermit teile ich Ihnen{Vertretung} folgende Änderung in den Verhältnissen von {NameMitAnrede} mit:\n\nÄnderung: [z. B. neue Miethöhe / Einkommen / Rente / Auszug einer Person]\nGültig ab: [Datum]\n\nDie entsprechenden Nachweise füge ich bei. Bitte berücksichtigen Sie die Änderung und übersenden Sie mir einen Änderungsbescheid.{VollmachtAbsatz}'},
+  {id:'jc_44', cat:'Jobcenter / Sozialamt', name:'Überprüfungsantrag (§ 44 SGB X)', subject:'Überprüfungsantrag nach § 44 SGB X – Bescheid vom [Datum des Bescheids] – Az. {Aktenzeichen}',
+   body:'hiermit beantrage ich{Vertretung} die Überprüfung Ihres Bescheids vom [Datum des Bescheids] nach § 44 SGB X.\n\nNach meiner Auffassung wurde [z. B. die Miete / das Einkommen / der Mehrbedarf] nicht richtig berücksichtigt. [Kurze Begründung]\n\nSollte sich die Rechtswidrigkeit bestätigen, bitte ich um Rücknahme des Bescheids und um Nachzahlung der zu Unrecht nicht erbrachten Leistungen.\n\nBitte bestätigen Sie mir den Eingang dieses Antrags.{VollmachtAbsatz}'},
+
+  // --- Krankenkasse ---
+  {id:'kk_zuzahlung', cat:'Krankenkasse', name:'Befreiung von Zuzahlungen (§ 62 SGB V)', subject:'Antrag auf Befreiung von Zuzahlungen – {Name} – {Krankenkasse}',
+   body:'hiermit beantrage ich{Vertretung} die Befreiung von Zuzahlungen für das Jahr [Jahr] nach § 62 SGB V.\n\n[Die Belastungsgrenze ist erreicht. / {NameMitAnrede} ist chronisch krank im Sinne der Chroniker-Richtlinie.]\n\nDie Einkommensnachweise und die Quittungen über die geleisteten Zuzahlungen füge ich bei. Bitte stellen Sie einen Befreiungsausweis aus und erstatten Sie bereits zu viel gezahlte Beträge.{VollmachtAbsatz}'},
+  {id:'kk_hilfsmittel', cat:'Krankenkasse', name:'Antrag auf Kostenübernahme Hilfsmittel', subject:'Antrag auf Kostenübernahme für ein Hilfsmittel – {Name} – {Krankenkasse}',
+   body:'hiermit beantrage ich{Vertretung} die Übernahme der Kosten für folgendes Hilfsmittel:\n\n[Bezeichnung des Hilfsmittels]\n\nDie ärztliche Verordnung vom [Datum] sowie den Kostenvoranschlag des Sanitätshauses füge ich bei. Das Hilfsmittel ist erforderlich, weil [Begründung].\n\nBitte teilen Sie mir Ihre Entscheidung schriftlich mit.{VollmachtAbsatz}'},
+  {id:'kk_fahrt', cat:'Krankenkasse', name:'Antrag auf Fahrkostenübernahme', subject:'Antrag auf Übernahme von Fahrkosten – {Name} – {Krankenkasse}',
+   body:'hiermit beantrage ich{Vertretung} die Übernahme der Fahrkosten zu ambulanten Behandlungen bei [Praxis / Klinik] in der Zeit von [Datum] bis [Datum].\n\nDie ärztliche Verordnung einer Krankenbeförderung füge ich bei. [Begründung, z. B. Pflegegrad / Merkzeichen aG, Bl oder H / Dialyse]\n\nBitte bestätigen Sie mir die Genehmigung schriftlich.{VollmachtAbsatz}'},
+
+  // --- Pflegekasse ---
+  {id:'pk_antrag', cat:'Pflegekasse', name:'Antrag auf Pflegegrad', subject:'Antrag auf Leistungen der Pflegeversicherung – {Name} – {Krankenkasse}',
+   body:'hiermit beantrage ich{Vertretung} Leistungen der Pflegeversicherung und die Feststellung eines Pflegegrades.\n\nGewünscht werden [Pflegegeld / Pflegesachleistungen / Kombinationsleistung].\n\nBitte senden Sie mir die Antragsunterlagen zu und teilen Sie mir den Termin der Begutachtung rechtzeitig mit, damit ich daran teilnehmen kann. Ich bitte zudem um Übersendung des Gutachtens zusammen mit dem Bescheid.{VollmachtAbsatz}'},
+  {id:'pk_hoeher', cat:'Pflegekasse', name:'Antrag auf Höherstufung', subject:'Antrag auf Höherstufung des Pflegegrades – {Name} – {Krankenkasse}',
+   body:'{NameMitAnrede}, geboren am {Geburtsdatum}, ist derzeit in Pflegegrad [Pflegegrad] eingestuft. Der Hilfebedarf hat sich seitdem deutlich erhöht, insbesondere [z. B. Mobilität, Körperpflege, nächtlicher Hilfebedarf, Orientierung].\n\nHiermit beantrage ich{Vertretung} daher eine erneute Begutachtung und die Einstufung in einen höheren Pflegegrad.\n\nBitte teilen Sie mir den Begutachtungstermin rechtzeitig mit und übersenden Sie mir das Gutachten zusammen mit dem Bescheid.{VollmachtAbsatz}'},
+  {id:'pk_widerspruch', cat:'Pflegekasse', name:'Widerspruch gegen Pflegegrad-Bescheid', subject:'Widerspruch gegen Ihren Bescheid vom [Datum des Bescheids] – {Name} – {Krankenkasse}',
+   body:'hiermit lege ich{Vertretung} gegen Ihren Bescheid vom [Datum des Bescheids] über die Einstufung von {NameMitAnrede} in Pflegegrad [Pflegegrad] fristgerecht Widerspruch ein.\n\nDie Einstufung entspricht nicht dem tatsächlichen Hilfebedarf. Zur Begründung bitte ich zunächst um Übersendung des vollständigen Gutachtens des Medizinischen Dienstes. Die ausführliche Begründung reiche ich nach Erhalt des Gutachtens nach.\n\nBitte bestätigen Sie mir den Eingang dieses Widerspruchs.{VollmachtAbsatz}'},
+  {id:'pk_entlastung', cat:'Pflegekasse', name:'Erstattung Entlastungsbetrag', subject:'Antrag auf Erstattung aus dem Entlastungsbetrag – {Name} – {Krankenkasse}',
+   body:'hiermit beantrage ich{Vertretung} die Erstattung von Kosten aus dem Entlastungsbetrag nach § 45b SGB XI.\n\nLeistungserbringer: [Name des anerkannten Anbieters]\nZeitraum: [Monat / Zeitraum]\nBetrag: [Betrag] €\n\nDie Rechnungen füge ich bei. Bitte überweisen Sie den Betrag auf das Konto [IBAN].{VollmachtAbsatz}'},
+  {id:'pk_verhinderung', cat:'Pflegekasse', name:'Antrag auf Verhinderungspflege', subject:'Antrag auf Verhinderungspflege – {Name} – {Krankenkasse}',
+   body:'die Pflegeperson von {NameMitAnrede}, geboren am {Geburtsdatum}, ist in der Zeit vom [Datum] bis [Datum] wegen [Urlaub / Krankheit / sonstiger Gründe] an der Pflege gehindert.\n\nHiermit beantrage ich{Vertretung} für diesen Zeitraum Leistungen der Verhinderungspflege. Die Ersatzpflege übernimmt [Name / Pflegedienst].\n\nDie Nachweise über die entstandenen Kosten reiche ich nach. Bitte bestätigen Sie mir die Bewilligung schriftlich.{VollmachtAbsatz}'},
+
+  // --- Rentenversicherung ---
+  {id:'rv_verlauf', cat:'Rente', name:'Versicherungsverlauf / Rentenauskunft anfordern', subject:'Anforderung Versicherungsverlauf und Rentenauskunft – Versicherungsnummer {Rentenversicherungsnummer}',
+   body:'hiermit bitte ich Sie{Vertretung}, einen aktuellen Versicherungsverlauf sowie eine Rentenauskunft zu übersenden.\n\nBitte senden Sie die Unterlagen an die oben genannte Absenderanschrift.{VollmachtAbsatz}'},
+  {id:'rv_konten', cat:'Rente', name:'Antrag auf Kontenklärung', subject:'Antrag auf Kontenklärung – Versicherungsnummer {Rentenversicherungsnummer}',
+   body:'im Versicherungsverlauf von {NameMitAnrede}, geboren am {Geburtsdatum}, sind folgende Zeiten nicht oder unvollständig erfasst:\n\n– [Zeitraum] – [z. B. Ausbildung / Beschäftigung bei … / Kindererziehung]\n– [Zeitraum] – [Art der Zeit]\n\nHiermit beantrage ich{Vertretung} die Klärung des Versicherungskontos. Vorhandene Nachweise füge ich bei. Bitte teilen Sie mir mit, welche Unterlagen gegebenenfalls noch benötigt werden.{VollmachtAbsatz}'},
+  {id:'rv_formlos', cat:'Rente', name:'Formloser Rentenantrag (fristwahrend)', subject:'Formloser Antrag auf [Altersrente / Erwerbsminderungsrente / Hinterbliebenenrente] – Versicherungsnummer {Rentenversicherungsnummer}',
+   body:'hiermit beantrage ich{Vertretung} fristwahrend [Leistung] ab dem [Datum].\n\nBitte senden Sie mir die erforderlichen Antragsformulare zu. Die vollständigen Unterlagen reiche ich umgehend nach.\n\nBitte bestätigen Sie mir den Eingang dieses Antrags.{VollmachtAbsatz}'}
+];
+const TPL_CATS = ['Allgemein', 'Jobcenter / Sozialamt', 'Krankenkasse', 'Pflegekasse', 'Rente', 'Eigene Vorlagen'];
+const tplCat = t => t.custom ? 'Eigene Vorlagen' : (t.cat || 'Allgemein');
+const allTemplates = () => [...BUILTIN_TEMPLATES, ...S.templates];
+const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenzeichen','Kundennummer','Krankenkasse','Rentenversicherungsnummer','SteuerID','Vertretung','VollmachtAbsatz','Datum'];
+
+// ---------- Navigation ----------
+const NAV = [
+  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'home'},
+  {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'folder'}, {r:'tasks', l:'Fristen & Aufgaben', i:'clock', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
+  {r:'letters', l:'Brief schreiben', i:'pen'}, {r:'documents', l:'Dokumente', i:'file'},
+  {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'receipt'}, {r:'assets', l:'Konten & Vermögen', i:'wallet'}, {r:'notes', l:'Notizen', i:'note'}, {r:'report', l:'Monatsbericht', i:'print'},
+  {grp:'Stammdaten'}, {r:'persons', l:'Personen & Vollmachten', i:'users'}, {r:'contacts', l:'Adressbuch', i:'book'}, {r:'settings', l:'Einstellungen', i:'sliders'}
+];
+const ROUTE_NAV = {case:'cases', brief:'letters', search:''};
+function parseHash(){
+  const h = location.hash.replace(/^#\/?/, ''); const [path, qs] = h.split('?');
+  const [route, id] = (path || 'dashboard').split('/');
+  return {route: route || 'dashboard', id, q: new URLSearchParams(qs || '')};
+}
+function renderNav(route){
+  const act = ROUTE_NAV[route] ?? route;
+  $('#nav').innerHTML = NAV.map(n => n.grp ? `<div class="grp">${n.grp}</div>` : (() => { const c = n.cnt ? n.cnt() : 0;
+    return `<a href="#/${n.r}" class="${act === n.r ? 'on' : ''}">${icon(n.i)}${n.l}${c ? `<span class="cnt">${c}</span>` : ''}</a>`; })()).join('');
+  $('#pills').innerHTML = `<button class="pill ${UI.person === 'all' ? 'on' : ''}" data-act="pfilter" data-id="all">Alle</button>` +
+    S.persons.map(p => `<button class="pill ${UI.person === p.id ? 'on' : ''}" data-act="pfilter" data-id="${p.id}"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}</button>`).join('');
+}
+let LD = null, LDkey = '';
+function render(){
+  const {route, id, q} = parseHash();
+  renderNav(route);
+  const v = VIEWS[route] || VIEWS.dashboard;
+  const main = $('#main'); const st = main.scrollTop;
+  main.innerHTML = v(id, q);
+  if (AFTER[route]) AFTER[route](id, q);
+  if (render._same === location.hash) main.scrollTop = st; render._same = location.hash;
+}
+
+// ---------- Ansichten ----------
+const VIEWS = {};
+const AFTER = {};
+
+VIEWS.dashboard = () => {
+  const items = deadlineItems();
+  const overdue = items.filter(i => daysUntil(i.date) < 0);
+  const week = items.filter(i => { const d = daysUntil(i.date); return d >= 0 && d <= 7; });
+  const soon = items.filter(i => daysUntil(i.date) <= 30);
+  const openCases = byPerson(S.cases).filter(c => c.status !== 'erledigt');
+  const waiting = openCases.filter(c => c.status === 'wartet auf Antwort');
+  const contracts = byPerson(S.contracts).filter(c => !c.ended);
+  const mon = contracts.reduce((s, c) => s + monthly(c), 0);
+  const cancelSoon = contracts.filter(c => { const i = contractInfo(c); return i.cancelBy && daysUntil(i.cancelBy) <= S.settings.contractDays && daysUntil(i.cancelBy) >= 0; });
+  const me = S.settings.me;
+  const setupMissing = !me.name || S.persons.every(p => !p.lastName);
+  const lb = S.settings.lastBackup; const needBackup = !lb || daysUntil(lb) < -14;
+  const byCat = {}; contracts.forEach(c => byCat[c.category || 'Sonstiges'] = (byCat[c.category || 'Sonstiges'] || 0) + monthly(c));
+  const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]); const maxCat = cats.length ? cats[0][1] : 1;
+  const persons = UI.person === 'all' ? S.persons : S.persons.filter(p => p.id === UI.person);
+  const recent = [...byPerson(S.documents).map(d => ({date:d.added || d.date, t:'Dokument', title:d.title, href:'#/documents', p:d.personId})),
+                  ...byPerson(S.letters).map(l => ({date:(l.updated || l.date || '').slice(0, 10), t:'Brief', title:letterSubject(l), href:'#/brief/' + l.id, p:l.personId}))]
+                  .sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 6);
+  return `
+  <div class="head"><div class="grow"><h1>Übersicht</h1><p class="sub" style="margin:0">${fmtDateLong(today())}${UI.person !== 'all' ? ' · ' + esc(getPerson(UI.person)?.role) : ''}</p></div>
+    <button class="btn" data-act="newTask">${icon('plus')}Frist</button><button class="btn" data-act="newCase">${icon('plus')}Vorgang</button><button class="btn" data-act="newDoc">${icon('plus')}Dokument</button><a class="btn pri" href="#/brief/new">${icon('pen')}Brief schreiben</a></div>
+  ${setupMissing ? `<div class="banner blue">${icon('users')}<div><b>Willkommen bei Office Home!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.</div></div>` : ''}
+  ${overdue.length ? `<div class="banner red">${icon('clock')}<div><b>${overdue.length} überfällige Frist${overdue.length > 1 ? 'en' : ''}!</b> ${overdue.slice(0, 3).map(i => esc(i.title)).join(' · ')}</div></div>` : ''}
+  ${needBackup && !setupMissing ? `<div class="banner amber">${icon('save')}<div>${lb ? 'Letzte Datensicherung am ' + fmtDate(lb) + '.' : 'Noch keine Datensicherung erstellt.'} <a href="#" data-act="backup">Jetzt sichern</a></div></div>` : ''}
+  <div class="kpis">
+    <div class="kpi ${overdue.length ? 'red' : ''}" data-go="#/tasks"><div class="l">Überfällig</div><div class="v">${overdue.length}</div></div>
+    <div class="kpi ${week.length ? 'amber' : ''}" data-go="#/tasks"><div class="l">Fällig in 7 Tagen</div><div class="v">${week.length}</div></div>
+    <div class="kpi" data-go="#/cases"><div class="l">Offene Vorgänge</div><div class="v">${openCases.length}</div><div class="l">${waiting.length} warten auf Antwort</div></div>
+    <div class="kpi" data-go="#/contracts"><div class="l">Fixkosten / Monat</div><div class="v">${eur(mon)}</div><div class="l">${eur(mon * 12)} im Jahr</div></div>
+    <div class="kpi ${cancelSoon.length ? 'amber' : ''}" data-go="#/contracts"><div class="l">Kündigungsfristen (${S.settings.contractDays} T.)</div><div class="v">${cancelSoon.length}</div></div>
+    <div class="kpi" data-go="#/documents"><div class="l">Dokumente</div><div class="v">${byPerson(S.documents).length}</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>${icon('clock')}Anstehende Fristen <a class="r" href="#/tasks">alle anzeigen</a></h3>
+      <div class="list">${soon.length ? soon.slice(0, 9).map(i => `<div class="row">${i.taskId ? `<span class="chk-row"><input type="checkbox" data-act="toggleTask" data-id="${i.taskId}" title="erledigt"></span>` : `<span class="badge blue">Vertrag</span>`}
+        <div class="grow"><a class="ttl trunc" href="${i.href}" style="color:inherit;display:block">${esc(i.title)}</a><div class="small">${personChip(i.personId)}</div></div>${dueBadge(i.date)}</div>`).join('') : '<div class="empty">Keine Fristen in den nächsten 30 Tagen 🎉</div>'}</div></div>
+    <div class="card"><h3>${icon('folder')}Offene Vorgänge <a class="r" href="#/cases">alle anzeigen</a></h3>
+      <div class="list">${openCases.length ? openCases.slice(0, 8).map(c => `<div class="row"><div class="grow"><a class="ttl trunc" href="#/case/${c.id}" style="color:inherit;display:block">${esc(c.title)}</a>
+        <div class="small muted">${personChip(c.personId)} ${c.contactId ? '· ' + esc(getContact(c.contactId)?.name || '') : ''} ${c.ref ? '· Az. ' + esc(c.ref) : ''}</div></div>${statusBadge(c.status)}</div>`).join('') : '<div class="empty">Keine offenen Vorgänge</div>'}</div></div>
+  </div>
+  <div class="grid ${persons.length > 1 ? 'g2' : ''}">
+    ${persons.map(p => { const pc = S.cases.filter(c => c.personId === p.id && c.status !== 'erledigt').length;
+      const nt = S.tasks.filter(t => t.personId === p.id && !t.done && t.due).sort((a, b) => a.due.localeCompare(b.due))[0];
+      const pm = S.contracts.filter(c => c.personId === p.id && !c.ended).reduce((s, c) => s + monthly(c), 0);
+      const pa = S.assets.filter(a => a.personId === p.id).reduce((s, a) => s + (Number(a.value) || 0), 0);
+      return `<div class="card pcard" style="border-top-color:${esc(p.color)}"><h3><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}: ${esc(personName(p))}<a class="r" href="#/persons">Details</a></h3>
+        <div class="kv"><div>Vollmacht</div><div>${p.poaDate ? 'seit ' + fmtDate(p.poaDate) + (p.poaScope ? ' · ' + esc(p.poaScope) : '') : '<span class="badge amber">nicht eingetragen</span>'}</div>
+        <div>Offene Vorgänge</div><div>${pc}</div><div>Nächste Frist</div><div>${nt ? esc(nt.title) + ' ' + dueBadge(nt.due) : '—'}</div>
+        <div>Fixkosten / Monat</div><div>${eur(pm)}</div><div>Vermögen (Saldo)</div><div>${eur(pa)}</div></div></div>`; }).join('')}
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>${icon('receipt')}Fixkosten nach Kategorie <span class="r muted">pro Monat</span></h3>
+      ${cats.length ? cats.map(([k, v]) => `<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between" class="small"><span>${esc(k)}</span><b>${eur(v)}</b></div><div class="bar"><span style="width:${Math.max(3, v / maxCat * 100)}%"></span></div></div>`).join('') : '<div class="empty">Noch keine Verträge erfasst</div>'}</div>
+    <div class="card"><h3>${icon('file')}Zuletzt hinzugefügt</h3><div class="list">${recent.length ? recent.map(r => `<div class="row"><span class="badge">${r.t}</span><div class="grow"><a class="trunc" style="display:block;color:inherit" href="${r.href}">${esc(r.title)}</a></div>${personChip(r.p)}<span class="small muted">${fmtDate(r.date)}</span></div>`).join('') : '<div class="empty">Noch nichts vorhanden</div>'}</div></div>
+  </div>`;
+};
+function statusBadge(s){ const m = {'offen':'blue', 'in Bearbeitung':'amber', 'wartet auf Antwort':'amber', 'erledigt':'green'}; return `<span class="badge ${m[s] || ''}">${esc(s || 'offen')}</span>`; }
+
+// Vorgänge
+VIEWS.cases = () => {
+  let list = byPerson(S.cases);
+  list = UI.caseTab === 'open' ? list.filter(c => c.status !== 'erledigt') : list.filter(c => c.status === 'erledigt');
+  const prio = {hoch:0, normal:1, niedrig:2};
+  list.sort((a, b) => (prio[a.priority] ?? 1) - (prio[b.priority] ?? 1) || (b.start || '').localeCompare(a.start || ''));
+  return `<div class="head"><div class="grow"><h1>Vorgänge</h1><p class="sub" style="margin:0">Jede Angelegenheit (Antrag, Bescheid, Streitfall …) als eigene Akte – mit Schritten, Fristen, Dokumenten, Briefen und Verlauf.</p></div><button class="btn pri" data-act="newCase">${icon('plus')}Neuer Vorgang</button></div>
+  <div class="tabs"><a class="${UI.caseTab === 'open' ? 'on' : ''}" data-act="caseTab" data-id="open">Offen</a><a class="${UI.caseTab === 'done' ? 'on' : ''}" data-act="caseTab" data-id="done">Erledigt</a></div>
+  <div class="card" style="padding:6px 8px">${list.length ? `<table class="t"><tr><th>Vorgang</th><th>Person</th><th>Behörde / Stelle</th><th>Aktenzeichen</th><th>Fortschritt</th><th>Nächste Frist</th><th>Status</th></tr>
+  ${list.map(c => { const steps = c.steps || []; const done = steps.filter(s => s.done).length; const nt = S.tasks.filter(t => t.caseId === c.id && !t.done && t.due).sort((a, b) => a.due.localeCompare(b.due))[0];
+    return `<tr class="click" data-go="#/case/${c.id}"><td><b>${esc(c.title)}</b>${c.priority === 'hoch' ? ' <span class="badge red">hoch</span>' : ''}</td><td>${personChip(c.personId)}</td><td>${esc(getContact(c.contactId)?.name || '')}</td><td>${esc(c.ref || '')}</td>
+    <td style="min-width:110px">${steps.length ? `<div class="bar"><span style="width:${done / steps.length * 100}%"></span></div><span class="small muted">${done}/${steps.length} Schritte</span>` : '<span class="muted small">—</span>'}</td><td>${nt ? dueBadge(nt.due) : '<span class="muted small">—</span>'}</td><td>${statusBadge(c.status)}</td></tr>`; }).join('')}</table>`
+  : `<div class="empty">${UI.caseTab === 'open' ? 'Keine offenen Vorgänge. Lege z. B. „Pflegegrad beantragen“ mit fertiger Schritte-Vorlage an.' : 'Noch keine erledigten Vorgänge.'}</div>`}</div>`;
+};
+VIEWS.case = id => {
+  const c = getCase(id); if (!c) return '<div class="empty">Vorgang nicht gefunden. <a href="#/cases">Zurück</a></div>';
+  const tasks = S.tasks.filter(t => t.caseId === c.id).sort((a, b) => (a.done - b.done) || (a.due || '9').localeCompare(b.due || '9'));
+  const docs = S.documents.filter(d => d.caseId === c.id); const letters = S.letters.filter(l => l.caseId === c.id);
+  const ct = getContact(c.contactId);
+  return `<div class="head"><div class="grow"><a href="#/cases" class="small">← Vorgänge</a><h1>${esc(c.title)}</h1>
+    <div class="small muted">${personChip(c.personId)} ${ct ? '· ' + esc(ct.name) : ''} ${c.ref ? '· Az. ' + esc(c.ref) : ''} · begonnen ${fmtDate(c.start)}</div></div>
+    <select class="btn" data-chg="caseStatus" data-id="${c.id}">${optHTML(CASE_STATUS, c.status)}</select>
+    <button class="btn" data-act="editCase" data-id="${c.id}">Bearbeiten</button><a class="btn pri" href="#/brief/new?case=${c.id}">${icon('pen')}Brief zu diesem Vorgang</a></div>
+  <div class="grid g2">
+    <div>
+      ${c.description ? `<div class="card"><h3>Beschreibung</h3><div style="white-space:pre-wrap">${esc(c.description)}</div></div>` : ''}
+      <div class="card"><h3>Schritte</h3><div class="list">${(c.steps || []).map(s => `<div class="row chk-row ${s.done ? 'done' : ''}"><input type="checkbox" ${s.done ? 'checked' : ''} data-act="toggleStep" data-id="${c.id}" data-sid="${s.id}"><div class="grow ttl" style="font-weight:400">${esc(s.text)}</div><button class="btn ghost sm" data-act="delStep" data-id="${c.id}" data-sid="${s.id}">✕</button></div>`).join('') || '<div class="muted small" style="padding:6px 0">Noch keine Schritte.</div>'}</div>
+        <div style="display:flex;gap:8px;margin-top:10px"><input id="newStep" placeholder="Neuer Schritt …" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="addStep" data-id="${c.id}">Hinzufügen</button></div></div>
+      <div class="card"><h3>${icon('clock')}Fristen & Aufgaben <button class="btn sm r" data-act="newTask" data-case="${c.id}">${icon('plus')}Frist</button></h3>
+        <div class="list">${tasks.map(t => taskRow(t)).join('') || '<div class="muted small">Keine Fristen.</div>'}</div></div>
+    </div>
+    <div>
+      <div class="card"><h3>${icon('file')}Dokumente <button class="btn sm r" data-act="newDoc" data-case="${c.id}">${icon('plus')}Dokument</button></h3>
+        <div class="list">${docs.map(d => `<div class="row"><div class="grow"><a href="#" data-act="openDoc" data-id="${d.id}" class="trunc" style="display:block">${esc(d.title)}</a><span class="small muted">${esc(d.category || '')} · ${fmtDate(d.date)}</span></div>${d.deadline ? dueBadge(d.deadline) : ''}</div>`).join('') || '<div class="muted small">Keine Dokumente.</div>'}</div></div>
+      <div class="card"><h3>${icon('mail')}Briefe</h3><div class="list">${letters.map(l => `<div class="row"><div class="grow"><a href="#/brief/${l.id}" class="trunc" style="display:block">${esc(letterSubject(l))}</a><span class="small muted">${fmtDate(l.date)}${l.shipping ? ' · ' + esc(l.shipping) : ''}</span></div></div>`).join('') || '<div class="muted small">Noch keine Briefe.</div>'}</div></div>
+      <div class="card"><h3>Verlauf / Notizen</h3>
+        <div style="display:flex;gap:8px;margin-bottom:10px"><input type="date" id="logDate" value="${today()}" style="padding:6px;border:1px solid var(--line);border-radius:8px"><input id="logText" placeholder="z. B. Anruf beim Sachbearbeiter, Ergebnis …" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="addLog" data-id="${c.id}">Eintragen</button></div>
+        <div class="list">${[...(c.log || [])].sort((a, b) => b.date.localeCompare(a.date)).map(l => `<div class="row"><span class="small muted" style="width:80px">${fmtDate(l.date)}</span><div class="grow" style="white-space:pre-wrap">${esc(l.text)}</div><button class="btn ghost sm" data-act="delLog" data-id="${c.id}" data-sid="${l.id}">✕</button></div>`).join('')}</div></div>
+    </div>
+  </div>`;
+};
+function taskRow(t){
+  return `<div class="row chk-row ${t.done ? 'done' : ''}"><input type="checkbox" ${t.done ? 'checked' : ''} data-act="toggleTask" data-id="${t.id}">
+    <div class="grow"><div class="ttl trunc">${esc(t.title)} ${t.priority === 'hoch' ? '<span class="badge red">hoch</span>' : ''} ${t.repeat ? '<span class="badge blue">↻</span>' : ''}</div>
+    <div class="small muted">${personChip(t.personId)}${t.caseId && getCase(t.caseId) ? ` · <a href="#/case/${t.caseId}">${esc(getCase(t.caseId).title)}</a>` : ''}${t.notes ? ' · ' + esc(t.notes.slice(0, 60)) : ''}</div></div>
+    ${t.done ? `<span class="small muted">erledigt ${fmtDate(t.doneAt)}</span>` : dueBadge(t.due)}<button class="btn ghost sm" data-act="editTask" data-id="${t.id}">Bearbeiten</button></div>`;
+}
+
+// Fristen & Aufgaben
+VIEWS.tasks = () => {
+  const all = byPerson(S.tasks);
+  if (UI.taskTab === 'done') {
+    const done = all.filter(t => t.done).sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''));
+    return tasksHead() + `<div class="card">${done.length ? `<div class="list">${done.map(taskRow).join('')}</div>` : '<div class="empty">Noch nichts erledigt.</div>'}</div>`;
+  }
+  const open = all.filter(t => !t.done);
+  const groups = [['Überfällig', t => t.due && daysUntil(t.due) < 0], ['Heute', t => t.due && daysUntil(t.due) === 0], ['Nächste 7 Tage', t => t.due && daysUntil(t.due) > 0 && daysUntil(t.due) <= 7],
+    ['Später', t => t.due && daysUntil(t.due) > 7], ['Ohne Datum', t => !t.due]];
+  const contractsDue = byPerson(S.contracts).map(c => ({c, i:contractInfo(c)})).filter(x => x.i.cancelBy && daysUntil(x.i.cancelBy) <= S.settings.contractDays).sort((a, b) => a.i.cancelBy.localeCompare(b.i.cancelBy));
+  return tasksHead() + groups.map(([name, fn]) => { const L = open.filter(fn).sort((a, b) => (a.due || '').localeCompare(b.due || ''));
+    return L.length ? `<div class="card"><h3>${name} <span class="badge">${L.length}</span></h3><div class="list">${L.map(taskRow).join('')}</div></div>` : ''; }).join('')
+    + (contractsDue.length ? `<div class="card"><h3>${icon('receipt')}Kündigungsfristen von Verträgen</h3><div class="list">${contractsDue.map(x => `<div class="row"><div class="grow"><div class="ttl">${esc(x.c.provider)}</div><div class="small muted">${personChip(x.c.personId)} · Laufzeit bis ${fmtDate(x.i.end)}</div></div>${dueBadge(x.i.cancelBy)}<a class="btn sm" href="${kuendigungLink(x.c)}">Kündigung schreiben</a></div>`).join('')}</div></div>` : '')
+    + (!open.length && !contractsDue.length ? '<div class="card"><div class="empty">Keine offenen Fristen 🎉</div></div>' : '');
+};
+function tasksHead(){
+  return `<div class="head"><div class="grow"><h1>Fristen & Aufgaben</h1><p class="sub" style="margin:0">Wiederkehrende Termine (z. B. jährliche Nachweise) mit ↻ werden nach dem Abhaken automatisch neu angesetzt.</p></div>
+  <button class="btn" data-act="ics">${icon('cal')}In Kalender exportieren (.ics)</button><button class="btn pri" data-act="newTask">${icon('plus')}Neue Frist</button></div>
+  <div class="tabs"><a class="${UI.taskTab === 'open' ? 'on' : ''}" data-act="taskTab" data-id="open">Offen</a><a class="${UI.taskTab === 'done' ? 'on' : ''}" data-act="taskTab" data-id="done">Erledigt</a></div>`;
+}
+function kuendigungLink(c){ const p = new URLSearchParams({tpl:'kuendigung'}); if (c.personId) p.set('person', c.personId); if (c.contactId) p.set('contact', c.contactId); if (c.customerNo) p.set('kd', c.customerNo); return '#/brief/new?' + p; }
+
+// Verträge
+VIEWS.contracts = () => {
+  const all = byPerson(S.contracts); const active = all.filter(c => !c.ended);
+  const mon = active.reduce((s, c) => s + monthly(c), 0);
+  const rows = [...active, ...all.filter(c => c.ended)];
+  return `<div class="head"><div class="grow"><h1>Verträge & Fixkosten</h1><p class="sub" style="margin:0">Laufzeiten und Kündigungsfristen werden automatisch berechnet – du wirst rechtzeitig erinnert.</p></div><button class="btn pri" data-act="newContract">${icon('plus')}Neuer Vertrag</button></div>
+  <div class="kpis"><div class="kpi"><div class="l">Fixkosten pro Monat</div><div class="v">${eur(mon)}</div></div><div class="kpi"><div class="l">Pro Jahr</div><div class="v">${eur(mon * 12)}</div></div><div class="kpi"><div class="l">Aktive Verträge</div><div class="v">${active.length}</div></div>
+  <div class="kpi"><div class="l">Per Lastschrift</div><div class="v">${active.filter(c => c.payment === 'Lastschrift').length}</div></div></div>
+  <div class="card" style="padding:6px 8px">${rows.length ? `<table class="t"><tr><th>Anbieter</th><th>Kategorie</th><th>Person</th><th>Kundennr.</th><th style="text-align:right">Betrag</th><th style="text-align:right">/ Monat</th><th>Laufzeit bis</th><th>Kündigen bis</th><th></th></tr>
+  ${rows.map(c => { const i = contractInfo(c); return `<tr class="click" data-act="editContract" data-id="${c.id}" style="${c.ended ? 'opacity:.55' : ''}"><td><b>${esc(c.provider)}</b></td><td>${esc(c.category || '')}</td><td>${personChip(c.personId)}</td><td class="small">${esc(c.customerNo || '')}</td>
+    <td style="text-align:right">${eur(c.amount)} <span class="small muted">${esc(c.interval || '')}</span></td><td style="text-align:right"><b>${eur(monthly(c))}</b></td>
+    <td>${i.state === 'beendet' ? '<span class="badge">beendet</span>' : i.state === 'unbefristet' ? '<span class="small muted">unbefristet</span>' : i.state === 'abgelaufen' ? '<span class="badge">abgelaufen ' + fmtDate(i.end) + '</span>' : fmtDate(i.end)}</td>
+    <td>${i.cancelBy ? dueBadge(i.cancelBy) : ''}</td><td class="act">${!c.ended ? `<a class="btn sm" href="${kuendigungLink(c)}" data-stop="1">Kündigen</a>` : ''}</td></tr>`; }).join('')}</table>`
+  : '<div class="empty">Noch keine Verträge. Erfasse z. B. Strom, Handy, Versicherungen, Rundfunkbeitrag …</div>'}</div>`;
+};
+
+// Dokumente
+VIEWS.documents = () => {
+  let list = byPerson(S.documents);
+  if (UI.docCat) list = list.filter(d => d.category === UI.docCat);
+  if (UI.docQ) { const q = UI.docQ.toLowerCase(); list = list.filter(d => [d.title, d.sender, d.tags, d.notes, d.fileName].join(' ').toLowerCase().includes(q)); }
+  list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return `<div class="head"><div class="grow"><h1>Dokumente</h1><p class="sub" style="margin:0">Briefe von Behörden, Bescheide, Verträge, Vollmachten – gescannt oder als PDF.</p></div><button class="btn pri" data-act="newDoc">${icon('plus')}Dokument hinzufügen</button></div>
+  <div class="drop" id="drop">Dateien hierher ziehen oder <a href="#" data-act="newDoc">auswählen</a> · Tipp: Mit dem Handy scannen (z. B. Adobe Scan) und die PDF hier ablegen.</div>
+  <div class="filters" style="margin-bottom:12px"><select data-chg="docCat"><option value="">Alle Kategorien</option>${optHTML(CATS_DOC, UI.docCat)}</select><input id="docQ" placeholder="Suchen in Titel, Absender, Schlagwörtern …" value="${esc(UI.docQ)}" style="width:300px"><span class="muted small">${list.length} Dokument(e)</span></div>
+  <div class="card" style="padding:6px 8px">${list.length ? `<table class="t"><tr><th>Datum</th><th>Titel</th><th>Kategorie</th><th>Person</th><th>Absender</th><th>Vorgang</th><th>Frist</th><th></th></tr>
+  ${list.map(d => `<tr><td class="small">${fmtDate(d.date)}</td><td><a href="#" data-act="openDoc" data-id="${d.id}"><b>${esc(d.title)}</b></a>${d.tags ? `<div class="small muted">${esc(d.tags)}</div>` : ''}${!d.fileId ? ' <span class="badge">ohne Datei</span>' : ''}</td><td>${esc(d.category || '')}</td><td>${personChip(d.personId)}</td><td>${esc(d.sender || '')}</td>
+    <td class="small">${d.caseId && getCase(d.caseId) ? `<a href="#/case/${d.caseId}">${esc(getCase(d.caseId).title)}</a>` : ''}</td><td>${d.deadline ? dueBadge(d.deadline) : ''}</td>
+    <td class="act"><button class="btn sm" data-act="dlDoc" data-id="${d.id}">⬇</button> <button class="btn sm" data-act="editDoc" data-id="${d.id}">Bearbeiten</button></td></tr>`).join('')}</table>`
+  : '<div class="empty">Keine Dokumente gefunden.</div>'}</div>`;
+};
+AFTER.documents = () => {
+  const dz = $('#drop');
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('over'); }));
+  dz.addEventListener('drop', e => { const files = Array.from(e.dataTransfer.files); queueFiles(files); });
+  const q = $('#docQ'); q.addEventListener('input', () => { UI.docQ = q.value; clearTimeout(q._t); q._t = setTimeout(() => { render(); const n = $('#docQ'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 300); });
+};
+function queueFiles(files){ if (!files.length) return; const f = files.shift(); editDoc(null, {}, f); const iv = setInterval(() => { if (!$('#modal')) { clearInterval(iv); queueFiles(files); } }, 300); }
+
+// Konten & Vermögen
+VIEWS.assets = () => {
+  const list = byPerson(S.assets);
+  const groups = ASSET_TYPES.map(t => [t, list.filter(a => (a.type || 'Sonstiges') === t)]).filter(g => g[1].length);
+  const total = list.reduce((s, a) => s + (Number(a.value) || 0), 0);
+  return `<div class="head"><div class="grow"><h1>Konten & Vermögen</h1><p class="sub" style="margin:0">Bankkonten, Versicherungen, Rente, Immobilien, Fahrzeuge, Schulden – alles auf einen Blick.</p></div><button class="btn pri" data-act="newAsset">${icon('plus')}Neuer Eintrag</button></div>
+  <div class="kpis"><div class="kpi"><div class="l">Saldo gesamt</div><div class="v">${eur(total)}</div></div>${(UI.person === 'all' ? S.persons : S.persons.filter(p => p.id === UI.person)).map(p => `<div class="kpi"><div class="l">${esc(p.role)}</div><div class="v">${eur(S.assets.filter(a => a.personId === p.id).reduce((s, a) => s + (Number(a.value) || 0), 0))}</div></div>`).join('')}</div>
+  ${groups.length ? groups.map(([t, L]) => `<div class="card" style="padding:12px 8px 6px"><h3 style="padding:0 10px">${esc(t)} <span class="r muted">${eur(L.reduce((s, a) => s + (Number(a.value) || 0), 0))}</span></h3><table class="t"><tr><th>Bezeichnung</th><th>Person</th><th>Institut</th><th>Nummer</th><th>Ansprechpartner</th><th style="text-align:right">Wert</th><th>Stand</th></tr>
+    ${L.map(a => `<tr class="click" data-act="editAsset" data-id="${a.id}"><td><b>${esc(a.name)}</b>${a.notes ? `<div class="small muted trunc" style="max-width:260px">${esc(a.notes)}</div>` : ''}</td><td>${personChip(a.personId)}</td><td>${esc(a.institution || '')}</td><td class="small">${esc(a.number || '')}</td><td class="small">${esc(a.contact || '')}</td><td style="text-align:right;${Number(a.value) < 0 ? 'color:var(--danger)' : ''}"><b>${a.value === '' || a.value == null ? '' : eur(a.value)}</b></td><td class="small muted">${fmtDate(a.valueDate)}</td></tr>`).join('')}</table></div>`).join('')
+  : '<div class="card"><div class="empty">Noch keine Einträge.</div></div>'}`;
+};
+
+// Notizen
+VIEWS.notes = () => {
+  const list = byPerson(S.notes).sort((a, b) => (b.pinned - a.pinned) || (b.updated || '').localeCompare(a.updated || ''));
+  return `<div class="head"><div class="grow"><h1>Notizen</h1><p class="sub" style="margin:0">Zugangsinfos, Telefonnotizen, Arzttermine, Wissenswertes …</p></div><button class="btn pri" data-act="newNote">${icon('plus')}Neue Notiz</button></div>
+  ${list.length ? `<div class="notes">${list.map(n => `<div class="note" data-act="editNote" data-id="${n.id}"><h4>${n.pinned ? '📌 ' : ''}${esc(n.title)}</h4><div class="small" style="margin-bottom:6px">${personChip(n.personId)} <span class="muted">· ${fmtDate(n.updated)}</span></div><p>${esc(n.content)}</p></div>`).join('')}</div>` : '<div class="card"><div class="empty">Noch keine Notizen.</div></div>'}`;
+};
+
+// Personen
+VIEWS.persons = () => `<div class="head"><div class="grow"><h1>Personen & Vollmachten</h1><p class="sub" style="margin:0">Die Daten werden automatisch in Briefe eingesetzt (Name, Geburtsdatum, Anschrift).</p></div><button class="btn pri" data-act="newPerson">${icon('plus')}Person hinzufügen</button></div>
+  <div class="grid g2">${S.persons.map(p => { const poaDoc = S.documents.find(d => d.personId === p.id && d.category === 'Vollmacht');
+    return `<div class="card pcard" style="border-top-color:${esc(p.color)}"><h3><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}<button class="btn sm r" data-act="editPerson" data-id="${p.id}">Bearbeiten</button></h3>
+    <div class="kv"><div>Name</div><div><b>${esc([p.salutation !== '—' ? p.salutation : '', personName(p)].join(' '))}</b></div><div>Geburtsdatum</div><div>${fmtDate(p.birth) || '—'}</div>
+    <div>Anschrift</div><div>${esc(addrOneLine(p)) || '—'}</div><div>Telefon / E-Mail</div><div>${esc([p.phone, p.email].filter(Boolean).join(' · ')) || '—'}</div>
+    <div>Steuer-ID</div><div>${esc(p.taxId) || '—'}</div><div>Rentenvers.-Nr.</div><div>${esc(p.pensionNo) || '—'}</div><div>Krankenkasse</div><div>${esc(p.healthInsurance) || '—'}</div>
+    <div>Vollmacht</div><div>${p.poaDate ? 'vom ' + fmtDate(p.poaDate) : '<span class="badge amber">nicht eingetragen</span>'} ${p.poaScope ? '· ' + esc(p.poaScope) : ''}</div>
+    <div>Vollmacht-Dokument</div><div>${poaDoc ? `<a href="#" data-act="openDoc" data-id="${poaDoc.id}">${esc(poaDoc.title)} öffnen</a>` : `<a href="#" data-act="newDoc" data-person="${p.id}" data-cat="Vollmacht">Vollmacht hochladen</a>`}</div>
+    ${p.notes ? `<div>Notizen</div><div style="white-space:pre-wrap">${esc(p.notes)}</div>` : ''}</div></div>`; }).join('')}</div>
+  <div class="banner blue">${icon('users')}<div>Tipp: Die Daten von Vater und Mutter bleiben getrennt. Über die Auswahl oben („Alle / Vater / Mutter“) siehst du jeweils nur die Unterlagen einer Person.</div></div>`;
+
+// Kontakte
+VIEWS.contacts = () => {
+  const q = UI.contactQ.trim().toLowerCase();
+  const list = [...S.contacts].filter(c => !UI.contactKind || (UI.contactKind === 'priv') === isPrivate(c))
+    .filter(c => !q || [c.name, c.department, c.contactPerson, c.street, c.zip, c.city, c.phone, c.email].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const nPriv = S.contacts.filter(isPrivate).length;
+  const tab = (v, l, n) => `<button class="btn sm ${UI.contactKind === v ? 'pri' : ''}" data-act="ckind" data-id="${v}">${l} (${n})</button>`;
+  return `<div class="head"><div class="grow"><h1>Adressbuch</h1><p class="sub" style="margin:0">Behörden, Firmen und Privatpersonen – als Empfänger oder Absender für Briefe.</p></div><button class="btn pri" data-act="newContact">${icon('plus')}Neuer Kontakt</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">${tab('', 'Alle', S.contacts.length)}${tab('beh', 'Behörden & Firmen', S.contacts.length - nPriv)}${tab('priv', 'Privatpersonen', nPriv)}
+    <span style="flex:1"></span><input id="contactQ" placeholder="Name, Ort, Telefon …" value="${esc(UI.contactQ)}" style="max-width:260px"></div>
+  <div class="card" style="padding:6px 8px">${list.length ? `<table class="t"><tr><th>Name</th><th>Abteilung</th><th>Anschrift</th><th>Telefon</th><th>E-Mail</th><th></th></tr>
+  ${list.map(c => `<tr class="click" data-act="editContact" data-id="${c.id}"><td><b>${esc(isPrivate(c) && c.salutation && c.salutation !== '—' ? c.salutation + ' ' + c.name : c.name)}</b>${isPrivate(c) ? ' <span class="small muted">· privat</span>' : ''}${c.contactPerson ? `<div class="small muted">${esc(c.contactPerson)}</div>` : ''}</td><td>${esc(c.department || '')}</td><td class="small">${esc(addrOneLine(c))}</td><td class="small">${esc(c.phone || '')}</td><td class="small">${esc(c.email || '')}</td>
+  <td class="act"><a class="btn sm" data-stop="1" href="#/brief/new?contact=${c.id}">${icon('pen')}Brief</a></td></tr>`).join('')}</table>` : '<div class="empty">Keine Kontakte gefunden.</div>'}</div>`;
+};
+AFTER.contacts = () => {
+  const i = $('#contactQ'); if (!i) return;
+  i.addEventListener('input', () => { UI.contactQ = i.value; clearTimeout(i._t); i._t = setTimeout(() => { render(); const n = $('#contactQ'); if (n) { n.focus(); n.selectionStart = n.selectionEnd = n.value.length; } }, 250); });
+};
+
+// Briefe (Liste)
+VIEWS.letters = () => {
+  const list = byPerson(S.letters).sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
+  return `<div class="head"><div class="grow"><h1>Brief schreiben</h1><p class="sub" style="margin:0">Briefe nach DIN 5008 mit fertigen Vorlagen – Daten, Unterschrift und Vollmachtshinweis werden automatisch eingesetzt.</p></div><a class="btn pri" href="#/brief/new">${icon('plus')}Neuer Brief</a></div>
+  <div class="card"><h3>Schnellstart mit Vorlage</h3>${TPL_CATS.filter(c => c !== 'Eigene Vorlagen').map(cat => { const L = BUILTIN_TEMPLATES.filter(t => tplCat(t) === cat);
+    return L.length ? `<div class="small muted" style="font-weight:600;margin:10px 0 6px">${esc(cat)}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${L.map(t => `<a class="btn sm" href="#/brief/new?tpl=${t.id}">${esc(t.name)}</a>`).join('')}</div>` : ''; }).join('')}</div>
+  <div class="card" style="padding:6px 8px"><h3 style="padding:8px 10px 0">Gespeicherte Briefe</h3>${list.length ? `<table class="t"><tr><th>Datum</th><th>Betreff</th><th>Empfänger</th><th>Person</th><th>Versand</th><th></th></tr>
+  ${list.map(l => `<tr class="click" data-go="#/brief/${l.id}"><td class="small">${fmtDate(l.date)}</td><td><b>${esc(letterSubject(l))}</b></td><td class="small">${esc((l.recipient || '').split('\n')[0])}</td><td>${personChip(l.personId)}</td><td class="small">${esc(l.shipping || '')}</td>
+  <td class="act"><button class="btn sm" data-act="dupLetter" data-id="${l.id}" data-stop="1">Kopie</button> <button class="btn sm dan" data-act="delLetter" data-id="${l.id}" data-stop="1">Löschen</button></td></tr>`).join('')}</table>` : '<div class="empty">Noch keine Briefe gespeichert.</div>'}</div>
+  ${S.templates.length ? `<div class="card"><h3>Eigene Vorlagen</h3><div class="list">${S.templates.map(t => `<div class="row"><div class="grow">${esc(t.name)}</div><a class="btn sm" href="#/brief/new?tpl=${t.id}">Verwenden</a><button class="btn sm dan" data-act="delTpl" data-id="${t.id}">Löschen</button></div>`).join('')}</div></div>` : ''}`;
+};
+
+// ---------- Brief-Editor ----------
+function newLetter(q){
+  const L = {id:uid(), personId: q.get('person') || (UI.person !== 'all' ? UI.person : (S.persons[0]?.id || '')), mode:'bev', contactId:'', recipient:'', templateId:'', subject:'', ref:'', customerNo: q.get('kd') || '',
+    date: today(), shipping:'', salutation:'Sehr geehrte Damen und Herren,', body:'', closing: S.settings.letter.greeting, useSig:true, useStamp:false, useMarke:false, markeImg:'', attachments:'', caseId:'', isNew:true};
+  const cs = q.get('case') && getCase(q.get('case'));
+  if (cs) { L.caseId = cs.id; L.ref = cs.ref || ''; if (cs.personId) L.personId = cs.personId; if (cs.contactId) L.contactId = cs.contactId; }
+  if (q.get('contact')) L.contactId = q.get('contact');
+  if (L.contactId) L.recipient = contactAddress(getContact(L.contactId));
+  const tpl = q.get('tpl') && allTemplates().find(t => t.id === q.get('tpl'));
+  if (tpl) { L.templateId = tpl.id; L.subject = tpl.subject; L.body = tpl.body; }
+  return L;
+}
+function contactAddress(c){ if (!c) return ''; const nm = isPrivate(c) && c.salutation === 'Herr' ? 'Herrn ' + c.name : isPrivate(c) && c.salutation === 'Frau' ? 'Frau ' + c.name : c.name;
+  return [nm, c.department, c.contactPerson ? 'z. Hd. ' + c.contactPerson : '', c.street, ((c.zip || '') + ' ' + (c.city || '')).trim()].filter(Boolean).join('\n'); }
+// Absender: L.senderId = '' (automatisch nach „Ich schreibe …“), 'me', 'p:<Person-ID>' oder 'c:<Kontakt-ID>'
+function senderOpts(){
+  const me = S.settings.me;
+  return [{v:'', l:'Automatisch (passend zu „Ich schreibe …“)'}, {v:'me', l:'Ich' + (me.name ? ' – ' + me.name : ' (Einstellungen)')},
+    ...S.persons.map(p => ({v:'p:' + p.id, l:p.role + (personName(p) && personName(p) !== p.role ? ' – ' + personName(p) : '')})),
+    ...S.contacts.filter(isPrivate).sort((a, b) => a.name.localeCompare(b.name)).map(c => ({v:'c:' + c.id, l:'Adressbuch – ' + c.name}))];
+}
+function senderIsMe(L){ const s = L.senderId || ''; return s === 'me' || (!s && L.mode !== 'self'); }
+function senderOf(L){
+  const s = L.senderId || '';
+  if (s.startsWith('p:')) { const sp = getPerson(s.slice(2)); if (sp) return {name: personName(sp), street:sp.street, zip:sp.zip, city:sp.city, phone:sp.phone, email:sp.email}; }
+  if (s.startsWith('c:')) { const c = getContact(s.slice(2)); if (c) return {name:c.name, street:c.street, zip:c.zip, city:c.city, phone:c.phone, email:c.email}; }
+  if (s === 'me') return Object.assign({}, S.settings.me);
+  const p = getPerson(L.personId);
+  if (L.mode === 'self' && p) return {name: personName(p), street:p.street, zip:p.zip, city:p.city, phone:p.phone, email:p.email};
+  return Object.assign({}, S.settings.me);
+}
+function applyVars(text, L){
+  const p = getPerson(L.personId); const bev = L.mode === 'bev' && p;
+  const vars = {Name: p ? personName(p) : '', NameMitAnrede: p ? anredeName(p) : '', Geburtsdatum: p && p.birth ? fmtDate(p.birth) : '', Anschrift: p ? addrOneLine(p) : '',
+    Aktenzeichen: L.ref, Kundennummer: L.customerNo, Bevollmächtigter: S.settings.me.name, Datum: fmtDate(L.date),
+    Krankenkasse: p ? p.healthInsurance : '', Rentenversicherungsnummer: p ? p.pensionNo : '', SteuerID: p ? p.taxId : ''};
+  let t = String(text || '');
+  t = t.replace(/[ \t]?\{Vertretung\}/g, bev ? ' im Namen und in Vollmacht von ' + anredeName(p) : '');
+  t = t.replace(/\s*\{VollmachtAbsatz\}\s*/g, bev ? '\n\nEine Kopie der Vollmacht liegt bei.\n\n' : '\n\n');
+  t = t.replace(/\{([^{}\n]+)\}/g, (m, k) => vars[k] ? vars[k] : m);
+  return t.replace(/\n{3,}/g, '\n\n').trim();
+}
+function markHTML(s){ return esc(s).replace(/(\{[^{}\n]+\}|\[[^\[\]\n]+\])/g, '<mark>$1</mark>'); }
+function paras(s){ return s.split(/\n\s*\n/).map(p => `<p>${markHTML(p).replace(/\n/g, '<br>')}</p>`).join(''); }
+const LETTER_DESIGNS = [
+  {v:'klassisch', l:'Klassisch', d:'Schlicht, Name fett oben links'},
+  {v:'modern', l:'Modern', d:'Name und Linie in Akzentfarbe'},
+  {v:'elegant', l:'Elegant', d:'Zentrierter Briefkopf mit Serifen'},
+  {v:'sachlich', l:'Sachlich', d:'Behördenstil, Kopf rechtsbündig'},
+  {v:'band', l:'Farbband', d:'Farbiger Briefkopf über die ganze Breite'},
+  {v:'linie', l:'Randlinie', d:'Farbige Linie am linken Rand'}
+];
+const LETTER_ACCENTS = [{v:'#1f4e79', l:'Dunkelblau'}, {v:'#0f766e', l:'Petrol'}, {v:'#166534', l:'Dunkelgrün'}, {v:'#7f1d1d', l:'Bordeaux'}, {v:'#374151', l:'Anthrazit'}, {v:'#1b2a44', l:'Navy'}];
+function sampleLetter(){
+  return {mode:'self', personId:'', recipient:'Jobcenter Musterstadt\nMusterstraße 1\n12345 Musterstadt', ref:'123A456', customerNo:'',
+    subject:'Antrag auf Weiterbewilligung', salutation:'Sehr geehrte Damen und Herren,', body:'hiermit beantrage ich die Weiterbewilligung der Leistungen ab dem nächsten Bewilligungszeitraum.\n\nDie erforderlichen Unterlagen füge ich bei. Bitte bestätigen Sie mir den Eingang dieses Schreibens.',
+    closing:S.settings.letter.greeting, date:today(), attachments:'Weiterbewilligungsantrag', useSig:false, useStamp:false, useMarke:false, shipping:''};
+}
+function letterHTML(L, design){
+  const ls = S.settings.letter; const dsg = design || ls.design || 'klassisch'; const p = getPerson(L.personId); const snd = senderOf(L); const bev = L.mode === 'bev' && p;
+  const ret = [snd.name, snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim()].filter(Boolean).join(' · ');
+  const info = [];
+  if (L.ref) info.push(['Ihr Zeichen', L.ref]);
+  if (L.customerNo) info.push(['Kunden-Nr.', L.customerNo]);
+  if (bev) info.push(['Betrifft', personName(p) + (p.birth ? ', geb. ' + fmtDate(p.birth) : '')]);
+  if (snd.name) info.push(['Name', snd.name]);
+  if (snd.phone) info.push(['Telefon', snd.phone]);
+  if (snd.email) info.push(['E-Mail', snd.email]);
+  info.push(['Datum', ls.longDate ? fmtDateLong(L.date) : fmtDate(L.date)]);
+  let anl = (L.attachments || '').split('\n').map(s => s.trim()).filter(Boolean);
+  if (bev && !anl.some(a => /vollmacht/i.test(a)) && /Vollmacht/.test(applyVars(L.body, L))) anl.unshift('Kopie der Vollmacht');
+  const sig = (senderIsMe(L) && L.useSig && S.settings.signature) ? `<img src="${S.settings.signature}" alt="">` : '';
+  const stamp = (senderIsMe(L) && L.useStamp && S.settings.stamp) ? `<img class="l-stamp" src="${S.settings.stamp}" alt="">` : '';
+  const marke = L.useMarke && L.markeImg ? `<img class="l-marke" src="${L.markeImg}" alt="">` : '';
+  return `<div class="letter d-${esc(dsg)}" style="--lf:'${esc(ls.font)}';--ls:${Number(ls.size) || 11}pt;--acc:${esc(ls.accent || '#1f4e79')}">
+    ${ls.foldMarks ? '<div class="fold" style="top:105mm"></div><div class="hole" style="top:148.5mm"></div><div class="fold" style="top:210mm"></div>' : ''}
+    <div class="l-head"><div class="n">${esc(snd.name || 'Dein Name (Einstellungen)')}</div><div class="a">${esc([snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim(), snd.phone, snd.email].filter(Boolean).join('  ·  '))}</div></div>
+    <div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone">${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
+      <div class="l-addr">${markHTML(L.recipient || '[Empfänger]').replace(/\n/g, '<br>')}</div></div>
+    <table class="l-info">${info.map(([k, v]) => `<tr><td>${esc(k)}:</td><td>${esc(v)}</td></tr>`).join('')}</table>
+    <div class="l-body">
+      <div class="l-subj">${markHTML(applyVars(L.subject, L) || '[Betreff]')}</div>
+      <p>${markHTML(L.salutation)}</p>
+      ${paras(applyVars(L.body, L) || '[Text]')}
+      <p style="margin-top:5mm">${esc(L.closing)}</p>
+      <div class="l-sigwrap"><div class="l-sig">${sig}</div>${stamp}</div>
+      <div>${esc(snd.name)}${bev ? `<br><span style="font-size:.92em">in Vollmacht für ${esc(anredeName(p))}</span>` : ''}</div>
+      ${anl.length ? `<div class="l-anl"><b>Anlage${anl.length > 1 ? 'n' : ''}</b>${anl.map(a => esc(a)).join('<br>')}</div>` : ''}
+    </div>
+    <div class="pgend"></div></div>`;
+}
+VIEWS.brief = (id, q) => {
+  const key = location.hash;
+  if (LDkey !== key || !LD) {
+    if (id && id !== 'new') { const ex = S.letters.find(l => l.id === id); if (!ex) return '<div class="empty">Brief nicht gefunden.</div>'; LD = clone(ex); }
+    else LD = newLetter(q);
+    LDkey = key;
+  }
+  const L = LD; const ls = S.settings;
+  return `<div class="head"><div class="grow"><a href="#/letters" class="small">← Briefe</a><h1>${L.isNew ? 'Neuer Brief' : 'Brief bearbeiten'}</h1></div>
+    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button><button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('file')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
+  ${!ls.me.name ? `<div class="banner amber">Bitte zuerst <a href="#/settings">deine Absenderdaten</a> in den Einstellungen eintragen.</div>` : ''}
+  <div class="brief">
+    <div class="ed">
+      <div class="card"><h3>1 · Absender & Person</h3>
+        <div class="fld"><label>Ich schreibe …</label><select data-lf="mode">${optHTML([{v:'bev', l:'als Bevollmächtigter für eine Person'}, {v:'self', l:'im Namen der Person (Person ist Absender)'}, {v:'me', l:'für mich selbst'}], L.mode)}</select></div>
+        <div class="fld" ${L.mode === 'me' ? 'style="display:none"' : ''}><label>Person</label><select data-lf="personId">${optHTML(personOpts(false), L.personId)}</select></div>
+        <div class="fld"><label>Absender im Briefkopf</label><div style="display:flex;gap:6px"><select data-lf="senderId" style="flex:1">${optHTML(senderOpts(), L.senderId || '')}</select><button class="btn sm" data-act="briefNewSender">+ Neu</button></div>
+          <span class="hint">Name, Anschrift, Telefon und E-Mail kommen aus Einstellungen, Personen oder Adressbuch. Unterschrift und Stempel nur, wenn du selbst Absender bist.</span></div>
+        <div class="fld"><label>Vorgang (optional)</label><select data-lf="caseId">${optHTML(caseOpts(), L.caseId)}</select></div></div>
+      <div class="card"><h3>2 · Empfänger</h3>
+        <div class="fld"><label>Aus Kontakten</label><div style="display:flex;gap:6px"><select data-lf="contactId" style="flex:1">${optHTML(contactOpts(), L.contactId)}</select><button class="btn sm" data-act="briefNewContact">+ Neu</button></div></div>
+        <div class="fld"><label>Anschrift (max. 6 Zeilen)</label><textarea data-lf="recipient" rows="5">${esc(L.recipient)}</textarea></div>
+        <div class="two"><div class="fld"><label>Versandart (Vermerk)</label><select data-lf="shipping">${optHTML(['', 'Einschreiben', 'Einschreiben Einwurf', 'Einschreiben mit Rückschein', 'Per Fax vorab', 'Per E-Mail vorab', 'Persönlich abgegeben'], L.shipping)}</select></div>
+        <div class="fld"><label>Datum</label><input type="date" data-lf="date" value="${esc(L.date)}"></div></div>
+        <div class="two"><div class="fld"><label>Ihr Zeichen / Aktenzeichen</label><input data-lf="ref" value="${esc(L.ref)}"></div><div class="fld"><label>Kunden- / Vertragsnummer</label><input data-lf="customerNo" value="${esc(L.customerNo)}"></div></div></div>
+      <div class="card"><h3>3 · Inhalt</h3>
+        <div class="fld"><label>Vorlage</label><select data-act-chg="tpl"><option value="">– Vorlage wählen –</option>${TPL_CATS.map(cat => { const T = allTemplates().filter(t => tplCat(t) === cat);
+          return T.length ? `<optgroup label="${esc(cat)}">${optHTML(T.map(t => ({v:t.id, l:t.name})), L.templateId)}</optgroup>` : ''; }).join('')}</select></div>
+        <div class="fld"><label>Betreff</label><input data-lf="subject" value="${esc(L.subject)}"></div>
+        <div class="fld"><label>Anrede</label><input data-lf="salutation" value="${esc(L.salutation)}" list="anreden"><datalist id="anreden"><option>Sehr geehrte Damen und Herren,</option><option>Sehr geehrte Frau …,</option><option>Sehr geehrter Herr …,</option></datalist></div>
+        <div class="fld"><label>Text</label><div class="ph">${PLACEHOLDERS.map(p => `<button type="button" data-act="insPh" data-id="${p}">{${p}}</button>`).join('')}</div>
+          <textarea data-lf="body" id="briefBody" rows="14">${esc(L.body)}</textarea>
+          <span class="hint">Platzhalter in {…} werden automatisch ausgefüllt. Stellen in […] gelb markiert = noch selbst ausfüllen.</span></div>
+        <div class="fld"><label>Grußformel</label><input data-lf="closing" value="${esc(L.closing)}"></div>
+        <div class="fld"><label>Anlagen (eine pro Zeile)</label><textarea data-lf="attachments" rows="3">${esc(L.attachments)}</textarea><span class="hint">„Kopie der Vollmacht“ wird bei Vollmacht automatisch ergänzt.</span></div></div>
+      <div class="card"><h3>4 · Unterschrift, Stempel & Internetmarke</h3>
+        <div class="fld cb"><input type="checkbox" data-lf="useSig" id="cbSig" ${L.useSig ? 'checked' : ''}><label for="cbSig">Unterschrift einfügen ${ls.signature ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
+        <div class="fld cb"><input type="checkbox" data-lf="useStamp" id="cbStamp" ${L.useStamp ? 'checked' : ''}><label for="cbStamp">Stempel einfügen ${ls.stamp ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
+        <div class="fld cb"><input type="checkbox" data-lf="useMarke" id="cbMarke" ${L.useMarke ? 'checked' : ''}><label for="cbMarke">Internetmarke (Porto) im Adressfeld drucken</label></div>
+        <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox"><button class="btn sm" data-act="markeUpload">Internetmarke als Bild laden (PNG/JPG)</button> ${L.markeImg ? '<button class="btn sm dan" data-act="markeDel">entfernen</button>' : ''}
+          ${L.markeImg ? `<img class="imgprev" src="${L.markeImg}">` : ''}<div class="hint small muted" style="margin-top:4px">Internetmarke bei der Deutschen Post online kaufen, als Bild speichern und hier laden. Vor dem ersten Versand einmal Probe drucken und mit Fensterumschlag (DL) prüfen.</div></div>
+      </div>
+    </div>
+    <div class="pv"><div class="tool"><b>Vorschau</b><span class="muted small">DIN 5008 Form B · A4</span><span class="pvwarn" id="pvwarn"></span></div><div class="pvbox" id="pvbox"><div class="pvscale" id="pvscale"></div></div></div>
+  </div>`;
+};
+AFTER.brief = () => {
+  if (!$('#pvbox')) return;
+  const upd = () => {
+    const box = $('#pvbox'), sc = $('#pvscale'); if (!box) return;
+    sc.innerHTML = letterHTML(LD);
+    const w = box.clientWidth - 36, letter = sc.firstElementChild, s = Math.min(1, w / letter.offsetWidth);
+    sc.style.transform = `scale(${s})`; sc.style.height = (letter.offsetHeight * s) + 'px'; sc.style.width = letter.offsetWidth + 'px';
+    const body = letter.querySelector('.l-body'); const limit = letter.offsetWidth * 279 / 210;
+    $('#pvwarn').textContent = (body.offsetTop + body.offsetHeight - 10 * letter.offsetWidth / 210) > limit ? 'Hinweis: Text geht über 1 Seite (wird beim Drucken umgebrochen).' : '';
+  };
+  AFTER.brief.upd = upd;
+  $$('[data-lf]').forEach(el => {
+    const ev = (el.type === 'checkbox' || el.tagName === 'SELECT' || el.type === 'date') ? 'change' : 'input';
+    el.addEventListener(ev, () => {
+      const k = el.dataset.lf; LD[k] = el.type === 'checkbox' ? el.checked : el.value;
+      if (k === 'contactId') { LD.recipient = contactAddress(getContact(el.value)); const r = $('[data-lf="recipient"]'); if (r) r.value = LD.recipient; }
+      if (k === 'caseId' && el.value) { const c = getCase(el.value); if (c) { if (!LD.ref && c.ref) LD.ref = c.ref; if (c.personId) LD.personId = c.personId; if (c.contactId && !LD.recipient) { LD.contactId = c.contactId; LD.recipient = contactAddress(getContact(c.contactId)); } } return render(); }
+      if (k === 'mode' || k === 'useMarke' || k === 'senderId') return render();
+      clearTimeout(upd._t); upd._t = setTimeout(upd, 120);
+    });
+  });
+  const tplSel = $('[data-act-chg="tpl"]');
+  tplSel.addEventListener('change', () => {
+    const t = allTemplates().find(x => x.id === tplSel.value); if (!t) return;
+    if (LD.body.trim() && LD.body !== (allTemplates().find(x => x.id === LD.templateId) || {}).body && !confirm('Den bisherigen Text durch die Vorlage ersetzen?')) { tplSel.value = LD.templateId; return; }
+    LD.templateId = t.id; LD.subject = t.subject; LD.body = t.body; render();
+  });
+  window.onresize = () => { if (parseHash().route === 'brief') upd(); };
+  upd();
+};
+const letterSubject = l => applyVars(l.subject, l) || '(ohne Betreff)';
+function letterHasGaps(L){ const all = [applyVars(L.subject, L), applyVars(L.body, L), L.recipient].join('\n'); return /\{[^{}\n]+\}|\[[^\[\]\n]+\]/.test(all) || !L.recipient.trim(); }
+function saveLetter(silent){
+  const L = LD; delete L.isNew; L.updated = new Date().toISOString();
+  const existed = S.letters.some(x => x.id === L.id);
+  upsert('letters', clone(L));
+  if (!existed && L.caseId) { const c = getCase(L.caseId); if (c) { c.log.push({id:uid(), date:today(), text:'Brief erstellt: ' + applyVars(L.subject, L) + (L.shipping ? ' (' + L.shipping + ')' : '')}); save(); } }
+  if (!silent) toast('Brief gespeichert');
+  if (!existed) { LDkey = '#/brief/' + L.id; history.replaceState(null, '', '#/brief/' + L.id); render._same = location.hash; render(); }
+}
+// Ausgabe: im Desktop-Programm über window.officeHome (Drucken bzw. PDF speichern), im Browser über window.print()
+const DESKTOP = !!(window.officeHome && window.officeHome.desktop);
+function outputPrint(html, title, asPDF){
+  $('#print-root').innerHTML = html;
+  const t = document.title; document.title = title.replace(/[\\/:*?"<>|]/g, '').slice(0, 90);
+  setTimeout(async () => {
+    try {
+      if (DESKTOP) { const r = asPDF ? await window.officeHome.savePDF(document.title) : await window.officeHome.print(); if (asPDF && r && r.ok) toast('PDF gespeichert'); }
+      else window.print();
+    } catch (e) { alert('Ausgabe fehlgeschlagen: ' + e.message); }
+    finally { document.title = t; }
+  }, 150);
+}
+function printLetter(asPDF){
+  if (letterHasGaps(LD) && !confirm('Es gibt noch gelb markierte Stellen bzw. keinen Empfänger. Trotzdem ' + (asPDF ? 'als PDF speichern' : 'drucken') + '?')) return;
+  saveLetter(true);
+  outputPrint(letterHTML(LD), 'Brief ' + LD.date + ' ' + applyVars(LD.subject, LD), asPDF);
+}
+
+// ---------- Monatsbericht ----------
+function monthShift(ym, n){ return addMonths(ym + '-01', n).slice(0, 7); }
+function monthLabel(ym){ const [y, m] = ym.split('-').map(Number); return MONATE[m - 1] + ' ' + y; }
+function reportHTML(ym){
+  const inM = d => !!d && String(d).slice(0, 7) === ym;
+  const first = ym + '-01', last = isoDate(new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0));
+  const nextLast = isoDate(new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) + 1, 0));
+  const pName = id => { const p = getPerson(id); return p ? p.role : 'Allgemein'; };
+  const who = UI.person === 'all' ? 'alle Personen' : (() => { const p = getPerson(UI.person); return p ? p.role + (personName(p) !== p.role ? ': ' + personName(p) : '') : ''; })();
+  const tbl = (head, rows, empty) => rows.length ? `<table><tr>${head.map(h => `<th${h.startsWith('#') ? ' class="num"' : ''}>${esc(h.replace(/^#/, ''))}</th>`).join('')}</tr>${rows.join('')}</table>` : `<p class="none">${esc(empty)}</p>`;
+  const td = (v, num) => `<td${num ? ' class="num"' : ''}>${v}</td>`;
+
+  // Erledigte Aufgaben (auch wiederkehrende, die im Monat abgehakt wurden)
+  const done = byPerson(S.tasks).filter(t => (t.done && inM(t.doneAt)) || (t.repeat && inM(t.lastDone)))
+    .sort((a, b) => (a.doneAt || a.lastDone || '').localeCompare(b.doneAt || b.lastDone || ''));
+  // Verlauf aus Vorgängen
+  const logs = [];
+  for (const c of byPerson(S.cases)) for (const l of (c.log || [])) if (inM(l.date)) logs.push({date:l.date, c, text:l.text});
+  logs.sort((a, b) => a.date.localeCompare(b.date));
+  const letters = byPerson(S.letters).filter(l => inM(l.date)).sort((a, b) => a.date.localeCompare(b.date));
+  const docs = byPerson(S.documents).filter(d => inM(d.date) || (!d.date && inM(d.added))).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  // Offene Fristen: überfällig oder fällig bis Ende des Folgemonats
+  const open = byPerson(S.tasks).filter(t => !t.done && t.due && t.due <= nextLast).sort((a, b) => a.due.localeCompare(b.due));
+  const cancel = byPerson(S.contracts).map(c => ({c, i:contractInfo(c)})).filter(x => x.i.cancelBy && x.i.cancelBy >= first && x.i.cancelBy <= nextLast).sort((a, b) => a.i.cancelBy.localeCompare(b.i.cancelBy));
+  const openCases = byPerson(S.cases).filter(c => c.status !== 'erledigt');
+  const contracts = byPerson(S.contracts).filter(c => !c.ended);
+  const mon = contracts.reduce((s, c) => s + monthly(c), 0);
+  const assets = byPerson(S.assets); const saldo = assets.reduce((s, a) => s + (Number(a.value) || 0), 0);
+  const me = S.settings.me;
+
+  return `<div class="report">
+    <h1>Monatsbericht ${esc(monthLabel(ym))}</h1>
+    <div class="rsub">${esc(who)} · Zeitraum ${fmtDate(first)} – ${fmtDate(last)} · erstellt am ${fmtDate(today())}${me.name ? ' von ' + esc(me.name) : ''}</div>
+    <div class="sums">
+      <div>Erledigt<b>${done.length}</b></div><div>Briefe / Dokumente<b>${letters.length} / ${docs.length}</b></div>
+      <div>Offene Vorgänge<b>${openCases.length}</b></div><div>Fixkosten / Monat<b>${eur(mon)}</b></div>
+    </div>
+
+    <h2>1. Erledigte Aufgaben und Fristen</h2>
+    ${tbl(['Datum', 'Aufgabe', 'Person', 'Vorgang'], done.map(t => `<tr>${td(fmtDate(t.done ? t.doneAt : t.lastDone))}${td(esc(t.title) + (t.repeat && !t.done ? ' (wiederkehrend)' : ''))}${td(esc(pName(t.personId)))}${td(esc(getCase(t.caseId)?.title || ''))}</tr>`), 'In diesem Monat wurden keine Aufgaben erledigt.')}
+
+    <h2>2. Verlauf der Vorgänge</h2>
+    ${tbl(['Datum', 'Vorgang', 'Person', 'Eintrag'], logs.map(l => `<tr>${td(fmtDate(l.date))}${td(esc(l.c.title))}${td(esc(pName(l.c.personId)))}${td(esc(l.text).replace(/\n/g, '<br>'))}</tr>`), 'Keine Einträge im Verlauf.')}
+
+    <h2>3. Geschriebene Briefe</h2>
+    ${tbl(['Datum', 'Betreff', 'Empfänger', 'Versand'], letters.map(l => `<tr>${td(fmtDate(l.date))}${td(esc(letterSubject(l)))}${td(esc((l.recipient || '').split('\n')[0]))}${td(esc(l.shipping || ''))}</tr>`), 'Keine Briefe in diesem Monat.')}
+
+    <h2>4. Eingegangene Dokumente</h2>
+    ${tbl(['Datum', 'Titel', 'Absender', 'Person', 'Frist'], docs.map(d => `<tr>${td(fmtDate(d.date || d.added))}${td(esc(d.title))}${td(esc(d.sender || ''))}${td(esc(pName(d.personId)))}${td(d.deadline ? fmtDate(d.deadline) : '')}</tr>`), 'Keine Dokumente in diesem Monat.')}
+
+    <h2>5. Offene Fristen bis ${fmtDate(nextLast)}</h2>
+    ${tbl(['Fällig', 'Aufgabe', 'Person', 'Vorgang'], open.map(t => `<tr>${td(`<span class="${t.due < today() ? 'over' : ''}">${fmtDate(t.due)}${t.due < today() ? ' (überfällig)' : ''}</span>`)}${td(esc(t.title))}${td(esc(pName(t.personId)))}${td(esc(getCase(t.caseId)?.title || ''))}</tr>`)
+      .concat(cancel.map(x => `<tr>${td(fmtDate(x.i.cancelBy))}${td('Kündigungsfrist: ' + esc(x.c.provider))}${td(esc(pName(x.c.personId)))}${td('Vertrag')}</tr>`)), 'Keine offenen Fristen.')}
+
+    <h2>6. Offene Vorgänge</h2>
+    ${tbl(['Vorgang', 'Person', 'Behörde / Stelle', 'Aktenzeichen', 'Status'], openCases.map(c => `<tr>${td(esc(c.title))}${td(esc(pName(c.personId)))}${td(esc(getContact(c.contactId)?.name || ''))}${td(esc(c.ref || ''))}${td(esc(c.status || 'offen'))}</tr>`), 'Keine offenen Vorgänge.')}
+
+    <h2>7. Fixkosten (laufende Verträge)</h2>
+    ${tbl(['Anbieter', 'Kategorie', 'Person', '#Betrag', '#pro Monat'], contracts.map(c => `<tr>${td(esc(c.provider))}${td(esc(c.category || ''))}${td(esc(pName(c.personId)))}${td(eur(c.amount) + ' ' + esc(c.interval || ''), 1)}${td(eur(monthly(c)), 1)}</tr>`)
+      .concat(contracts.length ? [`<tr><td colspan="4"><b>Summe pro Monat</b></td><td class="num"><b>${eur(mon)}</b></td></tr>`] : []), 'Keine laufenden Verträge erfasst.')}
+
+    <h2>8. Konten und Vermögen</h2>
+    ${tbl(['Bezeichnung', 'Art', 'Person', 'Stand vom', '#Wert'], assets.map(a => `<tr>${td(esc(a.name))}${td(esc(a.type || ''))}${td(esc(pName(a.personId)))}${td(fmtDate(a.valueDate))}${td(a.value === '' || a.value == null ? '' : eur(a.value), 1)}</tr>`)
+      .concat(assets.length ? [`<tr><td colspan="4"><b>Saldo</b></td><td class="num"><b>${eur(saldo)}</b></td></tr>`] : []), 'Keine Konten erfasst.')}
+
+    <div class="rsig"><div>Ort, Datum</div><div>Unterschrift ${me.name ? '(' + esc(me.name) + ')' : ''}</div></div>
+  </div>`;
+}
+VIEWS.report = () => `<div class="head"><div class="grow"><h1>Monatsbericht</h1><p class="sub" style="margin:0">Übersicht eines Monats zum Drucken oder als PDF – z. B. für die eigenen Unterlagen oder zur Abstimmung in der Familie. Die Auswahl oben (Alle / Vater / Mutter) gilt auch hier.</p></div>
+  <button class="btn" data-act="repMonth" data-id="-1">‹</button><input type="month" data-chg="reportMonth" value="${esc(UI.reportMonth)}" class="btn" style="padding:6px 10px"><button class="btn" data-act="repMonth" data-id="1">›</button>
+  ${DESKTOP ? `<button class="btn" data-act="printReport">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfReport">${icon('save')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printReport">${icon('print')}Drucken / PDF</button>`}</div>
+  <div class="rpwrap">${reportHTML(UI.reportMonth)}</div>`;
+function printReport(asPDF){
+  outputPrint(reportHTML(UI.reportMonth), 'Monatsbericht ' + UI.reportMonth + (UI.person !== 'all' ? ' ' + (getPerson(UI.person)?.role || '') : ''), asPDF);
+}
+
+// Suche
+VIEWS.search =(id, q) => {
+  const term = (q.get('q') || '').trim().toLowerCase(); if (!term) return '<div class="empty">Suchbegriff eingeben.</div>';
+  const m = o => JSON.stringify(o).toLowerCase().includes(term);
+  const sect = (name, list, fn) => list.length ? `<div class="card"><h3>${name} <span class="badge">${list.length}</span></h3><div class="list">${list.map(fn).join('')}</div></div>` : '';
+  const res = sect('Vorgänge', S.cases.filter(m), c => `<div class="row"><a class="grow" href="#/case/${c.id}">${esc(c.title)}</a>${personChip(c.personId)}${statusBadge(c.status)}</div>`)
+    + sect('Fristen & Aufgaben', S.tasks.filter(m), t => taskRow(t))
+    + sect('Dokumente', S.documents.filter(m), d => `<div class="row"><a class="grow" href="#" data-act="openDoc" data-id="${d.id}">${esc(d.title)}</a>${personChip(d.personId)}<span class="small muted">${fmtDate(d.date)}</span></div>`)
+    + sect('Briefe', S.letters.filter(m), l => `<div class="row"><a class="grow" href="#/brief/${l.id}">${esc(letterSubject(l))}</a><span class="small muted">${fmtDate(l.date)}</span></div>`)
+    + sect('Verträge', S.contracts.filter(m), c => `<div class="row"><a class="grow" href="#/contracts">${esc(c.provider)}</a>${personChip(c.personId)}<b>${eur(c.amount)}</b></div>`)
+    + sect('Konten & Vermögen', S.assets.filter(m), a => `<div class="row"><a class="grow" href="#/assets">${esc(a.name)}</a>${personChip(a.personId)}</div>`)
+    + sect('Notizen', S.notes.filter(m), n => `<div class="row"><a class="grow" href="#/notes">${esc(n.title)}</a>${personChip(n.personId)}</div>`)
+    + sect('Kontakte', S.contacts.filter(m), c => `<div class="row"><a class="grow" href="#/contacts">${esc(c.name)}</a><span class="small muted">${esc(c.phone || '')}</span></div>`);
+  return `<div class="head"><div class="grow"><h1>Suche: „${esc(q.get('q'))}“</h1></div></div>${res || '<div class="card"><div class="empty">Nichts gefunden.</div></div>'}`;
+};
+
+// Einstellungen
+VIEWS.settings = () => {
+  const s = S.settings, me = s.me, ls = s.letter;
+  const inp = (k, l, v, t = 'text') => `<div class="fld"><label>${l}</label><input type="${t}" data-set="${k}" value="${esc(v)}"></div>`;
+  return `<div class="head"><div class="grow"><h1>Einstellungen</h1></div></div>
+  <div class="grid g2">
+    <div class="card"><h3>Meine Daten (Bevollmächtigter / Absender)</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+      ${inp('me.name', 'Vor- und Nachname', me.name)}${inp('me.phone', 'Telefon', me.phone)}${inp('me.street', 'Straße und Hausnummer', me.street)}${inp('me.email', 'E-Mail', me.email, 'email')}${inp('me.zip', 'PLZ', me.zip)}${inp('me.city', 'Ort', me.city)}
+    </form></div><p class="small muted" style="margin:10px 0 0">Wird automatisch als Absender in Briefe übernommen.</p></div>
+    <div class="card"><h3>Briefgestaltung</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+      <div class="fld"><label>Schriftart</label><select data-set="letter.font">${optHTML(['Arial', 'Calibri', 'Helvetica', 'Verdana', 'Times New Roman', 'Georgia'], ls.font)}</select></div>
+      <div class="fld"><label>Schriftgröße</label><select data-set="letter.size">${optHTML(['10', '11', '12'], String(ls.size))}</select></div>
+      <div class="fld"><label>Datumsformat</label><select data-set="letter.longDate">${optHTML([{v:'true', l:'23. November 2026'}, {v:'false', l:'23.11.2026'}], String(ls.longDate))}</select></div>
+      <div class="fld"><label>Falz- und Lochmarken</label><select data-set="letter.foldMarks">${optHTML([{v:'true', l:'anzeigen'}, {v:'false', l:'ausblenden'}], String(ls.foldMarks))}</select></div>
+      <div class="fld full"><label>Standard-Grußformel</label><input data-set="letter.greeting" value="${esc(ls.greeting)}"></div>
+      <div class="fld full"><label>Sprache</label><select disabled><option>Deutsch</option></select></div>
+    </form></div></div>
+    <div class="card" style="grid-column:1/-1"><h3>Briefvorlage (Design)</h3>
+      <p class="small muted" style="margin-top:0">Gilt für alle Briefe. Anschriftfeld und Infoblock bleiben bei jedem Design nach DIN 5008 Form B, passend für Fensterumschläge.</p>
+      <div class="dsgrid">${(() => { const smp = sampleLetter(); return LETTER_DESIGNS.map(x => `<button type="button" class="dstile ${(ls.design || 'klassisch') === x.v ? 'on' : ''}" data-act="setDesign" data-id="${x.v}"><div class="pv">${letterHTML(smp, x.v)}</div><b>${x.l}</b><div class="small muted" style="max-width:168px">${x.d}</div></button>`).join(''); })()}</div>
+      <div class="modal" style="box-shadow:none;width:100%;max-height:none;margin-top:12px"><form style="padding:0" onsubmit="return false">
+        <div class="fld"><label>Akzentfarbe (Modern, Farbband, Randlinie)</label><select data-set="letter.accent" data-rerender="1">${optHTML(LETTER_ACCENTS, ls.accent)}</select></div><div></div>
+      </form></div></div>
+    <div class="card"><h3>Unterschrift & Stempel</h3>
+      <p class="small muted" style="margin-top:0">Unterschrift auf weißem Papier mit dunklem Stift, abfotografieren oder scannen, zuschneiden und hier laden (PNG mit transparentem Hintergrund ist ideal).</p>
+      <div style="display:flex;gap:28px;flex-wrap:wrap"><div><b class="small">Unterschrift</b>${s.signature ? `<img class="imgprev" src="${s.signature}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keine</div>'}
+        <button class="btn sm" data-act="upImg" data-id="signature">Laden</button> ${s.signature ? '<button class="btn sm dan" data-act="delImg" data-id="signature">Entfernen</button>' : ''}</div>
+      <div><b class="small">Stempel / Siegel</b>${s.stamp ? `<img class="imgprev" src="${s.stamp}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keiner</div>'}
+        <button class="btn sm" data-act="upImg" data-id="stamp">Laden</button> ${s.stamp ? '<button class="btn sm dan" data-act="delImg" data-id="stamp">Entfernen</button>' : ''}</div></div></div>
+    <div class="card"><h3>Erinnerungen</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+      <div class="fld"><label>Vertragskündigungen anzeigen (Tage vorher)</label><input type="number" data-set="contractDays" value="${s.contractDays}"></div><div></div>
+    </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.</p></div>
+    ${DESKTOP ? `<div class="card" id="updCard" style="grid-column:1/-1">${updCardHTML()}</div>` : ''}
+    <div class="card" style="grid-column:1/-1"><h3>${icon('save')}Datensicherung</h3>
+      <p style="margin-top:0">Alle Daten liegen <b>nur auf diesem Computer</b> (im Browser-Speicher dieses Programms). Erstelle regelmäßig eine Sicherung und speichere sie z. B. auf einem USB-Stick.</p>
+      <p class="small muted">Letzte Sicherung: ${s.lastBackup ? fmtDate(s.lastBackup) : 'noch nie'} · <span id="usage"></span></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="backup">Sicherung herunterladen</button><button class="btn" data-act="restore">Sicherung wiederherstellen</button><span style="flex:1"></span><button class="btn dan" data-act="wipe">Alle Daten löschen</button></div></div>
+  </div>`;
+};
+AFTER.settings = async () => {
+  $$('[data-set]').forEach(el => el.addEventListener('change', () => {
+    const path = el.dataset.set.split('.'); let o = S.settings; for (let i = 0; i < path.length - 1; i++) o = o[path[i]];
+    let v = el.value; if (v === 'true') v = true; else if (v === 'false') v = false; else if (el.type === 'number' || path[1] === 'size') v = Number(v);
+    o[path[path.length - 1]] = v; save(); toast('Gespeichert'); if (el.dataset.rerender || path[0] === 'letter') render();
+  }));
+  if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); const u = $('#usage'); if (u) u.textContent = 'Belegter Speicher: ' + (e.usage / 1048576).toFixed(1) + ' MB'; }
+};
+
+// ---------- Sicherung / Kalender ----------
+async function backup(){
+  const files = {};
+  for (const d of S.documents) if (d.fileId) { const f = await fileGet(d.fileId); if (f) files[d.fileId] = {name:f.name, type:f.type, data: await blobToDataURL(f.blob)}; }
+  S.settings.lastBackup = today(); save();
+  const data = {app:'OfficeHome', version:1, exported:new Date().toISOString(), state:S, files};
+  download(`OfficeHome-Sicherung-${today()}.json`, new Blob([JSON.stringify(data)], {type:'application/json'}));
+  toast('Sicherung erstellt'); render();
+}
+async function restore(){
+  const f = await pickFile('.json,application/json'); if (!f) return;
+  let data; try { data = JSON.parse(await f.text()); } catch (e) { return alert('Datei ist keine gültige Sicherung.'); }
+  if (data.app !== 'OfficeHome' || !data.state) return alert('Datei ist keine Office-Home-Sicherung.');
+  if (!confirm('Achtung: Alle aktuellen Daten werden durch die Sicherung vom ' + fmtDate((data.exported || '').slice(0, 10)) + ' ersetzt. Fortfahren?')) return;
+  if (DB.db) await DB.clear('files');
+  for (const [id, x] of Object.entries(data.files || {})) await filePut(id, {name:x.name, type:x.type, blob: await dataURLtoBlob(x.data)});
+  S = migrate(data.state); save(); toast('Sicherung wiederhergestellt'); location.hash = '#/dashboard'; render();
+}
+async function wipe(){
+  if (!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.')) return;
+  if (prompt('Zur Bestätigung bitte LÖSCHEN eingeben:') !== 'LÖSCHEN') return;
+  if (DB.db) await DB.clear('files'); S = defaultState(); save(); location.hash = '#/dashboard'; render();
+}
+function exportICS(){
+  const ev = [];
+  const fold = s => s.replace(/[\\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
+  const add = (date, title, desc) => { const d = date.replace(/-/g, ''); const nx = addMonths(date, 0); const end = isoDate(new Date(new Date(nx + 'T00:00').getTime() + 86400000)).replace(/-/g, '');
+    ev.push(['BEGIN:VEVENT', 'UID:' + uid() + '@officehome', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z', 'DTSTART;VALUE=DATE:' + d, 'DTEND;VALUE=DATE:' + end, 'SUMMARY:' + fold(title), 'DESCRIPTION:' + fold(desc || ''),
+      'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + fold(title), 'TRIGGER:-P2D', 'END:VALARM', 'END:VEVENT'].join('\r\n')); };
+  for (const t of byPerson(S.tasks)) if (!t.done && t.due) add(t.due, t.title + (getPerson(t.personId) ? ' (' + getPerson(t.personId).role + ')' : ''), t.notes);
+  for (const c of byPerson(S.contracts)) { const i = contractInfo(c); if (i.cancelBy) add(i.cancelBy, 'Kündigen bis: ' + c.provider, 'Vertragsende ' + fmtDate(i.end)); }
+  if (!ev.length) return toast('Keine Fristen mit Datum vorhanden');
+  download('OfficeHome-Fristen.ics', new Blob(['BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Office Home//DE\r\nCALSCALE:GREGORIAN\r\n' + ev.join('\r\n') + '\r\nEND:VCALENDAR\r\n'], {type:'text/calendar'}));
+  toast(ev.length + ' Termine exportiert');
+}
+
+// ---------- Aktionen ----------
+const ACT = {
+  pfilter: d => { UI.person = d.id; render(); },
+  newTask: d => editTask(null, d.case ? {caseId:d.case, personId:getCase(d.case)?.personId || ''} : {}),
+  editTask: d => editTask(S.tasks.find(t => t.id === d.id)),
+  toggleTask: d => toggleTask(S.tasks.find(t => t.id === d.id)),
+  newCase: () => editCase(null), editCase: d => editCase(getCase(d.id)),
+  caseTab: d => { UI.caseTab = d.id; render(); }, taskTab: d => { UI.taskTab = d.id; render(); },
+  toggleStep: d => { const c = getCase(d.id); const s = c.steps.find(x => x.id === d.sid); s.done = !s.done; if (s.done) c.log.push({id:uid(), date:today(), text:'Schritt erledigt: ' + s.text}); save(); render(); },
+  delStep: d => { const c = getCase(d.id); c.steps = c.steps.filter(x => x.id !== d.sid); save(); render(); },
+  addStep: d => { const v = $('#newStep').value.trim(); if (!v) return; getCase(d.id).steps.push({id:uid(), text:v, done:false}); save(); render(); setTimeout(() => $('#newStep')?.focus(), 0); },
+  addLog: d => { const v = $('#logText').value.trim(); if (!v) return; getCase(d.id).log.push({id:uid(), date:$('#logDate').value || today(), text:v}); save(); render(); },
+  delLog: d => { const c = getCase(d.id); c.log = c.log.filter(x => x.id !== d.sid); save(); render(); },
+  newContract: () => editContract(null), editContract: d => editContract(S.contracts.find(c => c.id === d.id)),
+  newDoc: d => editDoc(null, Object.assign({}, d.case ? {caseId:d.case, personId:getCase(d.case)?.personId || ''} : {}, d.person ? {personId:d.person} : {}, d.cat ? {category:d.cat, title:'Vollmacht ' + (getPerson(d.person)?.role || '')} : {})),
+  editDoc: d => editDoc(S.documents.find(x => x.id === d.id)),
+  openDoc: d => openDoc(S.documents.find(x => x.id === d.id)),
+  dlDoc: async d => { const doc = S.documents.find(x => x.id === d.id); const f = doc.fileId && await fileGet(doc.fileId); if (f) download(f.name, f.blob); else toast('Keine Datei hinterlegt'); },
+  newAsset: () => editAsset(null), editAsset: d => editAsset(S.assets.find(a => a.id === d.id)),
+  newNote: () => editNote(null), editNote: d => editNote(S.notes.find(n => n.id === d.id)),
+  newPerson: () => editPerson(null), editPerson: d => editPerson(getPerson(d.id)),
+  newContact: () => editContact(null), editContact: d => editContact(getContact(d.id)),
+  briefNewContact: () => editContact(null, c => { LD.contactId = c.id; LD.recipient = contactAddress(c); render(); }),
+  briefNewSender: () => editContact(null, c => { LD.senderId = isPrivate(c) ? 'c:' + c.id : LD.senderId; render(); }, {kind:'Privatperson'}),
+  ckind: d => { UI.contactKind = d.id; render(); },
+  insPh: d => { const ta = $('#briefBody'); const ins = '{' + d.id + '}'; const s = ta.selectionStart, e = ta.selectionEnd; ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e); ta.selectionStart = ta.selectionEnd = s + ins.length; ta.focus(); ta.dispatchEvent(new Event('input')); },
+  saveLetter: () => saveLetter(false), printLetter: () => printLetter(false), pdfLetter: () => printLetter(true),
+  saveTpl: () => { const n = prompt('Name der Vorlage:', LD.subject ? LD.subject.slice(0, 50) : ''); if (!n) return; const t = {id:'c_' + uid(), name:n, subject:LD.subject, body:LD.body, custom:true}; S.templates.push(t); LD.templateId = t.id; save(); toast('Vorlage gespeichert'); render(); },
+  delTpl: d => { if (confirm('Vorlage löschen?')) { remove('templates', d.id); render(); } },
+  dupLetter: d => { const l = clone(S.letters.find(x => x.id === d.id)); l.id = uid(); l.date = today(); l.updated = new Date().toISOString(); S.letters.push(l); save(); location.hash = '#/brief/' + l.id; },
+  delLetter: d => { if (confirm('Brief löschen?')) { remove('letters', d.id); render(); } },
+  markeUpload: async () => { const f = await pickFile('image/*'); if (!f) return; LD.markeImg = await imageToDataURL(f, 700); render(); },
+  markeDel: () => { LD.markeImg = ''; render(); },
+  upImg: async d => { const f = await pickFile('image/*'); if (!f) return; S.settings[d.id] = await imageToDataURL(f, 900); save(); render(); },
+  delImg: d => { S.settings[d.id] = ''; save(); render(); },
+  setDesign: d => { S.settings.letter.design = d.id; save(); render(); toast('Briefvorlage: ' + (LETTER_DESIGNS.find(x => x.v === d.id) || {}).l); },
+  repMonth: d => { UI.reportMonth = monthShift(UI.reportMonth, Number(d.id)); render(); },
+  printReport: () => printReport(false), pdfReport: () => printReport(true),
+  backup: () => backup(), restore:() => restore(), wipe: () => wipe(), ics: () => exportICS()
+};
+document.addEventListener('click', e => {
+  if ($('#modal') && $('#modal').contains(e.target)) return;
+  const stop = e.target.closest('[data-stop]');
+  const a = e.target.closest('[data-act]');
+  if (a && (!stop || stop === a || a.contains(stop) === false && stop.contains(a))) {
+    if (a.tagName === 'INPUT' && a.type === 'checkbox') { e.preventDefault(); }
+    else if (a.tagName === 'A' || a.tagName === 'BUTTON') e.preventDefault();
+    if (ACT[a.dataset.act]) ACT[a.dataset.act](Object.assign({}, a.dataset), a, e);
+    return;
+  }
+  if (stop) return;
+  const g = e.target.closest('[data-go]'); if (g) location.hash = g.dataset.go;
+});
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-chg]'); if (!el) return;
+  if (el.dataset.chg === 'caseStatus') { const c = getCase(el.dataset.id); c.status = el.value; c.log.push({id:uid(), date:today(), text:'Status: ' + el.value}); save(); render(); }
+  if (el.dataset.chg === 'docCat') { UI.docCat = el.value; render(); }
+  if (el.dataset.chg === 'reportMonth' && /^\d{4}-\d{2}$/.test(el.value)) { UI.reportMonth = el.value; render(); }
+});
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { location.hash = '#/search?q=' + encodeURIComponent(e.target.value); } });
+window.addEventListener('hashchange', render);
+window.addEventListener('beforeunload', () => { if (saveTimer && DB.db) { clearTimeout(saveTimer); DB.put('kv', 'state', S); } });
+
+// ---------- Programm-Update (nur Desktop) ----------
+const UPD = {state:'idle', current:'', version:'', percent:0, message:''};
+function updCardHTML(){
+  const u = UPD; let st = '', btn = '';
+  if (u.state === 'checking') st = 'Suche nach Updates …';
+  else if (u.state === 'none') st = '✓ Du hast die neueste Version.';
+  else if (u.state === 'available') { st = `<b>Neue Version ${esc(u.version)} verfügbar.</b>`; btn = '<button class="btn pri" data-act="updDownload">Herunterladen und installieren</button>'; }
+  else if (u.state === 'downloading') st = `Wird heruntergeladen … ${u.percent} %<div style="height:6px;background:#e5e7eb;border-radius:3px;margin-top:6px"><div style="height:6px;width:${u.percent}%;background:#2563eb;border-radius:3px"></div></div>`;
+  else if (u.state === 'downloaded') { st = `<b>Version ${esc(u.version)} ist bereit.</b> Das Programm schließt sich kurz, installiert das Update und startet neu. Deine Daten bleiben erhalten.`; btn = '<button class="btn pri" data-act="updInstall">Jetzt installieren und neu starten</button>'; }
+  else if (u.state === 'error') st = `<span style="color:#b91c1c">Update fehlgeschlagen: ${esc(u.message)}</span>`;
+  return `<h3>Programm-Update</h3><p style="margin-top:0">Installierte Version: <b>${esc(u.current || '–')}</b></p>
+    ${st ? `<p>${st}</p>` : ''}<div style="display:flex;gap:8px;flex-wrap:wrap">${btn}${['idle', 'none', 'error'].includes(u.state) ? '<button class="btn" data-act="updCheck">Nach Updates suchen</button>' : ''}</div>
+    <p class="small muted">Das Programm sucht beim Start automatisch nach einer neuen Version (Internet nötig).</p>`;
+}
+function updUI(){
+  const card = $('#updCard'); if (card) card.innerHTML = updCardHTML();
+  const chip = $('#updChip'); if (!chip) return;
+  const show = ['available', 'downloading', 'downloaded'].includes(UPD.state);
+  chip.innerHTML = show ? `<a href="#/settings" class="updchip">${UPD.state === 'downloaded' ? 'Update bereit – neu starten' : UPD.state === 'downloading' ? 'Update lädt … ' + UPD.percent + ' %' : 'Update ' + esc(UPD.version) + ' verfügbar'}</a>` : '';
+}
+function initUpdates(){
+  if (!DESKTOP || !window.officeHome.onUpdate) return;
+  window.officeHome.version().then(v => { UPD.current = v; updUI(); });
+  window.officeHome.onUpdate(d => {
+    if (d.type === 'available') { UPD.state = 'available'; UPD.version = d.version; toast('Neue Version ' + d.version + ' verfügbar'); }
+    else if (d.type === 'none') { if (UPD.state === 'checking') UPD.state = 'none'; }
+    else if (d.type === 'progress') { UPD.state = 'downloading'; UPD.percent = d.percent; }
+    else if (d.type === 'downloaded') { UPD.state = 'downloaded'; UPD.version = d.version; }
+    else if (d.type === 'error') { if (UPD.state !== 'idle') { UPD.state = 'error'; UPD.message = d.message; } }
+    updUI();
+  });
+}
+async function flushSave(){ clearTimeout(saveTimer); if (DB.db) await DB.put('kv', 'state', S); }
+Object.assign(ACT, {
+  updCheck: async () => { UPD.state = 'checking'; updUI(); const r = await window.officeHome.updateCheck();
+    if (!r.ok) { UPD.state = 'error'; UPD.message = r.message; } else if (UPD.state === 'checking') UPD.state = r.latest && r.latest !== r.current ? UPD.state : 'none'; updUI(); },
+  updDownload: async () => { UPD.state = 'downloading'; UPD.percent = 0; updUI(); const r = await window.officeHome.updateDownload(); if (!r.ok) { UPD.state = 'error'; UPD.message = r.message; updUI(); } },
+  updInstall: async () => { await flushSave(); toast('Update wird installiert …'); await window.officeHome.updateInstall(); }
+});
+
+// ---------- Start ----------
+(async () => {
+  try { await DB.open(); const st = await DB.get('kv', 'state'); if (st) S = migrate(st); }
+  catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  render(); initUpdates();
+})();
+</script>
+</body>
+</html>

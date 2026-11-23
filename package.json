@@ -1,0 +1,64 @@
+{
+  "name": "office-home",
+  "productName": "Office Home",
+  "version": "2.3.0",
+  "description": "Office Home – Familienbüro für Bevollmächtigte (offline)",
+  "author": "Leon",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "de.leon.officehome",
+    "productName": "Office Home",
+    "copyright": "Leon",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "OfficeHome.html",
+      "package.json"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "laith3bew-commit",
+        "repo": "office-home",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Office Home",
+      "deleteAppDataOnUninstall": false,
+      "language": "1031",
+      "installerLanguages": [
+        "de_DE"
+      ],
+      "artifactName": "OfficeHome-Setup-${version}.exe"
+    }
+  },
+  "allowScripts": {
+    "electron-winstaller": false
+  },
+  "dependencies": {
+    "electron-updater": "6.8.12"
+  }
+}
