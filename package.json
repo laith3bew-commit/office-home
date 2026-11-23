@@ -1,7 +1,7 @@
 {
   "name": "office-home",
   "productName": "Office Home",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "Office Home – Familienbüro für Bevollmächtigte (offline)",
   "author": "Leon",
   "private": true,
@@ -28,6 +28,7 @@
       "OfficeHome.html",
       "scan-main.js",
       "phone.html",
+      "fonts/**/*",
       "package.json"
     ],
     "extraResources": [

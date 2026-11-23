@@ -127,6 +127,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#
 /* Brief editor */
 .brief{display:grid;grid-template-columns:minmax(360px,440px) minmax(0,1fr);gap:18px;align-items:start}
 .brief>*{min-width:0}
+@font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-Italic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic;font-display:swap}
+.letter [data-ed]{cursor:text;border-radius:2px;outline:1px dashed transparent;outline-offset:1mm;transition:outline-color .15s}
+.letter [data-ed]:hover{outline-color:#93c5fd}
+.letter [data-ed]:focus{outline:2px solid #2563eb;background:#eff6ff;white-space:pre-wrap}
+.brief.wide{grid-template-columns:minmax(0,1fr)} .brief.wide>.ed{display:none}
+.pvhint{font-size:12px;color:var(--muted);margin-left:8px}
 .brief .ed .card{padding:14px 16px}
 .brief .ed .fld{margin-bottom:10px}
 .brief .ed .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1479,7 +1488,8 @@ function sampleLetter(){
     subject:'Antrag auf Weiterbewilligung', salutation:'Sehr geehrte Damen und Herren,', body:'hiermit beantrage ich die Weiterbewilligung der Leistungen ab dem nächsten Bewilligungszeitraum.\n\nDie erforderlichen Unterlagen füge ich bei. Bitte bestätigen Sie mir den Eingang dieses Schreibens.',
     closing:S.settings.letter.greeting, date:today(), attachments:'Weiterbewilligungsantrag', useSig:false, useStamp:false, useMarke:false, shipping:''};
 }
-function letterHTML(L, design){
+function letterHTML(L, design, opt = {}){
+  const ed = k => opt.edit ? ` data-ed="${k}" contenteditable="plaintext-only" spellcheck="true" title="Klicken und direkt im Brief schreiben"` : '';
   const ls = S.settings.letter; const dsg = design || ls.design || 'klassisch'; const p = getPerson(L.personId); const snd = senderOf(L); const bev = L.mode === 'bev' && p;
   const ret = [snd.name, snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim()].filter(Boolean).join(' · ');
   const info = [];
@@ -1499,13 +1509,13 @@ function letterHTML(L, design){
     ${ls.foldMarks ? '<div class="fold" style="top:105mm"></div><div class="hole" style="top:148.5mm"></div><div class="fold" style="top:210mm"></div>' : ''}
     <div class="l-head"><div class="n">${esc(snd.name || 'Dein Name (Einstellungen)')}</div><div class="a">${esc([snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim(), snd.phone, snd.email].filter(Boolean).join('  ·  '))}</div></div>
     <div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone">${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
-      <div class="l-addr">${markHTML(L.recipient || '[Empfänger]').replace(/\n/g, '<br>')}</div></div>
+      <div class="l-addr"${ed('recipient')}>${markHTML(L.recipient || '[Empfänger]').replace(/\n/g, '<br>')}</div></div>
     <table class="l-info">${info.map(([k, v]) => `<tr><td>${esc(k)}:</td><td>${esc(v)}</td></tr>`).join('')}</table>
     <div class="l-body">
-      <div class="l-subj">${markHTML(applyVars(L.subject, L) || '[Betreff]')}</div>
-      <p>${markHTML(L.salutation)}</p>
-      ${paras(applyVars(L.body, L) || '[Text]')}
-      <p style="margin-top:5mm">${esc(L.closing)}</p>
+      <div class="l-subj"${ed('subject')}>${markHTML(applyVars(L.subject, L) || '[Betreff]')}</div>
+      <p${ed('salutation')}>${markHTML(L.salutation)}</p>
+      <div${ed('body')}>${paras(applyVars(L.body, L) || '[Text]')}</div>
+      <p style="margin-top:5mm"${ed('closing')}>${esc(L.closing)}</p>
       <div class="l-sigwrap"><div class="l-sig">${sig}</div>${stamp}</div>
       <div>${esc(snd.name)}${bev ? `<br><span style="font-size:.92em">in Vollmacht für ${esc(anredeName(p))}</span>` : ''}</div>
       ${anl.length ? `<div class="l-anl"><b>Anlage${anl.length > 1 ? 'n' : ''}</b>${anl.map(a => esc(a)).join('<br>')}</div>` : ''}
@@ -1523,7 +1533,7 @@ VIEWS.brief = (id, q) => {
   return `<div class="head"><div class="grow"><a href="#/letters" class="small">← Briefe</a><h1>${L.isNew ? 'Neuer Brief' : 'Brief bearbeiten'}</h1></div>
     <button class="btn" data-act="saveTpl">Als Vorlage speichern</button>${memOn() ? `<button class="btn" data-act="memLetter">${icon('note')}Im Gedächtnis festhalten</button>` : ''}<button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('file')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
   ${!ls.me.name ? `<div class="banner amber">Bitte zuerst <a href="#/settings">deine Absenderdaten</a> in den Einstellungen eintragen.</div>` : ''}
-  <div class="brief">
+  <div class="brief ${UI.briefWide ? 'wide' : ''}">
     <div class="ed">
       <div class="card"><h3>1 · Absender & Person</h3>
         <div class="fld"><label>Ich schreibe …</label><select data-lf="mode">${optHTML([{v:'bev', l:'als Bevollmächtigter für eine Person'}, {v:'self', l:'im Namen der Person (Person ist Absender)'}, {v:'me', l:'für mich selbst'}], L.mode)}</select></div>
@@ -1556,14 +1566,24 @@ VIEWS.brief = (id, q) => {
       </div>
       ${memPanelHTML([getContact(L.contactId)?.name || '', getPerson(L.personId) ? personName(getPerson(L.personId)) : ''].filter(Boolean).join(' '), L.personId)}
     </div>
-    <div class="pv"><div class="tool"><b>Vorschau</b><span class="muted small">DIN 5008 Form B · A4</span><span class="pvwarn" id="pvwarn"></span></div><div class="pvbox" id="pvbox"><div class="pvscale" id="pvscale"></div></div></div>
+    <div class="pv"><div class="tool"><b>Vorschau</b><span class="muted small">DIN 5008 Form B · A4</span><span class="pvhint">Tipp: direkt im Brief klicken und schreiben</span><button class="btn sm" data-act="briefWide" style="margin-left:8px">${UI.briefWide ? 'Formular zeigen' : 'Große Vorschau'}</button><span class="pvwarn" id="pvwarn"></span></div><div class="pvbox" id="pvbox"><div class="pvscale" id="pvscale"></div></div></div>
   </div>`;
 };
 AFTER.brief = () => {
   if (!$('#pvbox')) return;
   const upd = () => {
     const box = $('#pvbox'), sc = $('#pvscale'); if (!box) return;
-    sc.innerHTML = letterHTML(LD);
+    const act = document.activeElement; if (act && act.closest && act.closest('#pvscale [data-ed]')) return; // gerade im Brief am Schreiben
+    sc.innerHTML = letterHTML(LD, null, {edit:true});
+    // Direkt im Brief bearbeiten: beim Klicken erscheint der Rohtext (mit {Platzhaltern}), Änderungen gehen sofort ins Formular
+    sc.querySelectorAll('[data-ed]').forEach(el => {
+      const k = el.dataset.ed;
+      el.addEventListener('focus', () => { el.textContent = LD[k] || ''; });
+      el.addEventListener('input', () => { LD[k] = el.innerText.replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').replace(/\n$/, ''); const f = $(`[data-lf="${k}"]`); if (f) f.value = LD[k]; });
+      el.addEventListener('blur', () => setTimeout(upd, 0));
+      el.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, normDigits(e.clipboardData.getData('text/plain'))); });
+      el.addEventListener('keydown', e => { if (e.key === 'Escape' || (e.key === 'Enter' && !['body', 'recipient'].includes(k))) { e.preventDefault(); el.blur(); } });
+    });
     const w = box.clientWidth - 36, letter = sc.firstElementChild, s = Math.min(1, w / letter.offsetWidth);
     sc.style.transform = `scale(${s})`; sc.style.height = (letter.offsetHeight * s) + 'px'; sc.style.width = letter.offsetWidth + 'px';
     const body = letter.querySelector('.l-body'); const limit = letter.offsetWidth * 279 / 210;
@@ -1577,7 +1597,7 @@ AFTER.brief = () => {
       if (k === 'contactId') { LD.recipient = contactAddress(getContact(el.value)); const r = $('[data-lf="recipient"]'); if (r) r.value = LD.recipient; }
       if (k === 'caseId' && el.value) { const c = getCase(el.value); if (c) { if (!LD.ref && c.ref) LD.ref = c.ref; if (c.personId) LD.personId = c.personId; if (c.contactId && !LD.recipient) { LD.contactId = c.contactId; LD.recipient = contactAddress(getContact(c.contactId)); } } return render(); }
       if (k === 'mode' || k === 'useMarke' || k === 'senderId') return render();
-      clearTimeout(upd._t); upd._t = setTimeout(upd, 120);
+      clearTimeout(upd._t); upd._t = setTimeout(upd, 30);
     });
   });
   const tplSel = $('[data-act-chg="tpl"]');
@@ -1746,7 +1766,7 @@ VIEWS.settings = () => {
       ${inp('me.name', 'Vor- und Nachname', me.name)}${inp('me.phone', 'Telefon', me.phone)}${inp('me.street', 'Straße und Hausnummer', me.street)}${inp('me.email', 'E-Mail', me.email, 'email')}${inp('me.zip', 'PLZ', me.zip)}${inp('me.city', 'Ort', me.city)}
     </form></div><p class="small muted" style="margin:10px 0 0">Wird automatisch als Absender in Briefe übernommen.</p></div>
     <div class="card"><h3>Briefgestaltung</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
-      <div class="fld"><label>Schriftart</label><select data-set="letter.font">${optHTML(['Arial', 'Calibri', 'Helvetica', 'Verdana', 'Times New Roman', 'Georgia'], ls.font)}</select></div>
+      <div class="fld"><label>Schriftart</label><select data-set="letter.font">${optHTML(['Arial', 'Calibri', 'Helvetica', 'Verdana', 'Times New Roman', 'Georgia', 'Courier Prime'], ls.font)}</select></div>
       <div class="fld"><label>Schriftgröße</label><select data-set="letter.size">${optHTML(['10', '11', '12'], String(ls.size))}</select></div>
       <div class="fld"><label>Datumsformat</label><select data-set="letter.longDate">${optHTML([{v:'true', l:'23. November 2026'}, {v:'false', l:'23.11.2026'}], String(ls.longDate))}</select></div>
       <div class="fld"><label>Falz- und Lochmarken</label><select data-set="letter.foldMarks">${optHTML([{v:'true', l:'anzeigen'}, {v:'false', l:'ausblenden'}], String(ls.foldMarks))}</select></div>
@@ -1855,6 +1875,7 @@ const ACT = {
   ckind: d => { UI.contactKind = d.id; render(); },
   setMode: d => setMode(d.id),
   demoReset: async () => { if (!confirm('Alle Demo-Daten durch einen frischen Beispiel-Datenbestand ersetzen? Deine echten Daten (Live) bleiben unberührt.')) return; S = buildDemoState(); await flushSave(); location.hash = '#/dashboard'; render(); toast('Demo-Daten neu erzeugt'); },
+  briefWide: () => { UI.briefWide = !UI.briefWide; const b = $('.brief'); if (b) b.classList.toggle('wide', UI.briefWide); const btn = $('[data-act=briefWide]'); if (btn) btn.textContent = UI.briefWide ? 'Formular zeigen' : 'Große Vorschau'; if (AFTER.brief.upd) AFTER.brief.upd(); },
   stat: d => { const [k, v] = d.id.split(':'); UI[k] = /Year$/.test(k) ? Number(v) : v; render(); },
   newBooking: () => editBooking(null), editBooking: d => editBooking(S.bookings.find(b => b.id === d.id)), csvImport: () => csvImport(),
   finMonth: d => { UI.finMonth = mshift(UI.finMonth, Number(d.id)); render(); },
