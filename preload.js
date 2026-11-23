@@ -15,5 +15,11 @@ contextBridge.exposeInMainWorld('officeHome', {
   updateCheck: () => ipcRenderer.invoke('oh:updateCheck'),
   updateDownload: () => ipcRenderer.invoke('oh:updateDownload'),
   updateInstall: () => ipcRenderer.invoke('oh:updateInstall'),
-  onUpdate: (cb) => ipcRenderer.on('oh:update', (e, data) => cb(data))
+  onUpdate: (cb) => ipcRenderer.on('oh:update', (e, data) => cb(data)),
+  // Gedächtnis (Memory-Engine)
+  memPickRoot: () => ipcRenderer.invoke('oh:memPickRoot'),
+  memStatus: (root) => ipcRenderer.invoke('oh:memStatus', root),
+  memSearch: (root, ws, query) => ipcRenderer.invoke('oh:memSearch', root, ws, query),
+  memNote: (root, ws, note) => ipcRenderer.invoke('oh:memNote', root, ws, note),
+  memTask: (root, task) => ipcRenderer.invoke('oh:memTask', root, task)
 });

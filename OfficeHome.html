@@ -213,6 +213,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#
 .num.aus,b.aus{color:var(--danger)} .num.ein{color:var(--ok)}
 .hb{margin-bottom:10px} .hbl{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:3px}
 @media (max-width:1100px){.stats.g2,.stats.g3{grid-template-columns:1fr}}
+.modesw{display:inline-flex;background:#eef1f5;border-radius:999px;padding:3px;gap:2px}
+.modesw button{border:0;background:transparent;padding:5px 14px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.modesw button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.modesw.demo button.on{background:#f59e0b;color:#1f2937}
+.demotag{font-size:12px;font-weight:700;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;padding:4px 6px 4px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+body.is-demo .mainwrap{box-shadow:inset 0 4px 0 #f59e0b}
 .updchip{display:block;margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#f59e0b;color:#1f2937;font-size:12.5px;font-weight:600;text-decoration:none;text-align:center}
 .dsgrid{display:flex;flex-wrap:wrap;gap:14px}
 .dstile{border:2px solid var(--line,#d9dee7);border-radius:10px;padding:8px;background:transparent;cursor:pointer;text-align:center;font:inherit;color:inherit}
@@ -266,6 +272,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#
   <div class="mainwrap">
     <div class="top">
       <div class="pills" id="pills"></div>
+      <div id="modesw" style="display:flex;align-items:center;gap:10px"></div>
       <div class="search">
         <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input id="q" placeholder="Alles durchsuchen … (Enter)" autocomplete="off">
@@ -372,7 +379,8 @@ function defaultState(){
     settings: {
       me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
       letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79'},
-      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true
+      signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true,
+      memory: {root:'', map:{}, defaultWs:'', remindDays:14}
     },
     persons: [p('p_vater', 'Vater', 'Herr', '#2563eb'), p('p_mutter', 'Mutter', 'Frau', '#db2777')],
     contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[]
@@ -381,13 +389,15 @@ function defaultState(){
 let S = defaultState();
 const UI = {person:'all', contactKind:'', contactQ:'', statRange:'monat', statYear:new Date().getFullYear(), finMonth: today().slice(0, 7), finYear:new Date().getFullYear(), finType:'', taskTab:'open', caseTab:'open', docCat:'', docQ:'', reportMonth: today().slice(0, 7)};
 let saveTimer = null;
-function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.db && DB.put('kv', 'state', S).catch(e => alert('Speichern fehlgeschlagen: ' + e)), 250); }
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(() => DB.db && DB.put('kv', stateKey(), S).catch(e => alert('Speichern fehlgeschlagen: ' + e)), 250); }
 function migrate(st){
   const d = defaultState();
   for (const k in d) if (st[k] === undefined) st[k] = d[k];
   st.settings = Object.assign({}, d.settings, st.settings);
   st.settings.me = Object.assign({}, d.settings.me, st.settings.me);
   st.settings.letter = Object.assign({}, d.settings.letter, st.settings.letter);
+  st.settings.memory = Object.assign({}, d.settings.memory, st.settings.memory);
+  st.settings.memory.map = Object.assign({}, st.settings.memory.map);
   return st;
 }
 
@@ -723,6 +733,7 @@ function renderNav(route){
   const act = ROUTE_NAV[route] ?? route;
   $('#nav').innerHTML = NAV.map(n => n.grp ? `<div class="grp">${n.grp}</div>` : (() => { const c = n.cnt ? n.cnt() : 0;
     return `<a href="#/${n.r}" class="${act === n.r ? 'on' : ''}">${icon(n.i)}${n.l}${c ? `<span class="cnt">${c}</span>` : ''}</a>`; })()).join('');
+  $('#modesw').innerHTML = modeSwitchHTML();
   $('#pills').innerHTML = `<button class="pill ${UI.person === 'all' ? 'on' : ''}" data-act="pfilter" data-id="all">Alle</button>` +
     S.persons.map(p => `<button class="pill ${UI.person === p.id ? 'on' : ''}" data-act="pfilter" data-id="${p.id}"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}</button>`).join('');
 }
@@ -763,7 +774,7 @@ VIEWS.dashboard = () => {
   return `
   <div class="head"><div class="grow"><h1>Übersicht</h1><p class="sub" style="margin:0">${fmtDateLong(today())}${UI.person !== 'all' ? ' · ' + esc(getPerson(UI.person)?.role) : ''}</p></div>
     <button class="btn" data-act="newTask">${icon('plus')}Frist</button><button class="btn" data-act="newCase">${icon('plus')}Vorgang</button><button class="btn" data-act="newDoc">${icon('plus')}Dokument</button><a class="btn pri" href="#/brief/new">${icon('pen')}Brief schreiben</a></div>
-  ${setupMissing ? `<div class="banner blue">${icon('users')}<div><b>Willkommen bei Office Home!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.</div></div>` : ''}
+  ${setupMissing ? `<div class="banner blue">${icon('users')}<div><b>Willkommen bei Office Home!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.<br><a href="#" data-act="setMode" data-id="demo">Oder zuerst im Demo-Modus mit vielen Beispieldaten ausprobieren →</a></div></div>` : ''}
   ${overdue.length ? `<div class="banner red">${icon('clock')}<div><b>${overdue.length} überfällige Frist${overdue.length > 1 ? 'en' : ''}!</b> ${overdue.slice(0, 3).map(i => esc(i.title)).join(' · ')}</div></div>` : ''}
   ${needBackup && !setupMissing ? `<div class="banner amber">${icon('save')}<div>${lb ? 'Letzte Datensicherung am ' + fmtDate(lb) + '.' : 'Noch keine Datensicherung erstellt.'} <a href="#" data-act="backup">Jetzt sichern</a></div></div>` : ''}
   <div class="kpis">
@@ -1229,7 +1240,7 @@ VIEWS.case = id => {
   return `<div class="head"><div class="grow"><a href="#/cases" class="small">← Vorgänge</a><h1>${esc(c.title)}</h1>
     <div class="small muted">${personChip(c.personId)} ${ct ? '· ' + esc(ct.name) : ''} ${c.ref ? '· Az. ' + esc(c.ref) : ''} · begonnen ${fmtDate(c.start)}</div></div>
     <select class="btn" data-chg="caseStatus" data-id="${c.id}">${optHTML(CASE_STATUS, c.status)}</select>
-    <button class="btn" data-act="editCase" data-id="${c.id}">Bearbeiten</button><a class="btn pri" href="#/brief/new?case=${c.id}">${icon('pen')}Brief zu diesem Vorgang</a></div>
+    <button class="btn" data-act="editCase" data-id="${c.id}">Bearbeiten</button>${memOn() ? `<button class="btn" data-act="memCase" data-id="${c.id}">${icon('note')}Im Gedächtnis festhalten</button>` : ''}<a class="btn pri" href="#/brief/new?case=${c.id}">${icon('pen')}Brief zu diesem Vorgang</a></div>
   <div class="grid g2">
     <div>
       ${c.description ? `<div class="card"><h3>Beschreibung</h3><div style="white-space:pre-wrap">${esc(c.description)}</div></div>` : ''}
@@ -1239,6 +1250,7 @@ VIEWS.case = id => {
         <div class="list">${tasks.map(t => taskRow(t)).join('') || '<div class="muted small">Keine Fristen.</div>'}</div></div>
     </div>
     <div>
+      ${memPanelHTML([ct ? ct.name : '', c.title].filter(Boolean).join(' '), c.personId)}
       <div class="card"><h3>${icon('file')}Dokumente <button class="btn sm r" data-act="newDoc" data-case="${c.id}">${icon('plus')}Dokument</button></h3>
         <div class="list">${docs.map(d => `<div class="row"><div class="grow"><a href="#" data-act="openDoc" data-id="${d.id}" class="trunc" style="display:block">${esc(d.title)}</a><span class="small muted">${esc(d.category || '')} · ${fmtDate(d.date)}</span></div>${d.deadline ? dueBadge(d.deadline) : ''}</div>`).join('') || '<div class="muted small">Keine Dokumente.</div>'}</div></div>
       <div class="card"><h3>${icon('mail')}Briefe</h3><div class="list">${letters.map(l => `<div class="row"><div class="grow"><a href="#/brief/${l.id}" class="trunc" style="display:block">${esc(letterSubject(l))}</a><span class="small muted">${fmtDate(l.date)}${l.shipping ? ' · ' + esc(l.shipping) : ''}</span></div></div>`).join('') || '<div class="muted small">Noch keine Briefe.</div>'}</div></div>
@@ -1481,7 +1493,7 @@ VIEWS.brief = (id, q) => {
   }
   const L = LD; const ls = S.settings;
   return `<div class="head"><div class="grow"><a href="#/letters" class="small">← Briefe</a><h1>${L.isNew ? 'Neuer Brief' : 'Brief bearbeiten'}</h1></div>
-    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button><button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('file')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
+    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button>${memOn() ? `<button class="btn" data-act="memLetter">${icon('note')}Im Gedächtnis festhalten</button>` : ''}<button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('file')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
   ${!ls.me.name ? `<div class="banner amber">Bitte zuerst <a href="#/settings">deine Absenderdaten</a> in den Einstellungen eintragen.</div>` : ''}
   <div class="brief">
     <div class="ed">
@@ -1514,6 +1526,7 @@ VIEWS.brief = (id, q) => {
         <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox"><button class="btn sm" data-act="markeUpload">Internetmarke als Bild laden (PNG/JPG)</button> ${L.markeImg ? '<button class="btn sm dan" data-act="markeDel">entfernen</button>' : ''}
           ${L.markeImg ? `<img class="imgprev" src="${L.markeImg}">` : ''}<div class="hint small muted" style="margin-top:4px">Internetmarke bei der Deutschen Post online kaufen, als Bild speichern und hier laden. Vor dem ersten Versand einmal Probe drucken und mit Fensterumschlag (DL) prüfen.</div></div>
       </div>
+      ${memPanelHTML([getContact(L.contactId)?.name || '', getPerson(L.personId) ? personName(getPerson(L.personId)) : ''].filter(Boolean).join(' '), L.personId)}
     </div>
     <div class="pv"><div class="tool"><b>Vorschau</b><span class="muted small">DIN 5008 Form B · A4</span><span class="pvwarn" id="pvwarn"></span></div><div class="pvbox" id="pvbox"><div class="pvscale" id="pvscale"></div></div></div>
   </div>`;
@@ -1728,6 +1741,7 @@ VIEWS.settings = () => {
       <div class="fld"><label>Vertragskündigungen anzeigen (Tage vorher)</label><input type="number" data-set="contractDays" value="${s.contractDays}"></div><div></div>
     </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.</p></div>
     ${DESKTOP ? `<div class="card" id="updCard" style="grid-column:1/-1">${updCardHTML()}</div>` : ''}
+    ${DESKTOP && window.officeHome.memStatus ? `<div class="card" id="memCard" style="grid-column:1/-1">${memCardHTML()}</div>` : ''}
     <div class="card" style="grid-column:1/-1"><h3>${icon('save')}Datensicherung</h3>
       <p style="margin-top:0">Alle Daten liegen <b>nur auf diesem Computer</b> (im Browser-Speicher dieses Programms). Erstelle regelmäßig eine Sicherung und speichere sie z. B. auf einem USB-Stick.</p>
       <p class="small muted">Letzte Sicherung: ${s.lastBackup ? fmtDate(s.lastBackup) : 'noch nie'} · <span id="usage"></span></p>
@@ -1745,6 +1759,7 @@ AFTER.settings = async () => {
 
 // ---------- Sicherung / Kalender ----------
 async function backup(){
+  if (MODE === 'demo') return alert('Im Demo-Modus gibt es keine Sicherung – das sind nur Beispieldaten. Für deine echten Daten oben auf „Live“ umschalten.');
   const files = {};
   for (const d of S.documents) if (d.fileId) { const f = await fileGet(d.fileId); if (f) files[d.fileId] = {name:f.name, type:f.type, data: await blobToDataURL(f.blob)}; }
   S.settings.lastBackup = today(); save();
@@ -1753,6 +1768,7 @@ async function backup(){
   toast('Sicherung erstellt'); render();
 }
 async function restore(){
+  if (MODE === 'demo') return alert('Im Demo-Modus nicht möglich. Bitte oben zuerst auf „Live“ umschalten.');
   const f = await pickFile('.json,application/json'); if (!f) return;
   let data; try { data = JSON.parse(await f.text()); } catch (e) { return alert('Datei ist keine gültige Sicherung.'); }
   if (data.app !== 'OfficeHome' || !data.state) return alert('Datei ist keine Office-Home-Sicherung.');
@@ -1762,6 +1778,7 @@ async function restore(){
   S = migrate(data.state); save(); toast('Sicherung wiederhergestellt'); location.hash = '#/dashboard'; render();
 }
 async function wipe(){
+  if (MODE === 'demo') return ACT.demoReset();
   if (!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.')) return;
   if (prompt('Zur Bestätigung bitte LÖSCHEN eingeben:') !== 'LÖSCHEN') return;
   if (DB.db) await DB.clear('files'); S = defaultState(); save(); location.hash = '#/dashboard'; render();
@@ -1804,6 +1821,8 @@ const ACT = {
   briefNewContact: () => editContact(null, c => { LD.contactId = c.id; LD.recipient = contactAddress(c); render(); }),
   briefNewSender: () => editContact(null, c => { LD.senderId = isPrivate(c) ? 'c:' + c.id : LD.senderId; render(); }, {kind:'Privatperson'}),
   ckind: d => { UI.contactKind = d.id; render(); },
+  setMode: d => setMode(d.id),
+  demoReset: async () => { if (!confirm('Alle Demo-Daten durch einen frischen Beispiel-Datenbestand ersetzen? Deine echten Daten (Live) bleiben unberührt.')) return; S = buildDemoState(); await flushSave(); location.hash = '#/dashboard'; render(); toast('Demo-Daten neu erzeugt'); },
   stat: d => { const [k, v] = d.id.split(':'); UI[k] = /Year$/.test(k) ? Number(v) : v; render(); },
   newBooking: () => editBooking(null), editBooking: d => editBooking(S.bookings.find(b => b.id === d.id)), csvImport: () => csvImport(),
   finMonth: d => { UI.finMonth = mshift(UI.finMonth, Number(d.id)); render(); },
@@ -1845,7 +1864,7 @@ document.addEventListener('change', e => {
 });
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { location.hash = '#/search?q=' + encodeURIComponent(e.target.value); } });
 window.addEventListener('hashchange', render);
-window.addEventListener('beforeunload', () => { if (saveTimer && DB.db) { clearTimeout(saveTimer); DB.put('kv', 'state', S); } });
+window.addEventListener('beforeunload', () => { if (saveTimer && DB.db) { clearTimeout(saveTimer); DB.put('kv', stateKey(), S); } });
 
 // ---------- Programm-Update (nur Desktop) ----------
 const UPD = {state:'idle', current:'', version:'', percent:0, message:''};
@@ -1879,7 +1898,7 @@ function initUpdates(){
     updUI();
   });
 }
-async function flushSave(){ clearTimeout(saveTimer); if (DB.db) await DB.put('kv', 'state', S); }
+async function flushSave(){ clearTimeout(saveTimer); if (DB.db) await DB.put('kv', stateKey(), S); }
 Object.assign(ACT, {
   updCheck: async () => { UPD.state = 'checking'; updUI(); const r = await window.officeHome.updateCheck();
     if (!r.ok) { UPD.state = 'error'; UPD.message = r.message; } else if (UPD.state === 'checking') UPD.state = r.latest && r.latest !== r.current ? UPD.state : 'none'; updUI(); },
@@ -1887,12 +1906,299 @@ Object.assign(ACT, {
   updInstall: async () => { await flushSave(); toast('Update wird installiert …'); await window.officeHome.updateInstall(); }
 });
 
+// ---------- Gedächtnis (Memory-Engine, nur Desktop) ----------
+// Office Home liest über „mem search“ aus dem Gedächtnis und schreibt Notizen (gesendete Briefe/E-Mails,
+// Vorgänge) sowie Erinnerungen hinein. Welche Person in welchen Arbeitsbereich gehört, steht in settings.memory.map.
+const MEM = {status:null, loading:false};
+const MEM_KINDS = ['Brief per Post', 'E-Mail', 'Fax', 'Antrag / Formular', 'Persönlich abgegeben', 'Telefonat', 'Notiz'];
+const memCfg = () => S.settings.memory;
+// Im Demo-Modus nie ins echte Gedächtnis schreiben oder daraus lesen.
+const memOn = () => DESKTOP && MODE !== 'demo' && !!window.officeHome.memStatus && !!memCfg().root && !!(MEM.status && MEM.status.ok);
+const memWsFor = personId => (personId && memCfg().map[personId]) || memCfg().defaultWs || '';
+const memWsOpts = () => [{v:'', l:'Hauptordner (Memory)'}, ...((MEM.status && MEM.status.workstations) || []).map(w => ({v:w.path, l:w.path}))];
+const addDaysISO = (iso, n) => { const d = new Date((iso || today()) + 'T00:00'); d.setDate(d.getDate() + (Number(n) || 0)); return isoDate(d); };
+
+async function memLoadStatus(){
+  if (!DESKTOP || !window.officeHome.memStatus || !memCfg().root) { MEM.status = null; return; }
+  MEM.status = await window.officeHome.memStatus(memCfg().root);
+}
+function memCardHTML(){
+  const m = memCfg(), st = MEM.status;
+  let body = `<p style="margin-top:0">Verbindet Office Home mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>Memory-Ordner:</b> <span class="small">${m.root ? esc(m.root) : '<span class="muted">nicht gewählt</span>'}</span>
+      <span style="flex:1"></span><button class="btn" data-act="memPick">Ordner wählen</button>${m.root ? '<button class="btn dan" data-act="memOff">Verbindung trennen</button>' : ''}</div>`;
+  if (m.root && st && !st.ok) body += `<p style="color:#b91c1c">${esc(st.message || 'Nicht erreichbar')}</p>`;
+  if (m.root && st && st.ok) {
+    body += `<p class="small" style="color:#166534">✓ Verbunden · ${st.workstations.length} Arbeitsbereiche gefunden</p>
+      <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+      ${S.persons.map(p => `<div class="fld"><label>${esc(p.role)}${personName(p) !== p.role ? ' – ' + esc(personName(p)) : ''} gehört zu</label><select data-chg="memMap" data-id="${p.id}">${optHTML(memWsOpts(), m.map[p.id] || '')}</select></div>`).join('')}
+      <div class="fld"><label>Ohne Person (Allgemein)</label><select data-chg="memDefault">${optHTML(memWsOpts(), m.defaultWs)}</select></div>
+      <div class="fld"><label>Erinnerung standardmäßig nach (Tagen)</label><input type="number" min="1" data-chg="memDays" value="${esc(m.remindDays)}"></div>
+      </form></div>
+      <p class="small muted">Wichtig: Jede Person in ihren eigenen Arbeitsbereich legen – die Wände des Gedächtnisses trennen die Bereiche. Notizen landen unter „&lt;Arbeitsbereich&gt;/.memory/office-home/“, Erinnerungen in der Aufgabenliste des Gedächtnisses (Dashboard → Tasks). Keine Passwörter oder PINs in festgehaltene Texte schreiben.</p>`;
+  }
+  return `<h3>${icon('note')}Gedächtnis (Memory)</h3>${body}`;
+}
+function memCardUpdate(){ const c = $('#memCard'); if (c) c.innerHTML = memCardHTML(); }
+
+function memPanelHTML(q, personId){
+  if (!memOn()) return '';
+  return `<div class="card"><h3>${icon('note')}Aus dem Gedächtnis</h3>
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap"><select id="memWs" style="padding:6px;border:1px solid var(--line);border-radius:8px;max-width:180px">${optHTML(memWsOpts(), memWsFor(personId))}</select>
+      <input id="memQ" value="${esc(q)}" placeholder="z. B. Jobcenter Aktenzeichen" style="flex:1;min-width:140px;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="memSearch">Suchen</button></div>
+    <div id="memHits" class="list"><div class="muted small">Suche im Gedächtnis – z. B. nach Behörde, Aktenzeichen oder letztem Schreiben.</div></div></div>`;
+}
+async function memSearch(){
+  const q = $('#memQ'), box = $('#memHits'); if (!q || !box) return;
+  if (!q.value.trim()) return q.focus();
+  box.innerHTML = '<div class="muted small">Suche läuft …</div>';
+  const r = await window.officeHome.memSearch(memCfg().root, $('#memWs').value, q.value);
+  if (!r.ok) { box.innerHTML = `<div class="small" style="color:#b91c1c">${esc(r.message)}</div>`; return; }
+  box.innerHTML = r.hits.length ? r.hits.map(h => `<div class="row" style="align-items:flex-start"><div class="grow"><div class="ttl">${esc(h.title)}</div>
+      <div class="small muted trunc">${esc(h.path)}</div>${h.snippet ? `<div class="small" style="white-space:pre-wrap;margin-top:3px">${esc(h.snippet.slice(0, 400))}</div>` : ''}</div></div>`).join('')
+    : '<div class="muted small">Nichts gefunden. Andere Begriffe versuchen.</div>';
+}
+
+// Gemeinsames Formular: Notiz ins Gedächtnis + optional Erinnerung (Gedächtnis und Office Home).
+function memRecord({title, kind, to, ref, body, personId, caseId, caseTitle, date, remindText}){
+  const m = memCfg(); const p = getPerson(personId);
+  const fields = [
+    {k:'ws', l:'Arbeitsbereich im Gedächtnis', t:'select', o:memWsOpts()},
+    {k:'kind', l:'Art', t:'select', o:MEM_KINDS},
+    {k:'title', l:'Titel', req:1, full:1}, {k:'date', l:'Datum', t:'date'}, {k:'to', l:'An / Stelle'},
+    {k:'body', l:'Inhalt (wird mit gespeichert)', t:'textarea', rows:9, full:1},
+    {k:'remind', l:'Erinnerung anlegen', t:'checkbox'}, {k:'days', l:'Erinnerung nach (Tagen)', t:'number'},
+    {k:'remindText', l:'Erinnerungstext', full:1},
+    {k:'localTask', l:'Erinnerung auch als Frist in Office Home', t:'checkbox', full:1}
+  ];
+  openForm({title:'Im Gedächtnis festhalten', fields, saveLabel:'Festhalten',
+    data:{ws:memWsFor(personId), kind:kind || MEM_KINDS[0], title, date:date || today(), to, body, remind:true, days:m.remindDays || 14, remindText, localTask:true},
+    onSave: async v => {
+      const due = addDaysISO(v.date, v.days);
+      const r = await window.officeHome.memNote(m.root, v.ws, {title:v.title, date:v.date, kind:v.kind, to:v.to, ref, caseTitle,
+        person: p ? personName(p) : '', body:v.body, reminder: v.remind ? fmtDate(due) + ' – ' + v.remindText : ''});
+      if (!r.ok) { alert('Festhalten fehlgeschlagen: ' + r.message); return false; }
+      if (v.remind && v.remindText) {
+        const t = await window.officeHome.memTask(m.root, {title:v.remindText, due, note:'aus Office Home: ' + v.title});
+        if (!t.ok) alert('Notiz gespeichert, aber Erinnerung fehlgeschlagen: ' + t.message);
+        if (v.localTask) S.tasks.push({id:uid(), title:v.remindText, due, personId:personId || '', caseId:caseId || '', priority:'normal', notes:'Festgehalten: ' + v.title, done:false, created:today()});
+      }
+      if (caseId) { const c = getCase(caseId); if (c) c.log.push({id:uid(), date:today(), text:'Im Gedächtnis festgehalten: ' + v.title}); }
+      save(); render();
+      toast(r.indexed ? 'Im Gedächtnis festgehalten' : 'Gespeichert – Index wird beim nächsten Lauf aktualisiert');
+    }});
+}
+function letterPlain(L){
+  return [L.recipient ? 'Empfänger:\n' + L.recipient : '', 'Betreff: ' + letterSubject(L), L.salutation || '', applyVars(L.body, L), L.closing || '',
+    L.attachments ? 'Anlagen:\n' + L.attachments : ''].filter(x => x && x.trim()).join('\n\n');
+}
+Object.assign(ACT, {
+  memPick: async () => { const r = await window.officeHome.memPickRoot(); if (!r) return; memCfg().root = r; save(); await memLoadStatus(); memCardUpdate(); if (MEM.status && MEM.status.ok) toast('Gedächtnis verbunden'); },
+  memOff: () => { if (!confirm('Verbindung zum Gedächtnis trennen? Es wird nichts gelöscht.')) return; memCfg().root = ''; MEM.status = null; save(); render(); },
+  memSearch: () => memSearch(),
+  memLetter: () => {
+    const L = LD; const ct = getContact(L.contactId); const to = ct ? ct.name : (L.recipient || '').split('\n')[0];
+    const kind = L.shipping === 'Per E-Mail vorab' ? 'E-Mail' : L.shipping === 'Per Fax vorab' ? 'Fax' : L.shipping === 'Persönlich abgegeben' ? 'Persönlich abgegeben' : 'Brief per Post';
+    const subj = letterSubject(L);
+    memRecord({title:`${kind} an ${to || 'Empfänger'}: ${subj}`, kind, to, ref:L.ref, body:letterPlain(L), personId:L.personId, caseId:L.caseId,
+      caseTitle:getCase(L.caseId)?.title || '', date:L.date, remindText:`Antwort von ${to || 'Empfänger'} auf „${subj}“ vom ${fmtDate(L.date)} prüfen`});
+  },
+  memCase: d => {
+    const c = getCase(d.id); const ct = getContact(c.contactId);
+    const log = [...(c.log || [])].sort((a, b) => a.date.localeCompare(b.date)).map(l => fmtDate(l.date) + ': ' + l.text).join('\n');
+    memRecord({title:`Vorgang: ${c.title}`, kind:'Notiz', to:ct ? ct.name : '', ref:c.ref, personId:c.personId, caseId:c.id, caseTitle:c.title,
+      body:[`Status: ${c.status}`, c.description || '', log ? 'Verlauf:\n' + log : ''].filter(Boolean).join('\n\n'), remindText:`Vorgang „${c.title}“ nachfassen`});
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-chg]'); if (!el) return; const m = memCfg();
+  if (el.dataset.chg === 'memMap') { m.map[el.dataset.id] = el.value; save(); toast('Gespeichert'); }
+  if (el.dataset.chg === 'memDefault') { m.defaultWs = el.value; save(); toast('Gespeichert'); }
+  if (el.dataset.chg === 'memDays') { m.remindDays = Math.max(1, Number(el.value) || 14); save(); toast('Gespeichert'); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'memQ') { e.preventDefault(); memSearch(); } });
+
+// ---------- Demo-Modus / Live-Modus ----------
+// Live- und Demo-Daten liegen getrennt in IndexedDB (kv: 'state' bzw. 'demoState'); der Modus steht in kv: 'mode'.
+let MODE = 'live';
+const stateKey = () => MODE === 'demo' ? 'demoState' : 'state';
+function modeSwitchHTML(){
+  return `<div class="modesw ${MODE}"><button class="${MODE === 'live' ? 'on' : ''}" data-act="setMode" data-id="live">Live</button><button class="${MODE === 'demo' ? 'on' : ''}" data-act="setMode" data-id="demo">Demo</button></div>`
+    + (MODE === 'demo' ? `<span class="demotag">DEMO-MODUS · Beispieldaten <button class="btn sm" data-act="demoReset">Neu erzeugen</button></span>` : '');
+}
+async function setMode(m){
+  if (m === MODE) return;
+  await flushSave(); MODE = m;
+  if (DB.db) await DB.put('kv', 'mode', m);
+  const st = DB.db ? await DB.get('kv', stateKey()) : null;
+  S = st ? migrate(st) : (m === 'demo' ? buildDemoState() : defaultState());
+  if (!st) await flushSave();
+  UI.person = 'all'; UI.finMonth = today().slice(0, 7); LD = null; LDkey = '';
+  document.body.classList.toggle('is-demo', MODE === 'demo');
+  location.hash = '#/dashboard'; render();
+  toast(m === 'demo' ? 'Demo-Modus: Beispieldaten – deine echten Daten bleiben unberührt' : 'Live-Modus: deine echten Daten');
+}
+
+// Erzeugt einen großen, in sich stimmigen Beispiel-Datenbestand (12 Monate rückwirkend ab heute).
+function buildDemoState(){
+  let seed = 20261123; const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1)), pick = a => a[Math.floor(rnd() * a.length)], money = (a, b) => Math.round((a + rnd() * (b - a)) * 100) / 100;
+  const T = today(), D = n => dshift(T, n), id = p => p + '_' + Math.random().toString(36).slice(2, 9);
+  const st = defaultState();
+  st.settings.me = {name:'Sami Becker', street:'Lindenweg 14', zip:'10115', city:'Berlin', phone:'0176 12345678', email:'sami.becker@example.org'};
+  st.settings.lastBackup = T;
+  const V = 'p_vater', M = 'p_mutter';
+  st.persons = [
+    Object.assign(st.persons[0], {firstName:'Karl', lastName:'Becker', birth:'1946-03-14', street:'Ahornstraße 7', zip:'10247', city:'Berlin', phone:'030 4455667', taxId:'12 345 678 901', pensionNo:'65 140346 B 012', healthInsurance:'AOK Nordost · A123456789', poaDate:'2023-05-02', poaScope:'Generalvollmacht (notariell)'}),
+    Object.assign(st.persons[1], {firstName:'Ingrid', lastName:'Becker', birth:'1949-09-02', street:'Birkenallee 22', zip:'10405', city:'Berlin', phone:'030 9988776', taxId:'98 765 432 109', pensionNo:'65 020949 K 507', healthInsurance:'Techniker Krankenkasse · T987654321', poaDate:'2023-05-02', poaScope:'Vorsorgevollmacht, Gesundheit und Behörden', notes:'Pflegegrad 3 seit 2025. Pflegedienst „Sonnenschein“ kommt 2× täglich.'})
+  ];
+  // Adressbuch
+  const C = (name, o = {}) => Object.assign({id:id('c'), kind:'Behörde / Firma', salutation:'—', name, department:'', contactPerson:'', street:'', zip:'', city:'Berlin', phone:'', email:'', fax:'', notes:''}, o);
+  const cJC = C('Jobcenter Berlin Mitte', {department:'Leistungsabteilung', street:'Postfach 21 11 11', zip:'10123', phone:'030 555 1100'});
+  const cDRV = C('Deutsche Rentenversicherung Bund', {street:'Ruhrstraße 2', zip:'10709', phone:'0800 1000 4800'});
+  const cAOK = C('AOK Nordost', {department:'Pflegekasse', street:'Wilhelmstraße 1', zip:'10963', phone:'0800 265 080', email:'service@nordost.aok.de'});
+  const cTK = C('Techniker Krankenkasse', {department:'Pflegeversicherung', street:'Bramfelder Straße 140', zip:'22305', city:'Hamburg', phone:'040 460 66 10 00'});
+  const cLAGeSo = C('Landesamt für Gesundheit und Soziales', {department:'Versorgungsamt', street:'Sächsische Straße 28', zip:'10707', phone:'030 90229 6000'});
+  const cWG = C('Bezirksamt Mitte – Wohngeldstelle', {street:'Karl-Marx-Allee 31', zip:'10178', phone:'030 9018 3000'});
+  const cFA = C('Finanzamt Prenzlauer Berg', {street:'Storkower Straße 134', zip:'10407', phone:'030 9024 2800'});
+  const cVerm = C('Wohnungsbau Berlin GmbH', {department:'Mieterservice', contactPerson:'Frau Kaya', street:'Alexanderstraße 5', zip:'10178', phone:'030 2468 100'});
+  const cPD = C('Pflegedienst Sonnenschein', {contactPerson:'Herr Wolf', street:'Rosenthaler Straße 40', zip:'10178', phone:'030 3344 556'});
+  const cArzt = C('Praxis Dr. Hoffmann', {department:'Allgemeinmedizin', street:'Schönhauser Allee 80', zip:'10439', phone:'030 444 2211'});
+  const cBank = C('Berliner Sparkasse', {street:'Alexanderplatz 2', zip:'10178', phone:'030 869 869 69'});
+  const cRB = C('ARD ZDF Deutschlandradio Beitragsservice', {street:'Freimersdorfer Weg 6', zip:'50829', city:'Köln'});
+  const cAmt = C('Amtsgericht Mitte', {department:'Nachlass- und Betreuungsgericht', street:'Littenstraße 12', zip:'10179'});
+  const cSan = C('Sanitätshaus Mobil', {street:'Torstraße 99', zip:'10119', phone:'030 2828 300'});
+  const privates = [C('Laura Becker', {kind:'Privatperson', salutation:'Frau', street:'Lindenweg 14', zip:'10115', phone:'0151 2233445', email:'laura.becker@example.org', notes:'Schwester'}),
+    C('Thomas Krüger', {kind:'Privatperson', salutation:'Herr', street:'Gartenstraße 3', zip:'10115', phone:'0170 9876543', notes:'Nachbar der Eltern, hat Schlüssel'}),
+    C('Maria Schulz', {kind:'Privatperson', salutation:'Frau', street:'Eichenweg 9', zip:'12557', phone:'030 6655 4433', notes:'Freundin der Mutter'})];
+  st.contacts = [cJC, cDRV, cAOK, cTK, cLAGeSo, cWG, cFA, cVerm, cPD, cArzt, cBank, cRB, cAmt, cSan, ...privates];
+  // Konten & Vermögen (Stand vor 12 Monaten, danach laufen die Buchungen)
+  const start = D(-365);
+  const aV = {id:id('a'), name:'Girokonto Karl', type:'Bankkonto', personId:V, institution:'Berliner Sparkasse', number:'DE12 1005 0000 0123 4567 89', value:3150, valueDate:start, contact:'Kundenberater Herr Lenz'};
+  const aM = {id:id('a'), name:'Girokonto Ingrid', type:'Bankkonto', personId:M, institution:'Berliner Volksbank', number:'DE34 1009 0000 9876 5432 10', value:1840, valueDate:start};
+  st.assets = [aV, aM,
+    {id:id('a'), name:'Sparbuch Karl', type:'Sparkonto / Depot', personId:V, institution:'Berliner Sparkasse', value:12400, valueDate:D(-30)},
+    {id:id('a'), name:'Tagesgeld Ingrid', type:'Sparkonto / Depot', personId:M, institution:'ING', value:6850, valueDate:D(-30)},
+    {id:id('a'), name:'Gesetzliche Rente', type:'Rente / Altersvorsorge', personId:V, institution:'Deutsche Rentenversicherung', number:'65 140346 B 012', value:'', valueDate:''},
+    {id:id('a'), name:'Sterbegeldversicherung', type:'Versicherung', personId:M, institution:'Ideal Versicherung', number:'SV-4471', value:5000, valueDate:D(-120)},
+    {id:id('a'), name:'VW Golf (Bj. 2014)', type:'Fahrzeug', personId:V, number:'B-KB 4612', value:6200, valueDate:D(-60)},
+    {id:id('a'), name:'Ratenkredit Küche', type:'Schulden / Kredit', personId:V, institution:'Berliner Sparkasse', value:-1850, valueDate:D(-30)}];
+  // Verträge
+  const K = (provider, category, personId, amount, interval, startDate, o = {}) => Object.assign({id:id('k'), provider, category, personId, amount, interval, start:startDate, payment:'Lastschrift', customerNo:'KD-' + ri(100000, 999999), noticeMonths:1, renewalMonths:0, end:'', contactId:'', notes:''}, o);
+  st.contracts = [
+    K('Wohnungsbau Berlin (Miete Karl)', 'Miete', V, 780, 'monatlich', '2012-04-01', {contactId:cVerm.id, payment:'Dauerauftrag'}),
+    K('Vattenfall Strom', 'Strom', V, 64, 'monatlich', '2021-01-15', {end:D(70), renewalMonths:12, noticeMonths:1}),
+    K('Vattenfall Strom', 'Strom', M, 52, 'monatlich', '2021-01-15', {end:D(70), renewalMonths:12}),
+    K('Telekom Festnetz & Internet', 'Internet / Telefon', V, 39.95, 'monatlich', '2019-07-12', {end:D(40), renewalMonths:12, noticeMonths:1}),
+    K('Vodafone Mobilfunk', 'Mobilfunk', M, 9.99, 'monatlich', '2022-02-05'),
+    K('Rundfunkbeitrag', 'Rundfunkbeitrag', V, 55.08, 'vierteljährlich', '2013-01-15', {contactId:cRB.id}),
+    K('Hausratversicherung', 'Versicherung', V, 96, 'jährlich', '2018-' + T.slice(5, 7) + '-20', {end:D(25), renewalMonths:12, noticeMonths:3}),
+    K('Privathaftpflicht', 'Versicherung', M, 68.4, 'jährlich', '2017-03-01', {renewalMonths:12, noticeMonths:3}),
+    K('Kfz-Versicherung VW Golf', 'Versicherung', V, 412, 'jährlich', '2020-01-01', {renewalMonths:12, noticeMonths:1, end:addMonths(T.slice(0, 4) + '-12-31', 0)}),
+    K('Pflegezusatzversicherung', 'Versicherung', M, 32.5, 'monatlich', '2016-06-01'),
+    K('Tageszeitung Abo', 'Abo / Streaming', V, 34.9, 'monatlich', '2015-09-01', {noticeMonths:1}),
+    K('Seniorensport Verein', 'Fitness / Verein', M, 12, 'monatlich', '2023-02-01'),
+    K('Ratenkredit Küche', 'Kredit', V, 95, 'monatlich', '2024-03-15', {end:D(560)}),
+    K('Hausnotruf DRK', 'Sonstiges', M, 25.5, 'monatlich', '2025-01-10'),
+    K('Streaming Abo', 'Abo / Streaming', M, 7.99, 'monatlich', '2023-11-03', {ended:true, end:D(-80)})
+  ];
+  // Buchungen: 12 Monate Einnahmen, Vertragszahlungen (als vom Konto abgebucht) und Alltag
+  const B = [], acc = p => p === V ? aV.id : aM.id;
+  const bk = (date, type, amount, category, personId, counterparty, text, o = {}) => B.push(Object.assign({id:id('b'), date, type, amount, category, personId, accountId:acc(personId), counterparty, text, source:'csv', contractId:'', hash:id('h')}, o));
+  for (let m = 12; m >= 0; m--) {
+    const ym = mshift(T.slice(0, 7), -m), d = day => ym + '-' + String(day).padStart(2, '0'), ok = x => x > start && x <= T;
+    if (ok(d(1))) { bk(d(1), 'ein', 1486.3, 'Rente', V, 'Deutsche Rentenversicherung', 'Rente ' + ym.slice(5) + '/' + ym.slice(0, 4)); bk(d(1), 'ein', 924.75, 'Rente', M, 'Deutsche Rentenversicherung', 'Rente ' + ym.slice(5) + '/' + ym.slice(0, 4)); }
+    if (ok(d(10))) bk(d(10), 'ein', 573, 'Pflegegeld', M, 'Techniker Krankenkasse Pflegekasse', 'Pflegegeld PG 3');
+    if (ok(d(15)) && ri(0, 3) === 0) bk(d(15), 'ein', money(18, 140), 'Erstattung', pick([V, M]), 'AOK Nordost', 'Erstattung Fahrkosten');
+    for (const c of st.contracts) { const cs = c.start, step = INTERVALS[c.interval]; const cm = (Number(ym.slice(5)) - Number(cs.slice(5, 7)) + 120) % step;
+      const dd = d(Math.min(28, Number(cs.slice(8)) || 1)); if (cm === 0 && ok(dd) && !(c.ended && dd > c.end)) bk(dd, 'aus', c.amount, bkCatOfContract(c), c.personId, c.provider, 'Lastschrift ' + c.customerNo, {contractId:c.id}); }
+    for (let w = 0; w < 5; w++) for (const p of [V, M]) { const x = d(Math.min(28, 2 + w * 6 + ri(0, 3))); if (ok(x)) bk(x, 'aus', money(28, 92), 'Lebensmittel', p, pick(['REWE', 'EDEKA', 'ALDI Nord', 'LIDL', 'Kaufland']), 'Kartenzahlung'); }
+    for (let k = 0; k < ri(2, 4); k++) { const x = d(ri(2, 28)); if (ok(x)) bk(x, 'aus', money(5, 38), 'Gesundheit & Pflege', pick([V, M, M]), pick(['Apotheke am Markt', 'Linden-Apotheke']), 'Zuzahlung Rezept'); }
+    { const x = d(ri(3, 8)); if (ok(x)) bk(x, 'aus', money(180, 320), 'Gesundheit & Pflege', M, 'Pflegedienst Sonnenschein', 'Eigenanteil Rechnung ' + ym); }
+    for (const p of [V, M]) { const x = d(ri(5, 25)); if (ok(x)) bk(x, 'aus', pick([50, 100, 100, 150, 200]), 'Bargeld', p, 'Geldautomat', 'Auszahlung'); }
+    { const x = d(ri(4, 26)); if (ok(x)) bk(x, 'aus', money(35, 75), 'Mobilität', V, pick(['Aral Tankstelle', 'Shell']), 'Tanken'); }
+    if (ri(0, 2) === 0) { const x = d(ri(4, 26)); if (ok(x)) bk(x, 'aus', money(25, 120), 'Kleidung', pick([V, M]), pick(['C&A', 'Deichmann', 'H&M']), 'Einkauf'); }
+    if (ri(0, 1) === 0) { const x = d(ri(4, 26)); if (ok(x)) bk(x, 'aus', money(15, 70), 'Freizeit', pick([V, M]), pick(['Café Rosengarten', 'Kino Babylon', 'Restaurant Akropolis']), 'Kartenzahlung'); }
+    if (ri(0, 4) === 0) { const x = d(ri(4, 26)); if (ok(x)) bk(x, 'aus', money(10, 60), 'Behörden & Gebühren', pick([V, M]), 'Bürgeramt Mitte', 'Gebühr'); }
+    if (ri(0, 5) === 0) { const x = d(ri(4, 26)); if (ok(x)) bk(x, 'aus', money(80, 420), 'Gesundheit & Pflege', M, 'Sanitätshaus Mobil', 'Hilfsmittel Eigenanteil'); }
+  }
+  st.bookings = B;
+  // Vorgänge mit Schritten und Verlauf
+  const st0 = (text, done) => ({id:id('s'), text, done});
+  const CS = (title, personId, contact, status, startDays, o = {}) => {
+    const c = Object.assign({id:id('v'), title, personId, contactId:contact.id, ref:o.ref || (ri(100, 999) + '-' + ri(10000, 99999)), status, priority:o.priority || 'normal', start:D(-startDays), description:o.desc || '', steps:(o.steps || []).map(s => st0(s[0], s[1])), log:[]}, {});
+    const L = o.log || []; L.forEach(([days, text]) => c.log.push({id:id('l'), date:D(-days), text}));
+    if (status !== 'offen') { const since = o.since != null ? o.since : Math.max(1, Math.round(startDays / 2)); c.statusSince = D(-since); c.log.push({id:id('l'), date:D(-since), text:'Status: ' + status}); if (status === 'erledigt') c.closedAt = D(-since); }
+    c.log.sort((a, b) => a.date.localeCompare(b.date)); return c;
+  };
+  st.cases = [
+    CS('Höherstufung Pflegegrad 3 → 4', M, cTK, 'wartet auf Antwort', 48, {priority:'hoch', since:19, desc:'Zustand hat sich verschlechtert, Antrag auf Höherstufung gestellt.', steps:[['Antrag stellen', true], ['Pflegetagebuch 2 Wochen führen', true], ['Begutachtung MD (Termin vereinbart)', false], ['Bescheid prüfen', false]], log:[[48, 'Antrag telefonisch angekündigt'], [44, 'Antrag per Einschreiben verschickt'], [21, 'MD hat Termin für Begutachtung angekündigt']]}),
+    CS('Widerspruch Ablehnung Rollator', M, cTK, 'in Bearbeitung', 30, {priority:'hoch', since:12, steps:[['Ablehnungsbescheid lesen', true], ['Ärztliche Stellungnahme anfordern', true], ['Widerspruch schreiben', false]], log:[[30, 'Ablehnungsbescheid eingegangen'], [25, 'Dr. Hoffmann um Stellungnahme gebeten']]}),
+    CS('Schwerbehindertenausweis Karl', V, cLAGeSo, 'erledigt', 210, {since:95, steps:[['Antrag ausfüllen', true], ['Befunde beilegen', true], ['Bescheid prüfen', true]], log:[[210, 'Antrag verschickt'], [150, 'Rückfrage Versorgungsamt beantwortet'], [95, 'GdB 60, Merkzeichen G anerkannt']]}),
+    CS('Kontenklärung Rentenversicherung', V, cDRV, 'erledigt', 300, {since:180, steps:[['Versicherungsverlauf anfordern', true], ['Lücken markieren', true], ['Nachweise einreichen', true]], log:[[300, 'Versicherungsverlauf angefordert'], [260, 'Lücke 1978–1979 entdeckt'], [180, 'Kontenklärung abgeschlossen']]}),
+    CS('Zuzahlungsbefreiung ' + T.slice(0, 4), M, cTK, 'erledigt', 320, {since:280, steps:[['Quittungen sammeln', true], ['Antrag stellen', true]], log:[[320, 'Antrag gestellt'], [280, 'Befreiungsausweis erhalten']]}),
+    CS('Zuzahlungsbefreiung ' + T.slice(0, 4), V, cAOK, 'erledigt', 318, {since:270, log:[[318, 'Antrag gestellt']]}),
+    CS('Wohngeld Weiterleistung', V, cWG, 'wartet auf Antwort', 40, {since:33, steps:[['Weiterleistungsantrag', true], ['Mietbescheinigung beilegen', true], ['Bescheid prüfen', false]], log:[[40, 'Antrag abgegeben (persönlich)']]}),
+    CS('Befreiung Rundfunkbeitrag', V, cRB, 'offen', 9, {steps:[['Nachweis Wohngeld beilegen', false], ['Antrag absenden', false]]}),
+    CS('Nebenkostenabrechnung prüfen', V, cVerm, 'in Bearbeitung', 22, {since:15, steps:[['Abrechnung mit Vorjahr vergleichen', true], ['Belegeinsicht anfragen', false]], log:[[22, 'Abrechnung eingegangen: Nachzahlung 186,40 €']]}),
+    CS('Pflegedienst Vertrag anpassen', M, cPD, 'erledigt', 120, {since:100, log:[[120, 'Gespräch mit Herrn Wolf'], [100, 'Neuer Pflegevertrag unterschrieben']]}),
+    CS('Steuererklärung Vorjahr', V, cFA, 'erledigt', 240, {since:140, log:[[240, 'Unterlagen gesammelt'], [200, 'Erklärung über ELSTER abgegeben'], [140, 'Bescheid: Erstattung 212 €']]}),
+    CS('Entlastungsbetrag abrechnen', M, cTK, 'wartet auf Antwort', 26, {since:14, log:[[26, 'Rechnungen Haushaltshilfe eingereicht']]}),
+    CS('Hausnotruf beantragen', M, cTK, 'erledigt', 330, {since:300, log:[[330, 'Antrag gestellt'], [300, 'Kostenübernahme bewilligt']]}),
+    CS('Kreditrestschuld klären', V, cBank, 'offen', 5, {steps:[['Termin bei Herrn Lenz', false]]}),
+    CS('Sterbegeldversicherung prüfen', M, cBank, 'in Bearbeitung', 60, {since:40}),
+    CS('Arztbriefe sammeln für MD', M, cArzt, 'erledigt', 70, {since:50}),
+    CS('Rollstuhl Leihgabe', M, cSan, 'erledigt', 150, {since:130}),
+    CS('Grundsicherung im Alter prüfen', M, cJC, 'offen', 3, {desc:'Prüfen, ob Anspruch auf aufstockende Grundsicherung besteht.'})
+  ];
+  const caseOf = t => st.cases.find(c => c.title.startsWith(t))?.id || '';
+  // Aufgaben: viele erledigte über das Jahr (meist pünktlich), dazu offene und überfällige
+  const TT = ['Bescheid ablegen und prüfen', 'Rückruf bei der Krankenkasse', 'Rezept beim Arzt abholen', 'Quittungen sammeln', 'Kontoauszüge abheften', 'Termin beim Hausarzt', 'Pflegedienst-Rechnung prüfen', 'Unterlagen kopieren', 'Brief zur Post bringen', 'Medikamente bestellen', 'Fahrkosten einreichen', 'Rentenbescheid prüfen'];
+  st.tasks = [];
+  for (let i = 0; i < 150; i++) {
+    const due = D(-ri(1, 360)), late = rnd() < .13, doneAt = late ? dshift(due, ri(1, 9)) : dshift(due, -ri(0, 6));
+    if (doneAt > T) continue;
+    st.tasks.push({id:id('t'), title:pick(TT), personId:pick([V, M, M, '']), due, doneAt, done:true, created:dshift(due, -ri(3, 25)), priority:pick(['normal', 'normal', 'hoch']), caseId:rnd() < .3 ? pick(st.cases).id : '', repeat:'', notes:''});
+  }
+  const open = [['Widerspruch Rollator abschicken', M, 4, 'hoch', 'Widerspruch Ablehnung'], ['Begutachtung MD: Unterlagen bereitlegen', M, 9, 'hoch', 'Höherstufung'], ['Belegeinsicht Nebenkosten', V, 12, 'normal', 'Nebenkosten'],
+    ['Strom: Kündigung oder Tarifwechsel prüfen', V, 18, 'normal', ''], ['Kfz-Versicherung Vergleich', V, 26, 'niedrig', ''], ['Rundfunkbefreiung absenden', V, -3, 'normal', 'Befreiung'], ['Nachweise Wohngeld nachreichen', V, -1, 'hoch', 'Wohngeld'],
+    ['Termin bei Herrn Lenz (Kredit)', V, 6, 'normal', 'Kreditrestschuld'], ['Grundsicherung: Einkommen zusammenstellen', M, 15, 'normal', 'Grundsicherung'], ['Zahnarzt Kontrolle Mutter', M, 33, 'normal', ''], ['Jahresmeldung Pflegezusatz prüfen', M, 48, 'niedrig', ''],
+    ['Steuerunterlagen sammeln', V, 70, 'normal', ''], ['Heizkosten ablesen lassen', V, 2, 'normal', ''], ['Arztbrief Kardiologie anfordern', V, -6, 'hoch', '']];
+  for (const [title, p, d, prio, cs] of open) st.tasks.push({id:id('t'), title, personId:p, due:D(d), done:false, created:D(-ri(2, 20)), priority:prio, caseId:caseOf(cs), repeat:'', notes:''});
+  st.tasks.push({id:id('t'), title:'Pflegegeld-Eingang kontrollieren', personId:M, due:D(ri(3, 20)), done:false, created:D(-200), lastDone:D(-ri(20, 30)), repeat:'1', priority:'normal', caseId:'', notes:''});
+  st.tasks.push({id:id('t'), title:'Weiterbewilligung Wohngeld vorbereiten', personId:V, due:D(150), done:false, created:D(-40), repeat:'12', priority:'normal', caseId:'', notes:''});
+  // Dokumente (ohne Datei)
+  const DOC = [['Bescheid Pflegegrad', 'Pflegekasse', cTK, M], ['Rentenanpassung', 'Rente', cDRV, V], ['Rentenanpassung', 'Rente', cDRV, M], ['Wohngeldbescheid', 'Behörde', cWG, V], ['Nebenkostenabrechnung', 'Wohnen / Miete', cVerm, V],
+    ['Arztbrief', 'Arzt / Medizin', cArzt, M], ['Arztbrief', 'Arzt / Medizin', cArzt, V], ['Kontoauszug', 'Bank', cBank, V], ['Beitragsrechnung', 'Versicherung', cBank, M], ['Ablehnungsbescheid Hilfsmittel', 'Krankenkasse', cTK, M],
+    ['Steuerbescheid', 'Finanzamt / Steuer', cFA, V], ['Bescheid Schwerbehinderung', 'Behörde', cLAGeSo, V], ['Rechnung Pflegedienst', 'Pflegekasse', cPD, M], ['Versicherungsverlauf', 'Rente', cDRV, V], ['Zuzahlungsbefreiung', 'Krankenkasse', cTK, M]];
+  st.documents = [];
+  for (let i = 0; i < 80; i++) { const [title, cat, c, p] = pick(DOC), date = D(-ri(0, 360));
+    st.documents.push({id:id('d'), title:title + ' ' + fmtDate(date).slice(3), personId:p, category:cat, sender:c.name, date, added:dshift(date, ri(1, 4)) > T ? T : dshift(date, ri(1, 4)), caseId:rnd() < .35 ? (st.cases.find(x => x.contactId === c.id)?.id || '') : '', deadline: rnd() < .15 ? dshift(date, 30) : '', tags:pick(['', 'wichtig', 'Original im Ordner', 'Kopie']), notes:''}); }
+  // Briefe aus den Vorlagen
+  st.letters = [];
+  for (let i = 0; i < 36; i++) { const tpl = pick(BUILTIN_TEMPLATES), c = pick(st.contacts.filter(x => x.kind !== 'Privatperson')), p = pick([V, M]), date = D(-ri(0, 350));
+    st.letters.push({id:id('br'), personId:p, mode:'bev', senderId:'', contactId:c.id, recipient:contactAddress(c), templateId:tpl.id, subject:tpl.subject, ref:ri(100, 999) + '-' + ri(10000, 99999), customerNo:'', date,
+      shipping:pick(['', '', 'Einschreiben', 'Einschreiben mit Rückschein', 'Per Fax vorab']), salutation:'Sehr geehrte Damen und Herren,', body:tpl.body, closing:'Mit freundlichen Grüßen', useSig:true, useStamp:false, useMarke:false, markeImg:'', attachments:'', caseId:'', updated:date + 'T10:00:00.000Z'}); }
+  // Notizen
+  st.notes = [
+    {id:id('n'), title:'Wichtige Telefonnummern', personId:'', pinned:true, content:'Pflegedienst Sonnenschein: 030 3344 556\nHausarzt Dr. Hoffmann: 030 444 2211\nNachbar Thomas Krüger: 0170 9876543\nHausnotruf DRK: 030 8500 5000', updated:D(-10)},
+    {id:id('n'), title:'Medikamente Mutter (Stand Oktober)', personId:M, pinned:true, content:'Ramipril 5 mg morgens\nMetformin 500 mg morgens und abends\nPantoprazol 20 mg morgens\nVitamin D 1000 IE', updated:D(-35)},
+    {id:id('n'), title:'Gespräch MD vorbereiten', personId:M, pinned:false, content:'- Stürze im September (2×)\n- nachts Hilfe beim Toilettengang\n- Orientierung schlechter\n- Pflegetagebuch mitnehmen', updated:D(-8)},
+    {id:id('n'), title:'Passwörter / Zugänge (nur Hinweise)', personId:'', pinned:false, content:'Online-Banking Karl: Zugang über Sparkassen-App (Laura weiß Bescheid)\nELSTER: Zertifikat liegt im Ordner „Steuer“', updated:D(-120)},
+    {id:id('n'), title:'Ideen für Weihnachten', personId:'', pinned:false, content:'Vater: neues Radio\nMutter: warme Hausschuhe, Fotobuch', updated:D(-3)},
+    {id:id('n'), title:'Absprache mit Laura', personId:'', pinned:false, content:'Laura übernimmt Arzttermine dienstags, ich die Behördenpost.', updated:D(-60)}
+  ];
+  return st;
+}
+
 // ---------- Start ----------
 (async () => {
-  try { await DB.open(); const st = await DB.get('kv', 'state'); if (st) S = migrate(st); }
+  try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  document.body.classList.toggle('is-demo', MODE === 'demo');
   render(); initUpdates();
+  if (memCfg().root) { await memLoadStatus(); render(); }
 })();
 </script>
 </body>
