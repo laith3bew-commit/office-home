@@ -5,6 +5,11 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.15.1', datum: '2026-11-24', de: [
+        'Fenster „Vorlage wählen“, Internetmarken und „Neu in Version“ mit sauberen Abständen; Suchfeld gestaltet.',
+        'Gedächtnis-Kasten im Brief: Ordner der Person übersichtlich, Suchfeld über die ganze Breite.',
+        'Dialoge liegen jetzt immer über dem Command-Knopf.'],
+      ar: ['نوافذ «اختيار قالب» والطوابع و«الجديد بالنسخة» صارت مرتبة مع مسافات، وخانة البحث صار إلها شكل.', 'مربع الذاكرة بالرسالة: مجلد الشخص واضح وخانة البحث بعرض كامل.', 'النوافذ صارت دايماً فوق زر Command.'] },
     { v: '2.15.0', datum: '2026-11-24', de: [
         'Büro: leuchtende Zustände wie bei Swipii – Ring am Boden, Kristall und Bildschirme grün (arbeitet), orange (Pause), rot (außer Dienst, keine Aufgaben). Briefkasten leuchtet weiß, bis die Sekretärin die Post geholt hat.',
         'Seitenleiste einklappbar (Knopf oben neben dem Logo): nur Symbole – Maus drüber klappt sie auf, Maus weg wieder zu.',
