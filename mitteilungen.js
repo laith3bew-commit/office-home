@@ -5,6 +5,19 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.16.2', datum: '2026-11-24', de: [
+        'E-Mail: Bilder und Dateien in E-Mails öffnen – Anhänge als Kacheln mit Vorschaubild, Klick auf ein Foto öffnet den Bildbetrachter (mit Vor/Zurück), andere Dateien öffnen im Standardprogramm.',
+        'Jeden Anhang mit einem Klick „Als Dokument“ ablegen.',
+        'E-Mails werden mit ihrer Gestaltung und den eingebetteten Bildern angezeigt („Mit Bildern“ / „Nur Text“). Bilder aus dem Internet bleiben zum Schutz vor Zählpixeln blockiert, bis du „Bilder laden“ drückst.',
+        'Behoben: Der Wechsel weg von „gemini-2.5-flash“ hat nicht geklappt, weil Google das alte Modell weiter in der Liste führt – jetzt wird es übersprungen und ein neueres Flash-Modell genommen. Die roten Einträge im Command werden automatisch neu gelesen.',
+        'Behoben: Dieselbe E-Mail stand mehrfach in der Liste, wenn „Ans Büro“ öfter gedrückt wurde. Doppelte werden entfernt.'
+      ], ar: [
+        'البريد: فتح الصور والملفات داخل الإيميلات – المرفقات كبطاقات مع صورة مصغرة، الضغط على صورة يفتح عارض الصور (مع التالي/السابق)، والملفات الأخرى تفتح بالبرنامج الافتراضي.',
+        'حفظ أي مرفق «كمستند» بضغطة واحدة.',
+        'الإيميلات تظهر بتنسيقها وصورها المضمنة («مع الصور» / «نص فقط»). صور الإنترنت محجوبة للحماية من بكسلات التتبع حتى تضغط «تحميل الصور».',
+        'إصلاح: التبديل من «gemini-2.5-flash» ما كان يشتغل لأن Google لسا بتعرض الموديل القديم بالقائمة – هلأ بيتخطاه وبياخد موديل Flash أحدث. البنود الحمرا بالـ Command بتنقرا من جديد تلقائياً.',
+        'إصلاح: نفس الإيميل كان يطلع أكتر من مرة بالقائمة إذا انضغط «للمكتب» أكتر من مرة. المكرر بينحذف.'
+      ] },
     { v: '2.16.1', datum: '2026-11-24', de: [
         'Gemini: Google hat das Modell „gemini-2.5-flash“ für neue Nutzer abgeschaltet. Home Office wählt jetzt automatisch das neueste Flash-Modell und wechselt selbst, wenn Google eins abschaltet.',
         'Dokumente, die daran gescheitert sind, werden automatisch noch einmal gelesen.',

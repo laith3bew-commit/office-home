@@ -2,7 +2,7 @@
    Abruf: stündlich durch die Sekretärin (eingang.js) oder per Knopf. Passwörter nur im Hauptprozess (verschlüsselt).
    Läuft nach dem Hauptskript und nutzt dessen Globale. */
 (function () {
-  const MU = { filter: 'alle', sel: '', konten: null, text: {}, ordner: 'eingang', gesendet: null, gSel: '', gLaedt: false };
+  const MU = { filter: 'alle', sel: '', konten: null, text: {}, ansicht: 'html', extern: {}, urls: {}, ordner: 'eingang', gesendet: null, gSel: '', gLaedt: false };
   const M = () => { if (!Array.isArray(S.mails)) S.mails = []; return S.mails; };
   const kurz = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
   const STATUS = { neu: ['Neu', 'gruen'], buero: ['Im Büro', 'lila'], erledigt: ['Erledigt', 'gruen'], ignoriert: ['Nicht bearbeitet', 'grau'] };
@@ -51,16 +51,61 @@
             ${sel.atts.length ? `<div class="matts">${sel.atts.map(a => `<span class="badge">📎 ${esc(kurz(a, 40))}</span>`).join('')}</div>` : ''}</div>
             <div class="mbody">${esc(sel.text) || '<span class="muted">(kein Text' + (sel.gross ? ' – E-Mail sehr groß, Text nicht geladen' : '') + ')</span>'}</div>` : '<div class="empty">Gesendete E-Mail links auswählen.</div>'}</div></div>`;
   }
+  const groesse = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  const istBild = a => /^image\//.test(a.type || '');
+  const endung = a => (String(a.name || '').split('.').pop() || '').slice(0, 5).toUpperCase();
   function leseHTML(m) {
-    const t = MU.text[m.id];
+    const t = MU.text[m.id], hatHtml = !!m.htmlFileId, ans = hatHtml ? MU.ansicht : 'text';
+    const anh = (m.atts || []).filter(a => !a.inline), imText = (m.atts || []).filter(a => a.inline && istBild(a));
     return `<div class="mrhead"><h3 style="margin:0">${esc(m.subject)}</h3><div class="small muted">${esc(m.fromName ? m.fromName + ' <' + m.from + '>' : m.from)} · ${esc(new Date(m.date).toLocaleString('de-DE'))}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${m.status === 'neu' || m.status === 'ignoriert' ? `<button class="btn sm pri" data-act="mBuero" data-id="${m.id}">${icon('alle')}Ans Büro (Gemini liest)</button>` : `<span class="badge">${(STATUS[m.status] || STATUS.neu)[0]}</span>`}
       <button class="btn sm" data-act="mAntwort" data-id="${m.id}">${icon('mail')}Antworten</button>${m.status === 'neu' ? `<button class="btn sm" data-act="mIgnor" data-id="${m.id}">Nicht bearbeiten</button>` : ''}</div>
-      ${(m.atts || []).length ? `<div class="matts">${m.atts.map(a => `<button class="btn sm" data-act="mAtt" data-id="${m.id}" data-f="${a.fileId}">${icon('dokumente')}${esc(kurz(a.name, 40))}</button>`).join('')}</div>` : ''}</div>
-      <div class="mbody">${t == null ? '<span class="muted">Lädt …</span>' : esc(t) || '<span class="muted">(kein Text)</span>'}</div>`;
+      ${!m.voll ? `<div class="small muted" style="margin-top:8px">${m.vollFehler ? 'Bilder und Anhänge konnten nicht nachgeladen werden: ' + esc(m.vollFehler) : 'Bilder und Anhänge werden aus dem Postfach nachgeladen …'}</div>` : ''}
+      ${anh.length ? `<div class="mgal">${anh.map(a => `<div class="mtile" data-act="mAttOpen" data-id="${m.id}" data-f="${a.fileId}" title="${esc(a.name)}">${istBild(a) ? `<img data-thumb="${a.fileId}" alt="">` : `<span class="mext">${esc(endung(a) || 'DATEI')}</span>`}
+          <span class="mtn">${esc(kurz(a.name, 28))}</span><span class="mts">${groesse(a.size || 0)}</span>
+          <span class="mtacts"><button class="btn sm" data-act="mAttSys" data-id="${m.id}" data-f="${a.fileId}" data-stop="1" title="Mit dem Standardprogramm öffnen">${icon('auge')}</button><button class="btn sm" data-act="mAttDoc" data-id="${m.id}" data-f="${a.fileId}" data-stop="1" title="Als Dokument ablegen">${icon('dokumente')}</button></span></div>`).join('')}</div>` : ''}
+      ${hatHtml ? `<div class="themesw msw"><button class="${ans === 'html' ? 'on' : ''}" data-act="mAnsicht" data-id="html">Mit Bildern</button><button class="${ans === 'text' ? 'on' : ''}" data-act="mAnsicht" data-id="text">Nur Text</button></div>` : ''}</div>
+      ${ans === 'html' ? `<div class="mextbar" id="mExtBar" style="display:none">${icon('info')}<span>Bilder aus dem Internet sind blockiert (Schutz vor Werbe- und Zählpixeln).</span><button class="btn sm" data-act="mExtern" data-id="${m.id}">Bilder laden</button></div>
+        <iframe class="mhtml" id="mHtml" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" title="E-Mail"></iframe>`
+        : `<div class="mbody">${t == null ? '<span class="muted">Lädt …</span>' : esc(t) || '<span class="muted">(kein Text)</span>'}</div>`}
+      ${imText.length && ans === 'text' ? `<div class="small muted" style="margin-top:8px">${imText.length} Bild(er) im Text – in der Ansicht „Mit Bildern“ sichtbar.</div>` : ''}`;
+  }
+  const url = async fid => { if (MU.urls[fid]) return MU.urls[fid]; const f = await fileGet(fid); if (!f || !f.blob) return ''; return (MU.urls[fid] = URL.createObjectURL(f.blob)); };
+  // HTML sicher anzeigen: keine Skripte (sandbox), Bilder aus der Mail (cid) als data:, externe Bilder nur auf Knopfdruck
+  async function htmlZeigen(m) {
+    const fr = document.getElementById('mHtml'); if (!fr || !m.htmlFileId) return;
+    const f = await fileGet(m.htmlFileId); let h = f && f.blob ? await f.blob.text() : '';
+    for (const a of (m.atts || []).filter(x => x.cid)) {
+      const g = await fileGet(a.fileId); if (!g || !g.blob || g.blob.size > 4 * 1024 * 1024) continue;
+      const du = await blobToDataURL(g.blob); const cid = a.cid.replace(/^<|>$/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      h = h.replace(new RegExp('cid:' + cid, 'gi'), du);
+    }
+    const extern = !!MU.extern[m.id], hatExtern = /<img[^>]+src=["']?https?:/i.test(h) || /url\(["']?https?:/i.test(h);
+    const csp = `default-src 'none'; img-src data: ${extern ? 'https: http:' : ''}; style-src 'unsafe-inline' ${extern ? 'https:' : ''}; font-src data: ${extern ? 'https:' : ''}; media-src data:`;
+    fr.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}"><base target="_blank">
+      <style>html,body{margin:0;padding:12px;background:#fff;color:#1B2A44;font:14px/1.5 Arial,sans-serif;word-wrap:break-word}img{max-width:100%;height:auto}table{max-width:100%}</style></head><body>${h}</body></html>`;
+    const bar = document.getElementById('mExtBar'); if (bar) bar.style.display = hatExtern && !extern ? '' : 'none';
+  }
+  async function thumbs() { for (const im of document.querySelectorAll('img[data-thumb]')) { const u = await url(im.dataset.thumb); if (u) im.src = u; } }
+  // Bildbetrachter mit Vor/Zurück (Pfeiltasten)
+  async function bildBetrachter(m, fid) {
+    const bilder = (m.atts || []).filter(a => istBild(a) && !a.inline); let i = Math.max(0, bilder.findIndex(a => a.fileId === fid));
+    if (typeof closeModal === 'function') closeModal();
+    const bg = document.createElement('div'); bg.className = 'modal-bg mlight'; bg.id = 'modal'; document.body.appendChild(bg);
+    const zeig = async () => { const a = bilder[i]; bg.innerHTML = `<div class="mlbox"><div class="mlhead"><b>${esc(a.name)}</b><span class="small muted">${i + 1} / ${bilder.length} · ${groesse(a.size || 0)}</span><span class="grow"></span>
+        <button class="btn sm" data-ml="sys">${icon('auge')}Öffnen</button><button class="btn sm" data-ml="doc">${icon('dokumente')}Als Dokument</button><button class="btn sm" data-ml="x">${icon('schliessen')}</button></div>
+        <div class="mlimg">${bilder.length > 1 ? '<button class="mlnav" data-ml="prev">‹</button>' : ''}<img src="${await url(a.fileId)}" alt="">${bilder.length > 1 ? '<button class="mlnav r" data-ml="next">›</button>' : ''}</div></div>`; };
+    await zeig();
+    bg.addEventListener('click', async e => { const b = e.target.closest('[data-ml]'); if (!b) { if (e.target === bg) bg.remove(); return; }
+      const k = b.dataset.ml; if (k === 'x') return bg.remove(); if (k === 'prev') { i = (i - 1 + bilder.length) % bilder.length; return zeig(); } if (k === 'next') { i = (i + 1) % bilder.length; return zeig(); }
+      if (k === 'sys') return ACT.mAttSys({ id: m.id, f: bilder[i].fileId }); if (k === 'doc') { bg.remove(); return ACT.mAttDoc({ id: m.id, f: bilder[i].fileId }); } });
+    const taste = e => { if (!document.body.contains(bg)) return document.removeEventListener('keydown', taste); if (e.key === 'ArrowLeft') bg.querySelector('[data-ml=prev]')?.click(); if (e.key === 'ArrowRight') bg.querySelector('[data-ml=next]')?.click(); };
+    document.addEventListener('keydown', taste);
   }
   AFTER.mail = async () => {
     const m = M().find(x => x.id === MU.sel); if (!m) return;
+    if (!m.voll && !m.vollFehler && window.EG && window.EG.mailVoll && !MU.laedt) { MU.laedt = true; window.EG.mailVoll(m).finally(() => { MU.laedt = false; if (parseHash().route === 'mail' && MU.sel === m.id) render(); }); }
+    thumbs(); if (m.htmlFileId && MU.ansicht === 'html') htmlZeigen(m);
     if (MU.text[m.id] == null) { const f = m.textFileId && await fileGet(m.textFileId); MU.text[m.id] = f && f.blob ? await f.blob.text() : ''; if (parseHash().route === 'mail') { const b = document.querySelector('.mbody'); if (b) b.textContent = MU.text[m.id] || '(kein Text)'; } }
   };
 
@@ -112,6 +157,12 @@
   Object.assign(ACT, {
     mFilter: d => { MU.filter = d.id; render(); },
     mOrdner: d => { MU.ordner = d.id; render(); },
+    mAnsicht: d => { MU.ansicht = d.id; render(); },
+    mExtern: d => { MU.extern[d.id] = true; const m = M().find(x => x.id === d.id); if (m) htmlZeigen(m); },
+    mAttOpen: d => { const m = M().find(x => x.id === d.id), a = m && (m.atts || []).find(x => x.fileId === d.f); if (!a) return; if (istBild(a)) return bildBetrachter(m, a.fileId); return ACT.mAttSys(d); },
+    mAttSys: async d => { const f = await fileGet(d.f); if (!f) return toast('Anhang nicht gefunden'); const r = await window.officeHome.openFile(f.name, await f.blob.arrayBuffer()); if (!r.ok) toast('Konnte nicht geöffnet werden'); },
+    mAttDoc: async d => { const m = M().find(x => x.id === d.id), f = await fileGet(d.f); if (!m || !f) return toast('Anhang nicht gefunden');
+      editDoc(null, { personId: m.personId || '', sender: m.fromName || m.from, date: (m.date || '').slice(0, 10), tags: 'E-Mail' }, new File([f.blob], f.name || 'anhang', { type: f.type || f.blob.type })); },
     mGOpen: d => { MU.gSel = d.id; render(); },
     mGesendetLaden: () => { MU.gesendet = null; render(); },
     mOpen: d => { MU.sel = d.id; const m = M().find(x => x.id === d.id); if (m && !m.gelesen) { m.gelesen = true; save(); } render(); },

@@ -12,6 +12,7 @@
   const M = () => { if (!Array.isArray(S.mails)) S.mails = []; return S.mails; };
   const bereit = () => window.OH_READY && DESKTOP && MODE !== 'demo';
   const offen = () => L().filter(x => x.status === 'vorschlag' || x.status === 'fehler');
+  const OFFEN_ST = ['warte', 'liest', 'frage', 'vorschlag', 'fehler'];
   const melde = m => { if (typeof ohMelden === 'function') ohMelden(m); };
   const buero = a => { try { if (typeof buPost === 'function') buPost({ typ: 'buero-ereignis', aufgabe: Object.assign({ dauer: 8 }, a) }); } catch (e) {} };
   const kurz = (s, n) => { s = String(s || ''); return s.length > (n || 60) ? s.slice(0, (n || 60) - 1) + '…' : s; };
@@ -23,6 +24,10 @@
     if (!window.OH_READY) return;
     const it = Object.assign({ id: uid(), created: new Date().toISOString(), status: 'warte', docIds: [], schritte: [] }, e);
     if (it.docIds.length && L().some(x => x.status !== 'ignoriert' && x.docIds.some(d => it.docIds.includes(d)))) return null; // schon in der Kette
+    if (it.mailId) { // dieselbe E-Mail nur einmal in der Kette – ein gescheiterter Eintrag wird stattdessen neu versucht
+      const da = L().find(x => x.mailId === it.mailId && OFFEN_ST.includes(x.status));
+      if (da) { if (da.status === 'fehler') { da.status = 'warte'; da.fehler = ''; save(); punkt(); if (bereit()) setTimeout(tick, 300); } return da; }
+    }
     L().push(it); save(); punkt();
     if (!bereit()) { if (MODE === 'demo') toast('Im Demo-Modus liest die KI nichts.'); return it; }
     setTimeout(tick, 300);
@@ -42,7 +47,7 @@
   }
   async function teileVon(it) {
     const parts = []; let summe = 0;
-    const ids = [...it.docIds.map(id => (S.documents.find(d => d.id === id) || {}).fileId), ...((it.mailId && (M().find(m => m.id === it.mailId) || {}).atts) || []).map(a => a.fileId)].filter(Boolean);
+    const ids = [...it.docIds.map(id => (S.documents.find(d => d.id === id) || {}).fileId), ...((it.mailId && (M().find(m => m.id === it.mailId) || {}).atts) || []).filter(a => !a.inline).map(a => a.fileId)].filter(Boolean);
     for (const fid of ids) {
       const f = await fileGet(fid); if (!f || !f.blob) continue;
       const mime = f.type || f.blob.type || ''; if (!/^(application\/pdf|image\/(jpeg|png|webp|heic|heif))$/.test(mime)) continue;
@@ -120,7 +125,7 @@
             if (!d.personId) d.personId = pid; if (res.absender && !d.sender) d.sender = String(res.absender); if (res.zusammenfassung && !d.notes) d.notes = String(res.zusammenfassung);
             if (res.titel && /^(scan|dokument|img|image|\d)/i.test(d.title)) d.title = String(res.titel).slice(0, 140);
             d.kiNummern = (res.nummern || []).filter(n => n && n.art && n.wert).slice(0, 30); d.ki = { at: new Date().toISOString(), ok: true }; markiere(d, s.farbe, it); docs.push(d); }
-          if (m) for (const a of m.atts || []) { const d = markiere({ id: uid(), added: today(), title: (res.titel ? String(res.titel).slice(0, 100) + ' – ' : '') + a.name.replace(/\.[^.]+$/, ''), personId: pid, category: kat, sender: res.absender || m.fromName || m.from, date: (m.date || '').slice(0, 10) || today(),
+          if (m) for (const a of (m.atts || []).filter(x => !x.inline)) { const d = markiere({ id: uid(), added: today(), title: (res.titel ? String(res.titel).slice(0, 100) + ' – ' : '') + a.name.replace(/\.[^.]+$/, ''), personId: pid, category: kat, sender: res.absender || m.fromName || m.from, date: (m.date || '').slice(0, 10) || today(),
             caseId: '', deadline: '', tags: 'E-Mail', notes: res.zusammenfassung || '', fileId: a.fileId, fileName: a.name, fileType: a.type, fileSize: a.size, kiNummern: (res.nummern || []).slice(0, 30), ki: { at: new Date().toISOString(), ok: true }, mailId: m.id }, s.farbe, it);
             S.documents.push(d); it.docIds.push(d.id); docs.push(d); }
           out.push(s.text);
@@ -272,6 +277,24 @@
   }
   document.addEventListener('click', e => { const el = e.target.closest('#main [data-id]'); if (!el) return; const o = finde(el.dataset.id); if (o && o.neu && !o.neu.gesehen) { o.neu.gesehen = true; save(); } }, true);
 
+  /* ---------- E-Mail-Inhalt speichern: Text, HTML (Ansicht mit Bildern), alle Anhänge (inline = Bild im Text) ---------- */
+  async function mailInhalt(m, x) {
+    // alte Dateien weg – außer sie gehören inzwischen zu einem abgelegten Dokument (gleiche Datei)
+    const benutzt = f => S.documents.some(d => d.fileId === f);
+    for (const f of [m.textFileId, m.htmlFileId, ...(m.atts || []).map(a => a.fileId)]) if (f && !benutzt(f)) await fileDel(f).catch(() => {});
+    m.textFileId = uid(); await filePut(m.textFileId, { blob: new Blob([x.text || ''], { type: 'text/plain' }), name: 'mail.txt', type: 'text/plain' });
+    m.htmlFileId = ''; if (x.html) { m.htmlFileId = uid(); await filePut(m.htmlFileId, { blob: new Blob([x.html], { type: 'text/html' }), name: 'mail.html', type: 'text/html' }); }
+    m.atts = [];
+    for (const a of x.atts || []) { const fid = uid(); await filePut(fid, { blob: new Blob([a.data], { type: a.type }), name: a.name, type: a.type }); m.atts.push({ fileId: fid, name: a.name, type: a.type, size: a.size, cid: a.cid || '', inline: !!a.inline }); }
+    m.voll = true;
+  }
+  // Ältere Mail (vor dieser Version nur Text + PDF) beim Öffnen vollständig nachladen
+  async function mailVoll(m) {
+    if (!m || m.voll || !DESKTOP || !window.officeHome.mailEinzeln || MODE === 'demo') return false;
+    const r = await window.officeHome.mailEinzeln(m.acc, m.uid); if (!r || !r.ok) { m.vollFehler = (r && r.message) || 'Fehler'; return false; }
+    await mailInhalt(m, r); save(); return true;
+  }
+
   /* ---------- E-Mail abrufen (Sekretärin, stündlich) ---------- */
   async function mailsAbrufen(still) {
     if (!bereit() || !window.officeHome.mailKonten) return { neu: 0 };
@@ -283,9 +306,8 @@
       if (!r || !r.ok) { if (!still) toast('E-Mail ' + k.user + ': ' + ((r && r.message) || 'Fehler')); melde({ typ: 'system', title: 'E-Mail-Abruf fehlgeschlagen (' + k.user + ')', lines: [(r && r.message) || ''], key: 'mailerr:' + k.id + ':' + today() }); continue; }
       for (const x of r.mails || []) {
         if (x.zuGross || M().some(m => m.acc === k.id && m.uid === x.uid)) continue;
-        const textFileId = uid(); await filePut(textFileId, { blob: new Blob([x.text || ''], { type: 'text/plain' }), name: 'mail.txt', type: 'text/plain' });
-        const atts = []; for (const a of x.atts || []) { const fid = uid(); await filePut(fid, { blob: new Blob([a.data], { type: a.type }), name: a.name, type: a.type }); atts.push({ fileId: fid, name: a.name, type: a.type, size: a.size }); }
-        const m = { id: uid(), acc: k.id, uid: x.uid, msgId: x.msgId, from: x.from, fromName: x.fromName, to: x.to, subject: x.subject, date: x.date, snippet: String(x.text || '').replace(/\s+/g, ' ').slice(0, 220), textFileId, atts, status: 'neu', gelesen: false, personId: k.personId || '' };
+        const m = { id: uid(), acc: k.id, uid: x.uid, msgId: x.msgId, from: x.from, fromName: x.fromName, to: x.to, subject: x.subject, date: x.date, snippet: String(x.text || '').replace(/\s+/g, ' ').slice(0, 220), atts: [], status: 'neu', gelesen: false, personId: k.personId || '' };
+        await mailInhalt(m, x);
         M().unshift(m); neue.push(m);
       }
     }
@@ -444,7 +466,12 @@
     const go = () => { if (!window.OH_READY) return setTimeout(go, 500);
       L().forEach(x => { if (x.status === 'liest') x.status = 'warte'; }); // nach Neustart wieder einreihen
       // Einträge, die nur am abgeschalteten Gemini-Modell gescheitert sind, automatisch noch einmal lesen
-      L().forEach(x => { if (x.status === 'fehler' && /no longer available|not found for API|is not supported/i.test(x.fehler || '')) { x.status = 'warte'; x.fehler = ''; } });
+      L().forEach(x => { if (x.status === 'fehler' && /no longer available|not found|is not supported|deprecated/i.test(x.fehler || '')) { x.status = 'warte'; x.fehler = ''; } });
+      // Doppelte Einträge derselben E-Mail (mehrfach „Ans Büro“ gedrückt) entfernen – der weiteste bleibt
+      const RF = { vorschlag: 5, frage: 4, liest: 3, warte: 2, fehler: 1 }, best = {};
+      L().forEach(x => { if (x.mailId && OFFEN_ST.includes(x.status)) { const b = best[x.mailId]; if (!b || (RF[x.status] || 0) > (RF[b.status] || 0)) best[x.mailId] = x; } });
+      S.eingang = L().filter(x => !(x.mailId && OFFEN_ST.includes(x.status) && best[x.mailId] !== x));
+      save();
       punkt(); punkteSetzen(); setInterval(tick, 4000); setTimeout(tick, 2500);
       setTimeout(() => mailsAbrufen(true), 20000); setInterval(() => mailsAbrufen(true), 60 * 60 * 1000); // stündlich: Sekretärin prüft das Postfach
     };
@@ -452,7 +479,7 @@
   }
   ACT.demoAufgabe = () => demoStart();
   window.EG = { neu, offen, listeHTML, karteHTML, aktion: async (id, a, panel) => { const it = L().find(x => x.id === id); if (it && it.typ === 'sammel' && a === 'ok') { const box = panel && panel.querySelector(`[data-eg="${id}"]`); await sammelOk(it, box ? [...box.querySelectorAll('[data-egs]')].filter(x => x.checked).map(x => x.dataset.egs) : []); return; } return aktion(id, a, panel); },
-    aktualisieren, mailsAbrufen, mailsNichtFragen, punkt, FARBE, demoStart, demoNeustart };
+    aktualisieren, mailsAbrufen, mailsNichtFragen, mailVoll, punkt, FARBE, demoStart, demoNeustart };
   // Sammelkarte nutzt dieselbe Darstellung wie Mailwahl/Vorschlag
   const kh = karteHTML; window.EG.karteHTML = id => { const it = L().find(x => x.id === id); if (it && it.typ === 'sammel' && it.status === 'vorschlag') return `<div class="egkarte" data-eg="${it.id}"><div class="eghead">${dot('gruen', true)}<b>${esc(it.titel)}</b></div><div class="egsteps">${it.schritte.map(s => `<label class="egstep"><input type="checkbox" data-egs="${s.id}" ${s.an ? 'checked' : ''}><span><b>${esc(s.text)}</b><small>${esc(s.sub)}</small></span></label>`).join('')}</div><div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">Ausgewählte ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Keine</button></div></div>`; return kh(id); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

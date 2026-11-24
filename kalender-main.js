@@ -61,22 +61,30 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
   const modellGespeichert = () => readJson('oh-prefs.json', {}).kiModel || '';
   const speichereModell = m => { const p = readJson('oh-prefs.json', {}); p.kiModel = m; writeJson('oh-prefs.json', p); };
   const veraltet = msg => /no longer available|not found|is not supported|deprecated|404/i.test(String(msg || ''));
-  async function neuestesModell(key, hinweis) {
-    // 1) Vorschlag aus der Fehlermeldung (z. B. „use models/gemini-x-flash“)
-    const m = String(hinweis || '').match(/models\/(gemini-[a-z0-9.\-]+flash)\b/i);
-    // 2) Liste der Modelle, die generateContent können: höchste Version von „gemini-<zahl>-flash“ (ohne lite/preview/exp)
+  // Kandidaten in sinnvoller Reihenfolge, ohne die Modelle in `ohne` (die gerade gescheitert sind).
+  // Wichtig: Google listet ein abgeschaltetes Modell (z. B. gemini-2.5-flash „nicht mehr für neue Nutzer“) teils weiter –
+  // deshalb nie dasselbe Modell noch einmal vorschlagen.
+  async function modellKandidaten(key, hinweis, ohne) {
+    const raus = new Set(ohne || []);
+    // Googles Meldung nennt zuerst das alte Modell, dann den Vorschlag („… please use models/gemini-3.8-flash“) → ersten Treffer nehmen, der nicht gescheitert ist
+    const vorschlag = [...String(hinweis || '').matchAll(/models\/(gemini-[a-z0-9.\-]*[a-z0-9])/gi)].map(x => x[1]).find(n => !raus.has(n));
+    let alle = [];
     try {
       const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
       const j = await r.json().catch(() => ({}));
-      const liste = (j.models || []).filter(x => (x.supportedGenerationMethods || []).includes('generateContent')).map(x => String(x.name || '').replace(/^models\//, ''))
-        .filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n));
-      const ver = n => parseFloat(n.match(/^gemini-(\d+(?:\.\d+)?)/)[1]);
-      liste.sort((a, b) => ver(b) - ver(a));
-      if (m && liste.includes(m[1])) return m[1];
-      if (liste.length) return liste[0];
+      alle = (j.models || []).filter(x => (x.supportedGenerationMethods || []).includes('generateContent')).map(x => String(x.name || '').replace(/^models\//, ''));
     } catch (e) {}
-    return m ? m[1] : '';
+    const ver = n => { const v = n.match(/^gemini-(\d+(?:\.\d+)?)/); return v ? parseFloat(v[1]) : 0; };
+    const nachVersion = l => l.sort((a, b) => ver(b) - ver(a));
+    const stabil = nachVersion(alle.filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n)));                 // gemini-3-flash, gemini-2.5-flash …
+    const latest = alle.filter(n => /^gemini-flash-latest$/.test(n));                                    // Alias auf das aktuelle Flash
+    const vorab = nachVersion(alle.filter(n => /^gemini-\d+(\.\d+)?-flash-preview(-[\w-]+)?$/.test(n)));  // gemini-3-flash-preview …
+    const out = [];
+    for (const n of [vorschlag && alle.includes(vorschlag) ? vorschlag : '', ...stabil, ...latest, ...vorab, vorschlag || '', 'gemini-flash-latest'])
+      if (n && !raus.has(n) && !out.includes(n)) out.push(n);
+    return out;
   }
+  async function neuestesModell(key, hinweis, ohne) { return (await modellKandidaten(key, hinweis, ohne))[0] || ''; }
   ipcMain.handle('oh:kiStatus', () => { const s = secrets(); return { hasKey: !!s.gemini, model: modellGespeichert() || 'automatisch' }; });
   ipcMain.handle('oh:kiSetKey', (e, key, model) => {
     try {
@@ -102,9 +110,14 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
         method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) });
       let r = await frage(model), j = await r.json().catch(() => ({}));
       if (!r.ok && veraltet((j.error && j.error.message) || r.status)) {
-        // Modell abgeschaltet → neuestes passendes Modell holen, merken, noch einmal versuchen
-        const neu = await neuestesModell(key, j.error && j.error.message);
-        if (neu && neu !== model) { model = neu; speichereModell(neu); r = await frage(model); j = await r.json().catch(() => ({})); }
+        // Modell abgeschaltet → nacheinander die passenden neueren Modelle probieren (nie das gescheiterte), das erste funktionierende merken
+        const versucht = [model];
+        const kandidaten = await modellKandidaten(key, j.error && j.error.message, versucht);
+        for (const neu of kandidaten.slice(0, 4)) {
+          versucht.push(neu); r = await frage(neu); j = await r.json().catch(() => ({}));
+          if (r.ok) { model = neu; speichereModell(neu); break; }
+          if (!veraltet((j.error && j.error.message) || r.status)) { model = neu; speichereModell(neu); break; } // anderer Fehler (z. B. Kontingent) – Modell gibt es aber
+        }
       }
       if (!r.ok) return { ok: false, message: (j.error && j.error.message) || ('Gemini-Fehler ' + r.status) };
       const text = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || '').join('');

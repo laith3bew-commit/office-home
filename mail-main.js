@@ -41,7 +41,32 @@ module.exports = function setupMail({ app, ipcMain, safeStorage }) {
   });
   ipcMain.handle('oh:mailKontoLoeschen', (e, id) => { speichereKonten(konten().filter(x => x.id !== id)); try { setSecret('mail:' + id, ''); } catch (err) {} return { ok: true }; });
 
-  // Neue Mails seit dem letzten Abruf (beim ersten Mal: die letzten 7 Tage, höchstens 40). Anhänge: PDF und Bilder bis 15 MB.
+  // E-Mail zerlegen: Text, HTML (für die Ansicht mit Bildern), alle Anhänge bis 25 MB (höchstens 25), Bilder im Text mit cid.
+  async function zerlege(source, internalDate) {
+    const m = await simpleParser(source);
+    const from = (m.from && m.from.value && m.from.value[0]) || {};
+    const html = typeof m.html === 'string' ? m.html.slice(0, 3 * 1024 * 1024) : '';
+    const atts = (m.attachments || []).filter(x => x.size <= 25 * 1024 * 1024 && !(x.related && x.size < 3 * 1024 && !x.cid)).slice(0, 25)
+      .map(x => ({ name: x.filename || ((x.contentType || '').startsWith('image/') ? 'bild.' + ((x.contentType.split('/')[1] || 'png').split(';')[0]) : 'anhang'), type: String(x.contentType || 'application/octet-stream').toLowerCase(),
+        size: x.size, cid: x.cid || '', inline: x.contentDisposition === 'inline' || !!x.related, data: new Uint8Array(x.content) }));
+    return { msgId: m.messageId || '', from: from.address || '', fromName: from.name || '', to: (m.to && m.to.text) || '', subject: m.subject || '(ohne Betreff)',
+      date: (m.date || internalDate || new Date()).toISOString(), html, voll: true,
+      text: String(m.text || (html ? html.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ') : '')).replace(/\n{3,}/g, '\n\n').slice(0, 60000), atts };
+  }
+  // Eine einzelne Mail (z. B. ältere ohne Bilder/Anhänge) vollständig nachladen
+  ipcMain.handle('oh:mailEinzeln', async (e, id, uid) => {
+    const a = konten().find(x => x.id === id); if (!a) return { ok: false, message: 'Konto nicht gefunden.' };
+    const c = imap(a);
+    try {
+      await c.connect(); const lock = await c.getMailboxLock('INBOX'); let r = null;
+      try { const msg = await c.fetchOne(String(uid), { source: true, internalDate: true }, { uid: true }); if (msg && msg.source && msg.source.length <= 40 * 1024 * 1024) r = await zerlege(msg.source, msg.internalDate); }
+      finally { lock.release(); }
+      await c.logout();
+      return r ? Object.assign({ ok: true }, r) : { ok: false, message: 'E-Mail im Postfach nicht mehr gefunden (verschoben oder gelöscht?).' };
+    } catch (err) { try { await c.logout(); } catch (e2) {} return { ok: false, message: errText(err) }; }
+  });
+
+  // Neue Mails seit dem letzten Abruf (beim ersten Mal: die letzten 7 Tage, höchstens 40).
   ipcMain.handle('oh:mailAbrufen', async (e, id) => {
     const list = konten(), a = list.find(x => x.id === id); if (!a) return { ok: false, message: 'Konto nicht gefunden.' };
     const c = imap(a); const out = [];
@@ -57,15 +82,7 @@ module.exports = function setupMail({ app, ipcMain, safeStorage }) {
         for (const uid of uids) {
           const msg = await c.fetchOne(String(uid), { source: true, internalDate: true }, { uid: true }); if (!msg || !msg.source) continue;
           if (msg.source.length > 30 * 1024 * 1024) { out.push({ uid, zuGross: true }); continue; }
-          const m = await simpleParser(msg.source);
-          const from = (m.from && m.from.value && m.from.value[0]) || {};
-          out.push({ uid, msgId: m.messageId || '', from: from.address || '', fromName: from.name || '', to: (m.to && m.to.text) || '', subject: m.subject || '(ohne Betreff)',
-            date: (m.date || msg.internalDate || new Date()).toISOString(), text: String(m.text || (m.html ? String(m.html).replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ') : '')).replace(/\n{3,}/g, '\n\n').slice(0, 60000),
-            atts: (m.attachments || []).filter(x => {
-                const t = String(x.contentType || '').toLowerCase(), pdf = t === 'application/pdf' || /\.pdf$/i.test(x.filename || '');
-                const bild = /^image\/(jpeg|png|webp|heic|heif)$/.test(t) && x.contentDisposition !== 'inline' && x.size > 20 * 1024; // keine Logos aus Signaturen
-                return (pdf || bild) && x.size <= 15 * 1024 * 1024; })
-              .slice(0, 10).map(x => ({ name: x.filename || 'anhang', type: (x.contentType || '').toLowerCase(), size: x.size, data: new Uint8Array(x.content) })) });
+          out.push(Object.assign({ uid }, await zerlege(msg.source, msg.internalDate)));
         }
         const neu = list.find(x => x.id === id); neu.uidValidity = uv; if (uids.length) neu.lastUid = Math.max(a.uidValidity === uv ? a.lastUid : 0, ...uids); neu.lastCheck = new Date().toISOString();
         speichereKonten(list);
