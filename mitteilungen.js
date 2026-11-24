@@ -5,6 +5,12 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.16.1', datum: '2026-11-24', de: [
+        'Gemini: Google hat das Modell „gemini-2.5-flash“ für neue Nutzer abgeschaltet. Home Office wählt jetzt automatisch das neueste Flash-Modell und wechselt selbst, wenn Google eins abschaltet.',
+        'Dokumente, die daran gescheitert sind, werden automatisch noch einmal gelesen.',
+        'E-Mail-Auswahl: „Alle auswählen“, markierte ans Büro geben oder „Nicht mehr fragen“ – gelöscht wird nichts, die E-Mails bleiben im Posteingang.',
+        'E-Mail: neuer Ordner „Gesendet“ – zeigt deine verschickten E-Mails direkt aus dem Postfach (auch vom Handy oder Browser gesendete).'],
+      ar: ['Gemini: جوجل وقّفت موديل «gemini-2.5-flash» للمستخدمين الجداد. البرنامج صار يختار لحالو أحدث موديل Flash، وبيغيّر لحالو إذا جوجل وقّفت موديل.', 'الملفات اللي فشلت بسبب هالشي بتنقرا مرة تانية لحالها.', 'اختيار الإيميلات: «تحديد الكل»، والمحدد بيروح للمكتب أو «ما عاد تسألني» – ما بينحذف شي، الإيميلات بتضل بالوارد.', 'الإيميل: مجلد جديد «Gesendet» بيعرض الإيميلات اللي بعتتها من الصندوق مباشرة (حتى اللي من الجوال أو المتصفح).'] },
     { v: '2.16.0', datum: '2026-11-24', de: [
         'E-Mail (mail.de): Postfach verbinden, Posteingang lesen, antworten und senden – Anhänge auch aus dem Programm.',
         'Eingangskette: E-Mail, Upload, Scan, Handy und Ordner gehen der Reihe nach durchs Büro – Briefkasten leuchtet, Sekretärin holt, Gemini liest.',

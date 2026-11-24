@@ -2,7 +2,7 @@
    Abruf: stündlich durch die Sekretärin (eingang.js) oder per Knopf. Passwörter nur im Hauptprozess (verschlüsselt).
    Läuft nach dem Hauptskript und nutzt dessen Globale. */
 (function () {
-  const MU = { filter: 'alle', sel: '', konten: null, text: {} };
+  const MU = { filter: 'alle', sel: '', konten: null, text: {}, ordner: 'eingang', gesendet: null, gSel: '', gLaedt: false };
   const M = () => { if (!Array.isArray(S.mails)) S.mails = []; return S.mails; };
   const kurz = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
   const STATUS = { neu: ['Neu', 'gruen'], buero: ['Im Büro', 'lila'], erledigt: ['Erledigt', 'gruen'], ignoriert: ['Nicht bearbeitet', 'grau'] };
@@ -18,18 +18,39 @@
     if (!DESKTOP) return `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1></div></div><div class="card"><div class="empty">E-Mail gibt es nur im installierten Programm.</div></div>`;
     if (!MU.konten) { konten().then(() => { if (parseHash().route === 'mail') render(); }); return `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1></div></div><div class="card"><div class="empty">Lädt …</div></div>`; }
     if (!MU.konten.length) return `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1><p class="sub" style="margin:0">Postfach verbinden – danach prüft die Sekretärin es jede Stunde.</p></div></div>${kontoForm()}`;
+    const kopf = `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1><p class="sub" style="margin:0">${esc(MU.konten.map(k => k.user).join(' · '))}${MU.konten[0] && MU.konten[0].lastCheck ? ' · zuletzt geprüft ' + datum(MU.konten[0].lastCheck) : ''}</p></div>
+      <button class="btn" data-act="mKonten">${icon('einstellungen')}Konten</button><button class="btn" data-act="${MU.ordner === 'gesendet' ? 'mGesendetLaden' : 'mAbrufen'}">${icon('update')}${MU.ordner === 'gesendet' ? 'Neu laden' : 'Abrufen'}</button><button class="btn pri" data-act="mNeu">${icon('plus')}Neue E-Mail</button></div>
+      <div class="themesw" style="margin-bottom:12px"><button class="${MU.ordner === 'eingang' ? 'on' : ''}" data-act="mOrdner" data-id="eingang">${icon('mail')}Posteingang</button><button class="${MU.ordner === 'gesendet' ? 'on' : ''}" data-act="mOrdner" data-id="gesendet">${icon('update')}Gesendet</button></div>`;
+    if (MU.ordner === 'gesendet') return kopf + gesendetHTML();
     const F = MU.filter, list = M().filter(m => F === 'alle' || m.status === F || (F === 'ungelesen' && !m.gelesen)).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     const sel = M().find(m => m.id === MU.sel) || null;
     const tab = (v, l) => `<button class="pill ${F === v ? 'on' : ''}" data-act="mFilter" data-id="${v}">${l} <span class="small muted">${v === 'alle' ? M().length : v === 'ungelesen' ? M().filter(m => !m.gelesen).length : M().filter(m => m.status === v).length}</span></button>`;
-    return `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1><p class="sub" style="margin:0">${esc(MU.konten.map(k => k.user).join(' · '))}${MU.konten[0] && MU.konten[0].lastCheck ? ' · zuletzt geprüft ' + datum(MU.konten[0].lastCheck) : ''}</p></div>
-      <button class="btn" data-act="mKonten">${icon('einstellungen')}Konten</button><button class="btn" data-act="mAbrufen">${icon('update')}Abrufen</button><button class="btn pri" data-act="mNeu">${icon('plus')}Neue E-Mail</button></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${tab('alle', 'Alle')}${tab('ungelesen', 'Ungelesen')}${tab('neu', 'Neu')}${tab('buero', 'Im Büro')}${tab('erledigt', 'Erledigt')}${tab('ignoriert', 'Nicht bearbeitet')}</div>
+    return kopf + `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${tab('alle', 'Alle')}${tab('ungelesen', 'Ungelesen')}${tab('neu', 'Neu')}${tab('buero', 'Im Büro')}${tab('erledigt', 'Erledigt')}${tab('ignoriert', 'Nicht bearbeitet')}</div>
       <div class="mwrap"><div class="card mlist">${list.length ? list.map(m => `<button class="mitem ${m.id === MU.sel ? 'on' : ''} ${m.gelesen ? '' : 'ungel'}" data-act="mOpen" data-id="${m.id}">
           <span class="mtop"><b>${esc(kurz(m.fromName || m.from, 40))}</b><small>${esc(datum(m.date))}</small></span>
           <span class="msub">${esc(kurz(m.subject, 70))}${(m.atts || []).length ? ' <span class="small">📎' + m.atts.length + '</span>' : ''}</span>
           <span class="msnip">${esc(kurz(m.snippet, 110))}</span><span class="mst">${(STATUS[m.status] || STATUS.neu)[0]}</span></button>`).join('') : '<div class="empty">Keine E-Mails.</div>'}</div>
         <div class="card mread">${sel ? leseHTML(sel) : '<div class="empty">E-Mail links auswählen.</div>'}</div></div>`;
   };
+  // Gesendet: direkt aus dem Ordner „Gesendet“ des Postfachs (auch Mails vom Handy/Browser)
+  async function gesendetLaden() {
+    if (MU.gLaedt) return; MU.gLaedt = true; const alle = [], fehler = [];
+    for (const k of MU.konten || []) { const r = await window.officeHome.mailGesendet(k.id, 50); if (r && r.ok) r.mails.forEach(m => alle.push(Object.assign({ id: k.id + ':' + m.uid, acc: k.id, von: k.user }, m))); else fehler.push(k.user + ': ' + ((r && r.message) || 'Fehler')); }
+    MU.gesendet = { list: alle.sort((a, b) => b.date.localeCompare(a.date)), fehler, am: new Date().toISOString() }; MU.gLaedt = false;
+    if (parseHash().route === 'mail') render();
+  }
+  function gesendetHTML() {
+    if (!MU.gesendet) { gesendetLaden(); return '<div class="card"><div class="empty">Gesendete E-Mails werden aus dem Postfach geladen …</div></div>'; }
+    const G = MU.gesendet, sel = G.list.find(m => m.id === MU.gSel);
+    return `${G.fehler.length ? `<div class="banner amber">${esc(G.fehler.join(' · '))}</div>` : ''}
+      <div class="mwrap"><div class="card mlist">${G.list.length ? G.list.map(m => `<button class="mitem ${m.id === MU.gSel ? 'on' : ''}" data-act="mGOpen" data-id="${esc(m.id)}">
+          <span class="mtop"><b>An: ${esc(kurz(m.to || '?', 40))}</b><small>${esc(datum(m.date))}</small></span>
+          <span class="msub">${esc(kurz(m.subject, 70))}${m.atts.length ? ' <span class="small">📎' + m.atts.length + '</span>' : ''}</span>
+          <span class="msnip">${esc(kurz((m.text || '').replace(/\s+/g, ' '), 110))}</span></button>`).join('') : '<div class="empty">Keine gesendeten E-Mails gefunden.</div>'}</div>
+        <div class="card mread">${sel ? `<div class="mrhead"><h3 style="margin:0">${esc(sel.subject)}</h3><div class="small muted">An: ${esc(sel.to)} · ${esc(new Date(sel.date).toLocaleString('de-DE'))}${(MU.konten || []).length > 1 ? ' · von ' + esc(sel.von) : ''}</div>
+            ${sel.atts.length ? `<div class="matts">${sel.atts.map(a => `<span class="badge">📎 ${esc(kurz(a, 40))}</span>`).join('')}</div>` : ''}</div>
+            <div class="mbody">${esc(sel.text) || '<span class="muted">(kein Text' + (sel.gross ? ' – E-Mail sehr groß, Text nicht geladen' : '') + ')</span>'}</div>` : '<div class="empty">Gesendete E-Mail links auswählen.</div>'}</div></div>`;
+  }
   function leseHTML(m) {
     const t = MU.text[m.id];
     return `<div class="mrhead"><h3 style="margin:0">${esc(m.subject)}</h3><div class="small muted">${esc(m.fromName ? m.fromName + ' <' + m.from + '>' : m.from)} · ${esc(new Date(m.date).toLocaleString('de-DE'))}</div>
@@ -83,13 +104,16 @@
       for (const f of extra) atts.push({ name: f.name, type: f.type, data: new Uint8Array(await f.arrayBuffer()) });
       const r = await window.officeHome.mailSenden(bg.querySelector('#mfAcc').value, { to: bg.querySelector('#mfTo').value, subject: bg.querySelector('#mfSub').value, text: bg.querySelector('#mfText').value, atts, inReplyTo: vor.inReplyTo || '' });
       if (!r || !r.ok) { b.disabled = false; b.textContent = 'Senden'; return alert('Nicht gesendet: ' + ((r && r.message) || 'Fehler')); }
-      bg.remove(); toast('E-Mail gesendet');
+      bg.remove(); toast('E-Mail gesendet'); MU.gesendet = null; if (parseHash().route === 'mail' && MU.ordner === 'gesendet') render();
       if (typeof ohMelden === 'function') ohMelden({ typ: 'system', title: 'E-Mail gesendet: ' + kurz(bg.querySelector('#mfSub').value, 60), lines: ['An ' + bg.querySelector('#mfTo').value] });
     });
   }
 
   Object.assign(ACT, {
     mFilter: d => { MU.filter = d.id; render(); },
+    mOrdner: d => { MU.ordner = d.id; render(); },
+    mGOpen: d => { MU.gSel = d.id; render(); },
+    mGesendetLaden: () => { MU.gesendet = null; render(); },
     mOpen: d => { MU.sel = d.id; const m = M().find(x => x.id === d.id); if (m && !m.gelesen) { m.gelesen = true; save(); } render(); },
     mAbrufen: async () => { if (!window.EG) return; toast('Postfach wird geprüft …'); const r = await window.EG.mailsAbrufen(false); MU.konten = null; await konten(); toast(r.neu ? r.neu + ' neue E-Mail(s)' : 'Keine neuen E-Mails'); render(); },
     mNeu: () => schreiben({}),

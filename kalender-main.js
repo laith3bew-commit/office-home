@@ -55,18 +55,41 @@ Antworte NUR mit JSON nach diesem Schema, ohne Erklärungen:
 Regeln: Nur Daten, die im Dokument stehen. Kontakte nur mit mindestens Organisation oder Name. Keine Kontakte für den Empfänger selbst oder die betroffene Person.
 Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechnen (Briefdatum + Frist, Zugang 3 Tage nach Briefdatum). Bei befristeten Bewilligungen oder Bescheiden das Ende in "gueltigkeit" eintragen.`;
 
-  ipcMain.handle('oh:kiStatus', () => { const s = secrets(); return { hasKey: !!s.gemini, model: readJson('oh-prefs.json', {}).kiModel || 'gemini-2.5-flash' }; });
+  // Modell: gespeichertes oder leer (= automatisch das neueste „flash“-Modell aus Googles Liste).
+  // Meldet Google, dass ein Modell nicht mehr verfügbar ist, wird automatisch gewechselt und gespeichert.
+  const ALT_MODELL = 'gemini-2.5-flash';
+  const modellGespeichert = () => readJson('oh-prefs.json', {}).kiModel || '';
+  const speichereModell = m => { const p = readJson('oh-prefs.json', {}); p.kiModel = m; writeJson('oh-prefs.json', p); };
+  const veraltet = msg => /no longer available|not found|is not supported|deprecated|404/i.test(String(msg || ''));
+  async function neuestesModell(key, hinweis) {
+    // 1) Vorschlag aus der Fehlermeldung (z. B. „use models/gemini-x-flash“)
+    const m = String(hinweis || '').match(/models\/(gemini-[a-z0-9.\-]+flash)\b/i);
+    // 2) Liste der Modelle, die generateContent können: höchste Version von „gemini-<zahl>-flash“ (ohne lite/preview/exp)
+    try {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+      const j = await r.json().catch(() => ({}));
+      const liste = (j.models || []).filter(x => (x.supportedGenerationMethods || []).includes('generateContent')).map(x => String(x.name || '').replace(/^models\//, ''))
+        .filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n));
+      const ver = n => parseFloat(n.match(/^gemini-(\d+(?:\.\d+)?)/)[1]);
+      liste.sort((a, b) => ver(b) - ver(a));
+      if (m && liste.includes(m[1])) return m[1];
+      if (liste.length) return liste[0];
+    } catch (e) {}
+    return m ? m[1] : '';
+  }
+  ipcMain.handle('oh:kiStatus', () => { const s = secrets(); return { hasKey: !!s.gemini, model: modellGespeichert() || 'automatisch' }; });
   ipcMain.handle('oh:kiSetKey', (e, key, model) => {
     try {
       if (key !== undefined && key !== null) setSecret('gemini', String(key).trim());
-      if (model) { const p = readJson('oh-prefs.json', {}); p.kiModel = String(model).trim(); writeJson('oh-prefs.json', p); }
+      if (model !== undefined && model !== null) { const v = String(model).trim(); speichereModell(/^(automatisch|auto)?$/i.test(v) ? '' : v); }
       return { ok: true };
     } catch (err) { return { ok: false, message: errText(err) }; }
   });
   ipcMain.handle('oh:kiAnalyze', async (e, doc) => {
     try {
       const key = secrets().gemini; if (!key) return { ok: false, message: 'Kein Gemini-Schlüssel eingetragen (Einstellungen → Kalender & KI).' };
-      const model = readJson('oh-prefs.json', {}).kiModel || 'gemini-2.5-flash';
+      let model = modellGespeichert();
+      if (!model) { model = await neuestesModell(key) || ALT_MODELL; speichereModell(model); }
       // Eine Datei (mime/data) oder mehrere (parts) und/oder ein E-Mail-Text (text)
       const teile = (Array.isArray(doc.parts) ? doc.parts : doc.data ? [{ mime: doc.mime, data: doc.data }] : []).map(p => ({ mime: p.mime, data: Buffer.from(p.data) }));
       const summe = teile.reduce((s, p) => s + p.data.length, 0);
@@ -75,9 +98,14 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
       const ctxText = doc.text ? `\n\nE-Mail (Absender: ${String(doc.von || '').slice(0, 200)}, Betreff: ${String(doc.betreff || '').slice(0, 300)}):\n${String(doc.text).slice(0, 20000)}\n\nBerücksichtige E-Mail-Text und alle Anhänge zusammen.` : '';
       const body = { contents: [{ parts: [...teile.map(p => ({ inline_data: { mime_type: p.mime, data: p.data.toString('base64') } })), { text: PROMPT(doc.ctx || { persons: [], today: '' }) + ctxText }] }],
         generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } };
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      const frage = mdl => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(mdl)}:generateContent`, {
         method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) });
-      const j = await r.json().catch(() => ({}));
+      let r = await frage(model), j = await r.json().catch(() => ({}));
+      if (!r.ok && veraltet((j.error && j.error.message) || r.status)) {
+        // Modell abgeschaltet → neuestes passendes Modell holen, merken, noch einmal versuchen
+        const neu = await neuestesModell(key, j.error && j.error.message);
+        if (neu && neu !== model) { model = neu; speichereModell(neu); r = await frage(model); j = await r.json().catch(() => ({})); }
+      }
       if (!r.ok) return { ok: false, message: (j.error && j.error.message) || ('Gemini-Fehler ' + r.status) };
       const text = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || '').join('');
       let out; try { out = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch (err) { return { ok: false, message: 'Antwort der KI war kein gültiges JSON.' }; }

@@ -301,7 +301,7 @@
     if (a === 'close') return schliessen();
     if (a === 'egkarte') { CMD.karte = b.dataset.id; return draw(); }
     if (a === 'egzurueck') { CMD.karte = null; return draw(); }
-    if (a === 'eg' && window.EG) { b.disabled = true; window.EG.aktion(b.dataset.id, b.dataset.ea, panel).then(r => { if (r === 'zu') CMD.karte = null; if (r !== 'bleib') draw(); }); return; }
+    if (a === 'eg' && window.EG) { b.disabled = true; window.EG.aktion(b.dataset.id, b.dataset.ea, panel).then(r => { b.disabled = false; if (r === 'zu') CMD.karte = null; if (r !== 'bleib') draw(); }); return; }
     if (a === 'send') return senden();
     if (a === 'neu') { CMD.run = null; CMD.mode = ''; draw(); const i = $('#cmdIn'); if (i) i.focus(); return; }
     if (a === 'quick') return quick(b.dataset.id);

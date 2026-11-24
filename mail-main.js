@@ -75,6 +75,32 @@ module.exports = function setupMail({ app, ipcMain, safeStorage }) {
     } catch (err) { try { await c.logout(); } catch (e2) {} return { ok: false, message: errText(err) }; }
   });
 
+  // Ordner „Gesendet“ lesen (nur lesen): die letzten n Mails, neueste zuerst; Anhänge nur als Namen
+  ipcMain.handle('oh:mailGesendet', async (e, id, n) => {
+    const a = konten().find(x => x.id === id); if (!a) return { ok: false, message: 'Konto nicht gefunden.' };
+    n = Math.min(100, Math.max(5, Number(n) || 40));
+    const c = imap(a), out = [];
+    try {
+      await c.connect();
+      const boxes = await c.list();
+      const sent = (boxes.find(b => b.specialUse === '\\Sent') || boxes.find(b => /^(sent|gesendet)/i.test(b.name)) || {}).path;
+      if (!sent) { await c.logout(); return { ok: false, message: 'Im Postfach wurde kein Ordner „Gesendet“ gefunden.' }; }
+      const lock = await c.getMailboxLock(sent);
+      try {
+        const total = c.mailbox.exists || 0;
+        if (total) for await (const msg of c.fetch(`${Math.max(1, total - n + 1)}:*`, { uid: true, envelope: true, size: true, source: { maxLength: 400000 } })) {
+          let text = '', atts = [];
+          try { const m = await simpleParser(msg.source); text = String(m.text || '').replace(/\n{3,}/g, '\n\n').slice(0, 20000); atts = (m.attachments || []).map(x => x.filename).filter(Boolean).slice(0, 10); } catch (err) {}
+          const env = msg.envelope || {};
+          out.push({ uid: msg.uid, to: (env.to || []).map(t => t.name ? t.name + ' <' + t.address + '>' : t.address).join(', '), subject: env.subject || '(ohne Betreff)', date: (env.date ? new Date(env.date) : new Date()).toISOString(),
+            text, atts, gross: (msg.size || 0) > 400000 });
+        }
+      } finally { lock.release(); }
+      await c.logout();
+      return { ok: true, ordner: sent, mails: out.sort((x, y) => y.date.localeCompare(x.date)) };
+    } catch (err) { try { await c.logout(); } catch (e2) {} return { ok: false, message: errText(err) }; }
+  });
+
   // Senden: SMTP (SSL 465), danach Kopie in den Ordner „Gesendet“ (special-use \Sent)
   ipcMain.handle('oh:mailSenden', async (e, id, m) => {
     const a = konten().find(x => x.id === id); if (!a) return { ok: false, message: 'Konto nicht gefunden.' };

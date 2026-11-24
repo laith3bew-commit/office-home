@@ -438,6 +438,7 @@ tr .egnew{float:none}
 .egstep small{font-size:11.5px;color:var(--muted)}
 .egstep .egdot{margin-top:3px}
 .egkarte .acts{display:flex;gap:6px;flex-wrap:wrap}
+.egalle{background:var(--hover);border-style:dashed}
 .egerg{margin:0;padding-inline-start:18px;font-size:13px;display:flex;flex-direction:column;gap:4px}
 /* Command (Strg+K): schwebender Knopf + Glasfenster */
 #cmdOrb{position:fixed;z-index:900;width:56px;height:56px;border-radius:50%;border:1px solid rgba(169,184,202,.55);cursor:grab;padding:0;touch-action:none;
@@ -3790,10 +3791,10 @@ function calCardHTML(){
     <div><b>Dokumente lesen (Google Gemini)</b>
       <p class="small muted" style="margin:4px 0 10px">Jedes neue Dokument (Upload, Scanner, Handy) wird an Gemini geschickt. Termine, Fristen und Gültigkeiten landen im Kalender, Ansprechpartner im Adressbuch.
       Bitte die <b>kostenpflichtige Stufe</b> von Google AI Studio nutzen – in der kostenlosen darf Google die Inhalte verwenden.</p>
-      <p>${k.hasKey ? '<span class="badge green">Schlüssel gespeichert</span>' : '<span class="badge amber">kein Schlüssel</span>'} <span class="small muted">Modell: ${esc(k.model || 'gemini-2.5-flash')}</span></p>
+      <p>${k.hasKey ? '<span class="badge green">Schlüssel gespeichert</span>' : '<span class="badge amber">kein Schlüssel</span>'} <span class="small muted">Modell: ${esc(k.model || 'automatisch')}</span></p>
       <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
         <div class="fld full"><label>Gemini-API-Schlüssel (aus aistudio.google.com)</label><input type="password" id="kiKey" placeholder="${k.hasKey ? '•••••••• (neu eingeben zum Ändern)' : 'AIza…'}" autocomplete="off"></div>
-        <div class="fld"><label>Modell</label><input id="kiModel" value="${esc(k.model || 'gemini-2.5-flash')}"></div>
+        <div class="fld"><label>Modell</label><input id="kiModel" value="${esc(k.model || 'automatisch')}" title="„automatisch“ = immer das neueste Flash-Modell von Google; bei abgeschalteten Modellen wechselt Home Office selbst"></div>
         <div class="fld cb" style="align-self:end"><input type="checkbox" id="kiAuto" data-act="kiAuto" ${calCfg().ki !== false ? 'checked' : ''}><label for="kiAuto">jedes neue Dokument automatisch lesen</label></div>
       </form></div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" data-act="kiSave">${icon('speichern')}Speichern</button>${k.hasKey ? `<button class="btn dan" data-act="kiDel">${icon('loeschen')}Schlüssel löschen</button>` : ''}</div></div>

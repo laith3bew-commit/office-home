@@ -207,6 +207,8 @@ Object.assign(W, {
   'Nur im Desktop-Programm verfügbar.': 'متاح فقط في برنامج سطح المكتب.', 'Drive': 'Drive', 'ohne Drive': 'بدون Drive',
   'Name und Anschrift zusätzlich oben im Briefkopf zeigen': 'إظهار الاسم والعنوان فوق برأس الرسالة كمان',
   'Aus = keine Wiederholung: Absender steht schon in der Rücksendezeile und im Infoblock.': 'مطفي = بدون تكرار: المرسل مكتوب أصلاً بسطر الإرجاع وبمربع المعلومات.',
+  'Posteingang': 'الوارد', 'Gesendet': 'المرسل', 'Neu laden': 'إعادة تحميل', 'Nicht mehr fragen': 'ما عاد تسألني', 'Ans Büro': 'للمكتب', 'Alle auswählen': 'تحديد الكل',
+  'Gesendete E-Mail links auswählen.': 'اختار إيميل مرسل من اليسار.', 'Keine gesendeten E-Mails gefunden.': 'ما في إيميلات مرسلة.',
   'E-Mail': 'الإيميل', 'Konten': 'الحسابات', 'Abrufen': 'جلب البريد', 'Neue E-Mail': 'إيميل جديد', 'Ungelesen': 'غير مقروء', 'Im Büro': 'بالمكتب', 'Erledigt': 'خلص', 'Nicht bearbeitet': 'ما انعالج',
   'Ans Büro (Gemini liest)': 'للمكتب (Gemini بيقرا)', 'Antworten': 'رد', 'Nicht bearbeiten': 'ما تعالجو', 'Senden': 'إرسال', 'E-Mail links auswählen.': 'اختار إيميل من اليسار.', 'Keine E-Mails.': 'ما في إيميلات.',
   'Postfach verbinden': 'ربط صندوق البريد', 'Verbinden und testen': 'ربط وتجربة', 'E-Mail-Adresse': 'عنوان الإيميل', 'Passwort / App-Passwort': 'كلمة السر / App-Passwort', 'Absendername': 'اسم المرسل',

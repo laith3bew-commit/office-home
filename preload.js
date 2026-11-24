@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('officeHome', {
   mailKontoLoeschen: (id) => ipcRenderer.invoke('oh:mailKontoLoeschen', id),
   mailAbrufen: (id) => ipcRenderer.invoke('oh:mailAbrufen', id),
   mailSenden: (id, m) => ipcRenderer.invoke('oh:mailSenden', id, m),
+  mailGesendet: (id, n) => ipcRenderer.invoke('oh:mailGesendet', id, n),
   memNote: (root, ws, note) => ipcRenderer.invoke('oh:memNote', root, ws, note),
   memTask: (root, task) => ipcRenderer.invoke('oh:memTask', root, task),
   // Claude-Anbindung (MCP): Server an/aus, Einrichtung, Werkzeugaufrufe aus Claude beantworten

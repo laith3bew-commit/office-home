@@ -200,18 +200,38 @@
       <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">${icon('erledigt')}Bestätigen</button><button class="btn sm" data-cmd="eg" data-ea="spaeter" data-id="${it.id}">Später</button><button class="btn sm dan" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Verwerfen</button>${it.docIds[0] ? `<button class="btn sm" data-cmd="eg" data-ea="doc" data-id="${it.id}">${icon('auge')}Datei</button>` : ''}</div>
       <div class="small muted">Nichts wird eingetragen, bevor du bestätigst.${it.typ === 'demo' ? ' (Probe – nur Demo-Daten)' : ''}</div>${demoMem}</div>`;
   }
+  // „Nicht mehr fragen“: Mail bleibt im Posteingang (nichts wird gelöscht), wird aber nicht bearbeitet und in keiner Auswahl mehr angeboten
+  function mailsNichtFragen(ids) {
+    let n = 0; M().forEach(m => { if (ids.includes(m.id) && m.status !== 'erledigt' && m.status !== 'buero') { m.status = 'ignoriert'; n++; } });
+    L().forEach(it => { if (it.typ === 'mailwahl' && it.status === 'vorschlag') { it.schritte = it.schritte.filter(s => !ids.includes(s.d.mailId)); if (!it.schritte.length) { it.status = 'erledigt'; it.ergebnis = ['Keine E-Mail mehr offen']; } } });
+    save(); punkt(); return n;
+  }
   function mailwahlHTML(it) {
+    it.schritte = it.schritte.filter(s => M().some(m => m.id === s.d.mailId)); // inzwischen gelöschte Mails weglassen
+    const n = it.schritte.length;
+    if (!n) return `<div class="egkarte"><div class="eghead">${dot('gruen')}<b>Keine E-Mails mehr in dieser Auswahl</b></div></div>`;
     return `<div class="egkarte" data-eg="${it.id}"><div class="eghead">${dot('gruen', true)}<b>${esc(it.titel)}</b></div>
-      <div class="small muted">Welche E-Mails soll das Büro bearbeiten? Nicht markierte bleiben nur im Posteingang.</div>
+      <div class="small muted">Markieren, dann ans Büro geben oder „Nicht mehr fragen“. Gelöscht wird nichts – alle E-Mails bleiben im Posteingang.</div>
+      <label class="egstep egalle"><input type="checkbox" data-egalle="1"><span><b>Alle auswählen</b><small>${n} E-Mail${n > 1 ? 's' : ''}</small></span></label>
       <div class="egsteps">${it.schritte.map(s => { const m = M().find(x => x.id === s.d.mailId) || {};
         return `<label class="egstep"><input type="checkbox" data-egs="${s.id}" ${s.an ? 'checked' : ''}><span><b>${esc(m.fromName || m.from || '?')}</b><small>${esc(kurz(m.subject, 80))}${(m.atts || []).length ? ' · 📎 ' + m.atts.length : ''}</small></span></label>`; }).join('')}</div>
-      <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">Ausgewählte ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Keine</button></div></div>`;
+      <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">${icon('alle')}Ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="nichtfragen" data-id="${it.id}" title="Bleibt im Posteingang, wird nicht bearbeitet und nicht mehr angeboten">${icon('schliessen')}Nicht mehr fragen</button><button class="btn sm" data-cmd="eg" data-ea="spaeter" data-id="${it.id}">Später</button></div></div>`;
   }
+  // „Alle auswählen“ in Auswahlkarten
+  document.addEventListener('change', e => { const a = e.target.closest('[data-egalle]'); if (!a) return; const box = a.closest('[data-eg]'); if (box) box.querySelectorAll('[data-egs]').forEach(x => { x.checked = a.checked; }); });
   async function aktion(id, a, panel) {
     const it = L().find(x => x.id === id); if (!it) return;
     const box = panel && panel.querySelector(`[data-eg="${id}"]`);
     const ids = box ? [...box.querySelectorAll('[data-egs]')].filter(x => x.checked).map(x => x.dataset.egs) : it.schritte.filter(s => s.an).map(s => s.id);
+    if (a === 'nichtfragen' && it.typ === 'mailwahl') {
+      if (!ids.length) { toast('Bitte zuerst E-Mails markieren.'); return 'bleib'; }
+      const mids = it.schritte.filter(s => ids.includes(s.id)).map(s => s.d.mailId);
+      const n = mailsNichtFragen(mids);
+      if (it.status === 'vorschlag') it.titel = it.schritte.length + ' neue E-Mail' + (it.schritte.length > 1 ? 's' : '') + ': ' + [...new Set(it.schritte.map(s => { const m = M().find(x => x.id === s.d.mailId) || {}; return m.fromName || m.from; }))].slice(0, 4).join(', ');
+      save(); toast(n + ' E-Mail(s) werden nicht mehr angeboten – sie bleiben im Posteingang'); if (parseHash().route === 'mail') render(); return;
+    }
     if (a === 'ok' && it.typ === 'mailwahl') {
+      if (!ids.length) { toast('Bitte zuerst E-Mails markieren.'); return 'bleib'; }
       const nimm = new Set(ids);
       for (const s of it.schritte) { const m = M().find(x => x.id === s.d.mailId); if (!m) continue;
         if (nimm.has(s.id)) { m.status = 'buero'; neu({ typ: 'mail', titel: m.subject || '(ohne Betreff)', von: m.fromName || m.from, mailId: m.id, personId: m.personId || '' }); }
@@ -423,6 +443,8 @@
   function start() {
     const go = () => { if (!window.OH_READY) return setTimeout(go, 500);
       L().forEach(x => { if (x.status === 'liest') x.status = 'warte'; }); // nach Neustart wieder einreihen
+      // Einträge, die nur am abgeschalteten Gemini-Modell gescheitert sind, automatisch noch einmal lesen
+      L().forEach(x => { if (x.status === 'fehler' && /no longer available|not found for API|is not supported/i.test(x.fehler || '')) { x.status = 'warte'; x.fehler = ''; } });
       punkt(); punkteSetzen(); setInterval(tick, 4000); setTimeout(tick, 2500);
       setTimeout(() => mailsAbrufen(true), 20000); setInterval(() => mailsAbrufen(true), 60 * 60 * 1000); // stündlich: Sekretärin prüft das Postfach
     };
@@ -430,7 +452,7 @@
   }
   ACT.demoAufgabe = () => demoStart();
   window.EG = { neu, offen, listeHTML, karteHTML, aktion: async (id, a, panel) => { const it = L().find(x => x.id === id); if (it && it.typ === 'sammel' && a === 'ok') { const box = panel && panel.querySelector(`[data-eg="${id}"]`); await sammelOk(it, box ? [...box.querySelectorAll('[data-egs]')].filter(x => x.checked).map(x => x.dataset.egs) : []); return; } return aktion(id, a, panel); },
-    aktualisieren, mailsAbrufen, punkt, FARBE, demoStart, demoNeustart };
+    aktualisieren, mailsAbrufen, mailsNichtFragen, punkt, FARBE, demoStart, demoNeustart };
   // Sammelkarte nutzt dieselbe Darstellung wie Mailwahl/Vorschlag
   const kh = karteHTML; window.EG.karteHTML = id => { const it = L().find(x => x.id === id); if (it && it.typ === 'sammel' && it.status === 'vorschlag') return `<div class="egkarte" data-eg="${it.id}"><div class="eghead">${dot('gruen', true)}<b>${esc(it.titel)}</b></div><div class="egsteps">${it.schritte.map(s => `<label class="egstep"><input type="checkbox" data-egs="${s.id}" ${s.an ? 'checked' : ''}><span><b>${esc(s.text)}</b><small>${esc(s.sub)}</small></span></label>`).join('')}</div><div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">Ausgewählte ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Keine</button></div></div>`; return kh(id); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
