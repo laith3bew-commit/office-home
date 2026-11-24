@@ -236,6 +236,7 @@ html[dir=rtl] .langsw button{font-family:'Manrope','IBM Plex Sans Arabic',sans-s
 .letter .l-zone{height:17.7mm;padding-left:5mm;position:relative}
 .letter .l-ret{font-size:7pt;padding-top:1.5mm;color:#222;max-width:80mm}
 .letter .l-field.hasm .l-ret{max-width:38mm}
+.letter .l-field .l-ret.one{max-width:none;white-space:nowrap;overflow:hidden;padding:0 0 0 5mm;height:3.2mm;line-height:3.2mm}
 .letter .l-verm{font-size:9pt;font-weight:700;margin-top:1.5mm}
 .letter .l-marke{position:absolute;right:0;top:0;max-width:42mm;max-height:17.5mm;z-index:1}
 .letter .l-addr{height:27.3mm;padding-left:5mm;overflow:hidden}
@@ -387,6 +388,57 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 .neuvh{display:flex;gap:10px;align-items:baseline}
 .neuv ul{margin:6px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
 .neuv ul li::marker{color:var(--accent2)}
+/* E-Mail-Bereich: Liste + Lesebereich */
+.mwrap{display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:16px;align-items:start}
+.mlist{padding:6px;max-height:calc(100vh - 230px);overflow:auto;display:flex;flex-direction:column;gap:2px}
+.mitem{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;border:0;background:transparent;color:var(--ink);font:inherit;text-align:start;cursor:pointer;position:relative}
+.mitem:hover{background:var(--hover)}
+.mitem.on{background:var(--accent-soft)}
+.mitem.ungel b{font-weight:800}
+.mitem.ungel::before{content:'';position:absolute;inset-inline-start:2px;top:16px;width:6px;height:6px;border-radius:3px;background:var(--accent2)}
+.mtop{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.mtop small{color:var(--muted);flex:none}
+.msub{font-size:13px}
+.msnip{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mst{font-size:10.5px;color:var(--accent2);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.mread{min-height:300px}
+.mrhead{padding-bottom:12px;border-bottom:1px solid var(--line2,var(--line));margin-bottom:12px}
+.matts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mbody{white-space:pre-wrap;font-size:14px;line-height:1.55;max-height:calc(100vh - 360px);overflow:auto;word-break:break-word}
+@media (max-width:1000px){.mwrap{grid-template-columns:1fr}}
+/* Eingang: Statuspunkte (Farben wie Swipii: Bereit glow, Arbeitet/Wartet pulsiert, Fehler statisch, Inaktiv gedimmt, Wird aufgebaut gestrichelt) */
+.egdot{display:inline-block;flex:none;width:11px;height:11px;border-radius:50%;background:var(--c,#6E6680);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 22%,transparent),0 0 10px var(--c);vertical-align:middle}
+.egdot.puls{animation:egpuls 1.6s ease-in-out infinite}
+.egdot.bau{background:transparent;border:2px dashed #A487D6;box-shadow:none;animation:egdreh 3s linear infinite}
+@keyframes egpuls{0%,100%{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 22%,transparent),0 0 6px var(--c)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 12%,transparent),0 0 16px var(--c)}}
+@keyframes egdreh{to{transform:rotate(360deg)}}
+.egnew{margin-inline-start:8px;float:inline-end;margin-top:4px}
+tr .egnew{float:none}
+.egorb{position:absolute;top:-2px;inset-inline-end:-2px;min-width:16px;height:16px;border-radius:999px;background:var(--c);color:#1B2A44;font:700 10px/16px var(--font,inherit);text-align:center;font-style:normal;box-shadow:0 0 0 2px var(--bg),0 0 12px var(--c);padding:0 3px;box-sizing:border-box}
+.egorb.puls{animation:egpuls 1.6s ease-in-out infinite}
+#cmdOrb.egbusy .core{animation:egbusy 1.2s ease-in-out infinite}
+@keyframes egbusy{50%{box-shadow:0 0 22px #A487D6}}
+.eglist{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.egitem{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;text-align:start;cursor:pointer}
+.egitem:hover{background:var(--accent-soft)}
+.egitem span{display:flex;flex-direction:column;min-width:0}
+.egitem b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.egitem small{font-size:11.5px;color:var(--muted)}
+.egkarte{display:flex;flex-direction:column;gap:10px}
+.eghead{display:flex;gap:10px;align-items:center;font-size:14.5px}
+.egmeta{color:var(--muted)}
+.eganl{padding:9px 12px;border-radius:12px;background:var(--hover);font-size:13.5px;line-height:1.45}
+.egper{display:flex;gap:8px;align-items:center}
+.egper select{padding:5px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);font:inherit}
+.egsteps{display:flex;flex-direction:column;gap:6px}
+.egstep{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.egstep input{margin-top:2px;flex:none}
+.egstep span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.egstep b{font-size:13px;font-weight:600}
+.egstep small{font-size:11.5px;color:var(--muted)}
+.egstep .egdot{margin-top:3px}
+.egkarte .acts{display:flex;gap:6px;flex-wrap:wrap}
+.egerg{margin:0;padding-inline-start:18px;font-size:13px;display:flex;flex-direction:column;gap:4px}
 /* Command (Strg+K): schwebender Knopf + Glasfenster */
 #cmdOrb{position:fixed;z-index:900;width:56px;height:56px;border-radius:50%;border:1px solid rgba(169,184,202,.55);cursor:grab;padding:0;touch-action:none;
   background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55),rgba(169,184,202,.28) 45%,rgba(27,42,68,.18) 75%);backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
@@ -794,13 +846,13 @@ function defaultState(){
     settings: {
       me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
       letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79',
-    logoAlways:true, logoSize:28, sigSize:22, footer:'', footerColor:'#555555', poaLink:true},
+    showHead:false, logoAlways:true, logoSize:28, sigSize:22, footer:'', footerColor:'#555555', poaLink:true},
       signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true, scan:{mode:'dok', watchDir:''},
       memory: {root:'', map:{}, defaultWs:'', remindDays:14},
       cal: {ki:true, gLastSync:''}
     },
     persons: [p('p_vater', 'Vater', 'Herr', '#4F6785'), p('p_mutter', 'Mutter', 'Frau', '#A9B8CA')],
-    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[], events:[], gDeleted:[], mitteilungen:[], marken:[]
+    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[], events:[], gDeleted:[], mitteilungen:[], marken:[], eingang:[], mails:[]
   };
 }
 let S = defaultState();
@@ -1968,9 +2020,14 @@ function letterHTML(L, design, opt = {}){
   return `<div class="letter d-${esc(dsg)} ${logo ? 'haslogo' : ''}" style="--lf:'${esc(ls.font)}';--ls:${Number(ls.size) || 11}pt;--acc:${esc(ls.accent || '#1f4e79')};--logo:${num(ls.logoSize, 28, 12, 50)}mm;--sig:${num(ls.sigSize, 22, 8, 45)}mm">
     ${ls.foldMarks ? '<div class="fold" style="top:105mm"></div><div class="hole" style="top:148.5mm"></div><div class="fold" style="top:210mm"></div>' : ''}
     ${logo}
-    <div class="l-head"><div class="n">${esc(snd.name || 'Dein Name (Einstellungen)')}</div><div class="a">${esc([snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim(), snd.phone, snd.email].filter(Boolean).join('  ·  '))}</div></div>
-    <div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone"${mOver ? ` style="height:${(17.7 + mOver).toFixed(1)}mm"` : ''}>${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
-      <div class="l-addr"${ed('recipient')}${mOver ? ` style="height:${(45 - 17.7 - mOver).toFixed(1)}mm;line-height:1.15"` : ''}>${markHTML(L.recipient || '[Empfänger]', opt.edit && 'recipient').replace(/\n/g, '<br>')}</div></div>
+    ${ls.showHead ? `<div class="l-head"><div class="n">${esc(snd.name || 'Dein Name (Einstellungen)')}</div><div class="a">${esc([snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim(), snd.phone, snd.email].filter(Boolean).join('  ·  '))}</div></div>` : ''}
+    ${mm ? (() => { /* Marke in Originalgröße oben rechts, Vermerk links daneben; Rücksendezeile einzeilig über die ganze Breite darunter */
+      const zh = Math.max(17.7, mm.h + .5), retPt = Math.max(5.5, Math.min(7, 78 / (Math.max(1, ret.length) * .6 * .3528)));
+      return `<div class="l-field hasm"><div class="l-zone" style="height:${zh.toFixed(1)}mm">${marke}${L.shipping ? `<div class="l-verm" style="padding-top:1.5mm">${esc(L.shipping)}</div>` : ''}</div>
+      <div class="l-ret one" style="font-size:${retPt.toFixed(2)}pt">${esc(ret)}</div>
+      <div class="l-addr"${ed('recipient')} style="height:${(45 - zh - 3.2).toFixed(1)}mm;line-height:1.15">`; })()
+    : `<div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone">${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
+      <div class="l-addr"${ed('recipient')}>`}${markHTML(L.recipient || '[Empfänger]', opt.edit && 'recipient').replace(/\n/g, '<br>')}</div></div>
     <table class="l-info">${info.map(([k, v]) => `<tr><td>${esc(k)}:</td><td>${esc(v)}</td></tr>`).join('')}</table>
     <div class="l-body">
       <div class="l-subj"${ed('subject')}>${markHTML(applyVars(L.subject, L) || '[Betreff]', opt.edit && 'subject')}</div>
@@ -2328,6 +2385,8 @@ VIEWS.settings = (id, q) => {
             <button class="btn sm" data-act="upImg" data-id="stamp">${icon('hochladen')}Laden</button> ${s.stamp ? '<button class="btn sm dan" data-act="delImg" data-id="stamp">' + icon('loeschen') + 'Entfernen</button>' : ''}</div>
           <div class="setrow"><label class="small" style="min-width:110px">Größe Logo</label><input type="range" min="12" max="50" step="1" data-set="letter.logoSize" data-live="logo" value="${Number(ls.logoSize) || 28}"><b class="small" id="lvLogo">${Number(ls.logoSize) || 28} mm</b></div>
           <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-set="letter.logoAlways" ${ls.logoAlways !== false ? 'checked' : ''}>In jedem neuen Brief automatisch einsetzen</label>
+          <label class="small" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" data-set="letter.showHead" ${ls.showHead ? 'checked' : ''}>Name und Anschrift zusätzlich oben im Briefkopf zeigen</label>
+          <div class="small muted" style="margin:2px 0 0 22px">Aus = keine Wiederholung: Absender steht schon in der Rücksendezeile und im Infoblock.</div>
           <div style="margin-top:16px"><b class="small">Unterschrift</b>${s.signature ? `<img class="imgprev" src="${s.signature}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keine</div>'}
             <button class="btn sm" data-act="upImg" data-id="signature">${icon('hochladen')}Laden</button> ${s.signature ? '<button class="btn sm dan" data-act="delImg" data-id="signature">' + icon('loeschen') + 'Entfernen</button>' : ''}</div>
           <div class="setrow"><label class="small" style="min-width:110px">Größe Unterschrift</label><input type="range" min="8" max="45" step="1" data-set="letter.sigSize" data-live="sig" value="${Number(ls.sigSize) || 22}"><b class="small" id="lvSig">${Number(ls.sigSize) || 22} mm</b></div>
@@ -2694,7 +2753,7 @@ let MODE = 'live';
 const stateKey = () => MODE === 'demo' ? 'demoState' : 'state';
 function modeSwitchHTML(){
   return `<div class="modesw ${MODE}"><button class="${MODE === 'live' ? 'on' : ''}" data-act="setMode" data-id="live">Live</button><button class="${MODE === 'demo' ? 'on' : ''}" data-act="setMode" data-id="demo">Demo</button></div>`
-    + (MODE === 'demo' ? `<span class="demotag">DEMO-MODUS · Beispieldaten <button class="btn sm" data-act="demoReset">${icon('update')}Neu erzeugen</button></span>` : '');
+    + (MODE === 'demo' ? `<span class="demotag">DEMO-MODUS · Beispieldaten <button class="btn sm" data-act="demoReset">${icon('update')}Neu erzeugen</button><button class="btn sm pri" data-act="demoAufgabe">${icon('alle')}Aufgabe probieren</button></span>` : '');
 }
 async function setMode(m){
   if (m === MODE) return;
@@ -3974,6 +4033,8 @@ function initBuero(){
 </script>
 <script src="mitteilungen.js"></script>
 <script src="marken.js"></script>
+<script src="eingang.js"></script>
+<script src="email.js"></script>
 <script src="command.js"></script>
 </body>
 </html>

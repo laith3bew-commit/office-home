@@ -5,6 +5,25 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.16.0', datum: '2026-11-24', de: [
+        'E-Mail (mail.de): Postfach verbinden, Posteingang lesen, antworten und senden – Anhänge auch aus dem Programm.',
+        'Eingangskette: E-Mail, Upload, Scan, Handy und Ordner gehen der Reihe nach durchs Büro – Briefkasten leuchtet, Sekretärin holt, Gemini liest.',
+        'Nichts ohne dich: Zu jedem Eingang kommt eine Karte im Command mit allen vorgeschlagenen Schritten zum Abhaken (Termin, Frist, Zahlung, Unterlagen, Adressbuch, Notiz, Gedächtnis, Ablage).',
+        'Die Sekretärin prüft das Postfach jede Stunde und fragt dich, welche E-Mails bearbeitet werden sollen.',
+        'Farbpunkte: rot = wichtig, orange = Termin/Frist oder Ergänzung, grün = Bestätigung – am Command-Knopf und an jedem neuen Eintrag, bis du ihn öffnest.',
+        'Knopf „Aktualisieren“ im Command: sucht neue E-Mails, Scans, Handy-Fotos und ungelesene Dateien.',
+        'Demo-Modus: „Aufgabe probieren“ – ein Testbrief läuft sichtbar durchs Büro, mit Rückfragen, Karte zum Bestätigen und Demo-Gedächtnis; jederzeit neu startbar. Live bleibt unberührt.'],
+      ar: ['الإيميل (mail.de): ربط الصندوق، قراءة الوارد، الرد والإرسال – والمرفقات كمان من البرنامج.',
+        'سلسلة الوارد: الإيميل والرفع والسكان والجوال والمجلد بيمروا بالمكتب واحد ورا التاني – الصندوق بيضوي، السكرتيرة بتستلم، Gemini بيقرا.',
+        'ما في شي بدونك: لكل وارد بطاقة بالـ Command فيها كل الخطوات المقترحة مع ✓ (موعد، مهلة، دفع، أوراق، دفتر العناوين، ملاحظة، ذاكرة، حفظ).',
+        'السكرتيرة بتفحص البريد كل ساعة وبتسألك أي إيميلات تنعالج.',
+        'نقاط ملونة: أحمر = مهم، برتقالي = موعد/مهلة أو إضافة، أخضر = تأكيد – على زر Command وجنب كل شي جديد لحد ما تفتحو.',
+        'زر «تحديث» بالـ Command: بيدوّر على إيميلات وسكانات وصور جوال وملفات ما انقرت.',
+        'وضع الديمو: «Aufgabe probieren» – رسالة تجريبية بتمرق قدامك بالمكتب، مع أسئلة وبطاقة تأكيد وذاكرة تجريبية، وفيك تعيد تشغيلها. الوضع الحقيقي ما بيتأثر.'] },
+    { v: '2.15.2', datum: '2026-11-24', de: [
+        'Briefkopf ohne doppelten Namen und doppelte Anschrift oben (in Einstellungen → Briefe wieder einschaltbar).',
+        'Mit Internetmarke steht die Rücksendezeile jetzt in einer Zeile unter der Marke.'],
+      ar: ['رأس الرسالة بدون تكرار الاسم والعنوان فوق (فيك ترجّعو من الإعدادات ← الرسائل).', 'مع طابع البريد، سطر عنوان المرسل صار بسطر واحد تحت الطابع.'] },
     { v: '2.15.1', datum: '2026-11-24', de: [
         'Fenster „Vorlage wählen“, Internetmarken und „Neu in Version“ mit sauberen Abständen; Suchfeld gestaltet.',
         'Gedächtnis-Kasten im Brief: Ordner der Person übersichtlich, Suchfeld über die ganze Breite.',
@@ -107,6 +126,7 @@
     if (a === 'zu') return zu();
     if (a === 'item') { const m = L.find(x => x.id === b.dataset.id); if (!m) return; m.read = true; save(); badge();
       if (m.typ === 'neu') { zu(); return neuFenster(m.key ? m.key.replace(/^neu:/, '') : null, true); }
+      if (m.link && m.link.startsWith('cmd:')) { zu(); if (window.ohCommand) window.ohCommand.karte(m.link.slice(4)); return; }
       if (m.link) { zu(); location.hash = m.link; } else zeichnen(); }
   }
 

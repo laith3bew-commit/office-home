@@ -1,7 +1,7 @@
 {
   "name": "office-home",
   "productName": "Office Home",
-  "version": "2.15.1",
+  "version": "2.16.0",
   "description": "Home Office – Familienbüro für Bevollmächtigte (offline)",
   "author": "Leon",
   "private": true,
@@ -30,8 +30,11 @@
       "command.js",
       "mitteilungen.js",
       "marken.js",
+      "eingang.js",
+      "email.js",
       "scan-main.js",
       "kalender-main.js",
+      "mail-main.js",
       "buero.html",
       "i18n.js",
       "buero-preload.js",
@@ -79,6 +82,9 @@
   },
   "dependencies": {
     "electron-updater": "6.8.12",
+    "imapflow": "2.11.0",
+    "mailparser": "3.14.2",
+    "nodemailer": "10.4.0",
     "pdf-lib": "1.17.1",
     "qrcode": "1.5.4"
   }

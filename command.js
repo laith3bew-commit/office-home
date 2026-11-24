@@ -191,12 +191,15 @@
 
   /* ---------- Schnellknöpfe ---------- */
   const QUICK = [
+    { id: 'aktualisieren', l: 'Aktualisieren', i: 'update' },
     { id: 'upload', l: 'Datei hochladen', i: 'hochladen' },
     { id: 'fragen', l: 'Offene Rückfragen', i: 'info' },
     { id: 'fristen', l: 'Fristen heute & diese Woche', i: 'fristen' },
     { id: 'dok', l: 'Dokumente durchsuchen', i: 'suche' }
   ];
   function quick(id) {
+    if (id === 'aktualisieren') { if (window.EG) window.EG.aktualisieren(); return; }
+    if (id === 'probe') { schliessen(); if (window.EG) window.EG.demoStart(); return; }
     if (id === 'upload') return hochladen();
     if (id === 'dok') { CMD.mode = 'dok'; draw(); const i = $('#cmdIn'); if (i) { i.placeholder = 'Dokumente durchsuchen … (Titel, Absender, Inhalt)'; i.focus(); } return; }
     if (id === 'fragen') return ausfuehren('Offene Rückfragen', { label: 'Offene Rückfragen zeigen', quick: async (run, step) => {
@@ -296,6 +299,9 @@
     const b = t.closest('[data-cmd]'); if (!b) return;
     const a = b.dataset.cmd;
     if (a === 'close') return schliessen();
+    if (a === 'egkarte') { CMD.karte = b.dataset.id; return draw(); }
+    if (a === 'egzurueck') { CMD.karte = null; return draw(); }
+    if (a === 'eg' && window.EG) { b.disabled = true; window.EG.aktion(b.dataset.id, b.dataset.ea, panel).then(r => { if (r === 'zu') CMD.karte = null; if (r !== 'bleib') draw(); }); return; }
     if (a === 'send') return senden();
     if (a === 'neu') { CMD.run = null; CMD.mode = ''; draw(); const i = $('#cmdIn'); if (i) i.focus(); return; }
     if (a === 'quick') return quick(b.dataset.id);
@@ -310,6 +316,12 @@
   }
   function draw() {
     if (!panel || !CMD.open) return;
+    // Karte aus dem Eingang (Vorschlag mit Häkchen)
+    if (CMD.karte && window.EG) {
+      panel.innerHTML = `<div class="cmdhead"><button class="cmdx" data-cmd="egzurueck" aria-label="Zurück">‹</button><div class="grow"><b>Eingang</b><div class="small muted">Erst nach deiner Bestätigung wird etwas eingetragen</div></div><button class="cmdx" data-cmd="close" aria-label="Schließen">${ICO('schliessen')}</button></div>
+        <div class="cmdbody">${window.EG.karteHTML(CMD.karte)}</div>`;
+      return;
+    }
     const r = CMD.run, running = r && r.status === 'running';
     const inp = $('#cmdIn'); const val = inp ? inp.value : '';
     panel.innerHTML = `<div class="cmdhead"><span class="cmdlogo">${ICO('ki')}</span><div class="grow"><b>Home Office Command</b><div class="small muted">Fragen ans Gedächtnis und an deine Dokumente</div></div><kbd>Strg K</kbd><button class="cmdx" data-cmd="close" aria-label="Schließen">${ICO('schliessen')}</button></div>
@@ -319,7 +331,7 @@
           : `<div class="cmdsteplist">${r.steps.map((s, i) => `<div class="${running && i === r.steps.length - 1 ? 'cur' : ''}">${running && i === r.steps.length - 1 ? '<span class="spin"></span>' : ICO('erledigt')}${esc(s)}</div>`).join('')}${running && !r.steps.length ? '<div class="cur"><span class="spin"></span>Wird gesendet …</div>' : ''}</div>`}
         ${r.antwort ? `<div class="cmdans"><div class="lbl"><i></i>Antwort</div><div class="txt">${r.antwort.text}</div>${r.antwort.html || ''}${(r.antwort.acts || []).length ? `<div class="acts">${r.antwort.acts.map((a, i) => `<button class="btn sm ${i === 0 ? 'pri' : ''}" data-cmd="act" data-i="${i}">${ICO(a[1])}${esc(a[0])}</button>`).join('')}</div>` : ''}</div>` : ''}</div>
         <div class="cmdfoot">${r.status === 'done' ? `<button class="cmdtile sm" data-cmd="neu">${ICO('update')}Neue Anfrage</button>` : ''}<span class="grow"></span>${QUICK.map(q => `<button class="cmdico" data-cmd="quick" data-id="${q.id}" title="${esc(q.l)}" ${running ? 'disabled' : ''}>${ICO(q.i)}</button>`).join('')}</div>`
-      : `<div><div class="cmdlbl">Schnellaktionen</div><div class="cmdgrid">${QUICK.map(q => `<button class="cmdtile" data-cmd="quick" data-id="${q.id}">${ICO(q.i)}${esc(q.l)}</button>`).join('')}</div>
+      : `${window.EG ? window.EG.listeHTML() : ''}<div><div class="cmdlbl">Schnellaktionen</div><div class="cmdgrid">${(MODE === 'demo' ? [{ id: 'probe', l: 'Aufgabe probieren', i: 'alle' }, ...QUICK] : QUICK).map(q => `<button class="cmdtile" data-cmd="quick" data-id="${q.id}">${ICO(q.i)}${esc(q.l)}</button>`).join('')}</div>
         <div class="cmdtip small muted">Beispiele: „Versichertennummer Mutter“, „شو رقم تأمين ماما“, „IBAN Vater“, „Frist morgen AOK anrufen“, „Kündigung Vodafone“, „öffne Verträge Vater“.</div></div>`}`;
     const i2 = $('#cmdIn'); if (i2 && val && !running) i2.value = val;
     if (i2 && !running && document.activeElement === document.body) i2.focus();
@@ -328,5 +340,7 @@
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aufbauen); else aufbauen();
-  window.ohCommand = { oeffnen, schliessen, frage: q => { oeffnen(); ausfuehren(q); } };
+  window.ohCommand = { oeffnen, schliessen, frage: q => { oeffnen(); ausfuehren(q); },
+    karte: id => { CMD.karte = id; CMD.run = null; if (!CMD.open) oeffnen(); else draw(); },
+    neuZeichnen: () => { if (CMD.open && !CMD.busy && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#cmdPanel input:not([type=checkbox]), #cmdPanel select'))) draw(); } };
 })();

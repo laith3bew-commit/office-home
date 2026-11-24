@@ -494,6 +494,9 @@ ipcMain.handle('oh:bueroOffen', () => !!(bueroWin && !bueroWin.isDestroyed()));
 // ---------- Kalender: Gemini, Google Kalender, Erinnerungen ----------
 require('./kalender-main.js')({ app, ipcMain, shell, safeStorage, Notification, getWin: () => win, showWin });
 
+// ---------- E-Mail: IMAP-Abruf und SMTP-Versand ----------
+require('./mail-main.js')({ app, ipcMain, safeStorage });
+
 app.on('second-instance', () => showWin());
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);

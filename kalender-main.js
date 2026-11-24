@@ -44,7 +44,13 @@ Antworte NUR mit JSON nach diesem Schema, ohne Erklärungen:
  "termine": [ { "titel": "kurzer Titel", "datum": "JJJJ-MM-TT", "uhrzeit": "HH:MM oder leer", "art": "termin (Termin mit Uhrzeit/Anwesenheit) oder frist (Abgabe, Rückmeldung, Widerspruch)",
    "ort": "Ort/Raum oder leer", "was_tun": "konkret: was mitbringen, einreichen oder erledigen" } ],
  "gueltigkeit": [ { "was": "z. B. Bewilligung Bürgergeld", "gueltig_bis": "JJJJ-MM-TT", "erneuern": "was rechtzeitig zu beantragen oder einzureichen ist" } ],
- "nummern": [ { "art": "z. B. Versichertennummer, Krankenkasse, Aktenzeichen, Kundennummer, Vertragsnummer, BG-Nummer, Steuer-ID, Steuernummer, Rentenversicherungsnummer, IBAN, Betrag, Pflegegrad", "wert": "genau wie im Dokument" } ]
+ "nummern": [ { "art": "z. B. Versichertennummer, Krankenkasse, Aktenzeichen, Kundennummer, Vertragsnummer, BG-Nummer, Steuer-ID, Steuernummer, Rentenversicherungsnummer, IBAN, Betrag, Pflegegrad", "wert": "genau wie im Dokument" } ],
+ "titel": "kurzer deutscher Titel des Schreibens, z. B. Anforderung von Unterlagen – Ausländerbehörde",
+ "art": "eins von: Bescheid, Rechnung, Mahnung, Anforderung, Termin, Bestätigung, Antwort, Vertrag, Information, Werbung",
+ "wichtigkeit": "hoch (Frist/Geld/Rechtsfolge, schnell handeln) | mittel (etwas zu tun, Zeit vorhanden) | niedrig (nur zur Kenntnis / Bestätigung)",
+ "anliegen": "1 Satz auf Deutsch: was der Absender konkret verlangt oder mitteilt",
+ "unterlagen": [ "angeforderte Unterlage 1", "…" ],
+ "zahlungen": [ { "betrag": "123,45", "empfaenger": "", "iban": "", "verwendungszweck": "", "faellig": "JJJJ-MM-TT oder leer" } ]
 }
 Regeln: Nur Daten, die im Dokument stehen. Kontakte nur mit mindestens Organisation oder Name. Keine Kontakte für den Empfänger selbst oder die betroffene Person.
 Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechnen (Briefdatum + Frist, Zugang 3 Tage nach Briefdatum). Bei befristeten Bewilligungen oder Bescheiden das Ende in "gueltigkeit" eintragen.`;
@@ -61,9 +67,13 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
     try {
       const key = secrets().gemini; if (!key) return { ok: false, message: 'Kein Gemini-Schlüssel eingetragen (Einstellungen → Kalender & KI).' };
       const model = readJson('oh-prefs.json', {}).kiModel || 'gemini-2.5-flash';
-      const data = Buffer.from(doc.data);
-      if (data.length > 18 * 1024 * 1024) return { ok: false, message: 'Datei ist zu groß für die KI (über 18 MB).' };
-      const body = { contents: [{ parts: [{ inline_data: { mime_type: doc.mime, data: data.toString('base64') } }, { text: PROMPT(doc.ctx || { persons: [], today: '' }) }] }],
+      // Eine Datei (mime/data) oder mehrere (parts) und/oder ein E-Mail-Text (text)
+      const teile = (Array.isArray(doc.parts) ? doc.parts : doc.data ? [{ mime: doc.mime, data: doc.data }] : []).map(p => ({ mime: p.mime, data: Buffer.from(p.data) }));
+      const summe = teile.reduce((s, p) => s + p.data.length, 0);
+      if (summe > 18 * 1024 * 1024) return { ok: false, message: 'Dateien sind zu groß für die KI (zusammen über 18 MB).' };
+      if (!teile.length && !doc.text) return { ok: false, message: 'Nichts zum Lesen.' };
+      const ctxText = doc.text ? `\n\nE-Mail (Absender: ${String(doc.von || '').slice(0, 200)}, Betreff: ${String(doc.betreff || '').slice(0, 300)}):\n${String(doc.text).slice(0, 20000)}\n\nBerücksichtige E-Mail-Text und alle Anhänge zusammen.` : '';
+      const body = { contents: [{ parts: [...teile.map(p => ({ inline_data: { mime_type: p.mime, data: p.data.toString('base64') } })), { text: PROMPT(doc.ctx || { persons: [], today: '' }) + ctxText }] }],
         generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } };
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
         method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) });

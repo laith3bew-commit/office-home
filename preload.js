@@ -24,6 +24,12 @@ contextBridge.exposeInMainWorld('officeHome', {
   memPickDir: (root, current) => ipcRenderer.invoke('oh:memPickDir', root, current),
   memCopyFile: (root, ws, name, buf) => ipcRenderer.invoke('oh:memCopyFile', root, ws, name, buf),
   onReminder: (cb) => ipcRenderer.on('oh:reminder', (e, r) => cb(r)),
+  // E-Mail
+  mailKonten: () => ipcRenderer.invoke('oh:mailKonten'),
+  mailKontoSpeichern: (konto, pass) => ipcRenderer.invoke('oh:mailKontoSpeichern', konto, pass),
+  mailKontoLoeschen: (id) => ipcRenderer.invoke('oh:mailKontoLoeschen', id),
+  mailAbrufen: (id) => ipcRenderer.invoke('oh:mailAbrufen', id),
+  mailSenden: (id, m) => ipcRenderer.invoke('oh:mailSenden', id, m),
   memNote: (root, ws, note) => ipcRenderer.invoke('oh:memNote', root, ws, note),
   memTask: (root, task) => ipcRenderer.invoke('oh:memTask', root, task),
   // Claude-Anbindung (MCP): Server an/aus, Einrichtung, Werkzeugaufrufe aus Claude beantworten
