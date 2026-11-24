@@ -5,6 +5,19 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.16.5', datum: '2026-11-25', de: [
+        'Farbige Punkte „Neu aus dem Eingang“ stehen jetzt direkt vor dem Titel des Eintrags – im Kalender, bei Aufgaben, Dokumenten, Kontakten, Notizen und Finanzen.',
+        'Google Kalender: Du kannst wählen, mit welchem Kalender Home Office abgleicht (Einstellungen → Kalender, Google & KI). Gibt es einen Kalender „Home Office“, wird er automatisch genommen und die bisherigen Termine werden dorthin verschoben – auf dem Handy erscheinen sie dann in diesem Kalender, Termine vom Handy kommen ins Programm.',
+        'Einmal nötig: In den Einstellungen Google „Trennen“ und neu verbinden (für die Kalender-Auswahl).',
+        'Eingang: Unter jeder Karte „Aufgabe hinzufügen“ – schreib, was zu tun ist (z. B. „Antwort schreiben, Unterlagen kommen bis Freitag“). Gemini entwirft den Brief, du liest ihn im Command und öffnest ihn als Brief.',
+        'Brief-Editor: Neuer Knopf „Als E-Mail senden“ – der Brief kommt als PDF in den Anhang und sein Text in die E-Mail; den Empfänger trägst du selbst ein.'
+      ], ar: [
+        'النقاط الملونة «جديد من الوارد» صارت قبل عنوان البند مباشرة – بالتقويم والمهام والمستندات والعناوين والملاحظات والمالية.',
+        'تقويم Google: صار فيك تختار مع أي تقويم بيتزامن البرنامج (الإعدادات ← Kalender, Google & KI). إذا في تقويم اسمو «Home Office» بينختار تلقائياً والمواعيد القديمة بتنتقل عليه – بتطلع على الجوال بهالتقويم، واللي بتكتبو من الجوال بيوصل للبرنامج.',
+        'مرة وحدة لازم: بالإعدادات افصل Google («Trennen») وارجع اربطو (مشان اختيار التقويم).',
+        'الوارد: تحت كل كرت «إضافة مهمة» – اكتب شو لازم ينعمل (مثلاً «اكتب رد، الأوراق بتوصل الجمعة»). Gemini بيكتب مسودة الرسالة، بتقراها بالـ Command وبتفتحها كرسالة.',
+        'محرر الرسائل: زر جديد «إرسال كإيميل» – الرسالة بتنرفق PDF ونصها بينحط بالإيميل، والمستلم بتكتبو إنت.'
+      ] },
     { v: '2.16.4', datum: '2026-11-25', de: [
         'E-Mail → Gesendet: Bilder und Dateien (z. B. PDF) in gesendeten E-Mails öffnen – mit Vorschaubildern, Bildbetrachter, „Als Dokument“ und eingebetteten Bildern wie im Posteingang.',
         'Die gesendete E-Mail wird beim Anklicken aus dem Postfach geladen und belegt keinen Platz im Programm.'

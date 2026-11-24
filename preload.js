@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('officeHome', {
   desktop: true,
   // Speichert den aktuellen Inhalt von #print-root als PDF (Speichern-Dialog).
   savePDF: (fileName) => ipcRenderer.invoke('oh:savePDF', fileName),
+  pdfDaten: () => ipcRenderer.invoke('oh:pdfDaten'),
   // Öffnet den Druckdialog von Windows für den Inhalt von #print-root.
   print: () => ipcRenderer.invoke('oh:print'),
   // Öffnet ein gespeichertes Dokument mit dem Standardprogramm von Windows.
@@ -52,6 +53,7 @@ contextBridge.exposeInMainWorld('officeHome', {
   kiStatus: () => ipcRenderer.invoke('oh:kiStatus'),
   kiSetKey: (key, model) => ipcRenderer.invoke('oh:kiSetKey', key, model),
   kiAnalyze: (doc) => ipcRenderer.invoke('oh:kiAnalyze', doc),
+  kiSchreiben: (doc) => ipcRenderer.invoke('oh:kiSchreiben', doc),
   gStatus: () => ipcRenderer.invoke('oh:gStatus'),
   gSetClient: (id, secret) => ipcRenderer.invoke('oh:gSetClient', id, secret),
   gConnect: () => ipcRenderer.invoke('oh:gConnect'),
@@ -62,6 +64,9 @@ contextBridge.exposeInMainWorld('officeHome', {
   gList: (from, to) => ipcRenderer.invoke('oh:gList', from, to),
   gUpsert: (ev, id) => ipcRenderer.invoke('oh:gUpsert', ev, id),
   gDelete: (id) => ipcRenderer.invoke('oh:gDelete', id),
+  gKalender: () => ipcRenderer.invoke('oh:gKalender'),
+  gKalenderSetzen: (id, name) => ipcRenderer.invoke('oh:gKalenderSetzen', id, name),
+  gMove: (id, von, nach) => ipcRenderer.invoke('oh:gMove', id, von, nach),
   remindSet: (list) => ipcRenderer.invoke('oh:remindSet', list),
   bgGet: () => ipcRenderer.invoke('oh:bgGet'),
   bgSet: (v) => ipcRenderer.invoke('oh:bgSet', v),

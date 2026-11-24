@@ -434,6 +434,7 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 @keyframes egpuls{0%,100%{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 22%,transparent),0 0 6px var(--c)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 12%,transparent),0 0 16px var(--c)}}
 @keyframes egdreh{to{transform:rotate(360deg)}}
 /* „Neu aus dem Eingang“: überall gleich – am Anfang der Zeile, senkrecht mittig; bei hohen Karten oben */
+.egnew.inl{display:inline-block;width:9px;height:9px;vertical-align:middle;margin:-2px 0 0;margin-inline-end:8px;position:relative;top:0}
 .eghost{position:relative}
 .eghost>.egnew{position:absolute;inset-inline-start:-5px;top:50%;margin:-5.5px 0 0;z-index:2;pointer-events:none}
 .row.eghost>.egnew{inset-inline-start:-15px}
@@ -463,6 +464,12 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 .egstep small{font-size:11.5px;color:var(--muted)}
 .egstep .egdot{margin-top:3px}
 .egkarte .acts{display:flex;gap:6px;flex-wrap:wrap}
+.egauf{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.egauf textarea{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);font:inherit;font-size:13px;resize:vertical;min-height:52px}
+.egentw{padding:9px 11px;border-radius:12px;border:1px solid var(--line);background:var(--panel)}
+.egbrief{background:#fff;color:#1B2A44;border-radius:8px;padding:10px 12px;margin:4px 0;font-size:12.5px;line-height:1.5}
+.egbrief .muted{color:#4F6785}
+.egbtext{white-space:pre-wrap;margin-top:6px;max-height:230px;overflow:auto}
 .egalle{background:var(--hover);border-style:dashed}
 .egerg{margin:0;padding-inline-start:18px;font-size:13px;display:flex;flex-direction:column;gap:4px}
 /* Command (Strg+K): schwebender Knopf + Glasfenster */
@@ -2077,7 +2084,7 @@ VIEWS.brief = (id, q) => {
   }
   const L = LD; const ls = S.settings;
   return `<div class="head"><div class="grow"><a href="#/letters" class="small">← Briefe</a><h1>${L.isNew ? 'Neuer Brief' : 'Brief bearbeiten'}</h1></div>
-    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button>${memOn() ? `<button class="btn" data-act="memLetter">${icon('gedaechtnis')}Im Gedächtnis festhalten</button>` : ''}<button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('pdf')}Als PDF speichern</button>` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
+    <button class="btn" data-act="saveTpl">Als Vorlage speichern</button>${memOn() ? `<button class="btn" data-act="memLetter">${icon('gedaechtnis')}Im Gedächtnis festhalten</button>` : ''}<button class="btn" data-act="saveLetter">${icon('save')}Speichern</button>${DESKTOP ? `<button class="btn" data-act="printLetter">${icon('print')}Drucken</button><button class="btn pri" data-act="pdfLetter">${icon('pdf')}Als PDF speichern</button>${window.ohMailSchreiben ? `<button class="btn" data-act="mailLetter">${icon('mail')}Als E-Mail senden</button>` : ''}` : `<button class="btn pri" data-act="printLetter">${icon('print')}Drucken / PDF</button>`}</div>
   ${!ls.me.name ? `<div class="banner amber">Bitte zuerst <a href="#/settings">deine Absenderdaten</a> in den Einstellungen eintragen.</div>` : ''}
   <div class="brief ${UI.briefWide ? 'wide' : ''}">
     <div class="ed">
@@ -2234,6 +2241,22 @@ function outputPrint(html, title, asPDF, onDone){
     } catch (e) { alert('Ausgabe fehlgeschlagen: ' + e.message); }
     finally { document.title = t; }
   }, 150);
+}
+// Brief als E-Mail: PDF (wie „Als PDF speichern“) als Anhang + derselbe Text im E-Mail-Feld. Empfänger trägt Leon selbst ein.
+async function mailLetter(){
+  if (!window.ohMailSchreiben || !window.officeHome.pdfDaten) return;
+  if (letterHasGaps(LD) && !confirm('Es gibt noch gelb markierte Stellen bzw. keinen Empfänger. Trotzdem als E-Mail vorbereiten?')) return;
+  saveLetter(true);
+  const L = LD, betreff = letterSubject(L);
+  $('#print-root').innerHTML = letterHTML(L);
+  const t = document.title; document.title = ('Brief ' + L.date + ' ' + betreff).replace(/[\\/:*?"<>|]/g, '').slice(0, 90);
+  await new Promise(r => setTimeout(r, 200));
+  let r; try { r = await window.officeHome.pdfDaten(); } finally { document.title = t; $('#print-root').innerHTML = ''; }
+  if (!r || !r.ok) return alert('PDF konnte nicht erstellt werden: ' + ((r && r.message) || 'Fehler'));
+  const name = ('Brief ' + L.date + ' ' + betreff).replace(/[\\/]/g, '-').replace(/[:*?"<>|]/g, '').replace(/\s+/g, ' ').trim().slice(0, 90) + '.pdf';
+  const s = senderOf(L), link = poaLinkOf(L);
+  const text = [L.salutation || '', applyVars(L.body, L), link ? 'Die Vollmacht finden Sie hier: ' + link : '', (L.closing || '') + (s.name ? '\n' + s.name : ''), 'Anlage: dieses Schreiben als PDF'].filter(x => x && String(x).trim()).join('\n\n');
+  window.ohMailSchreiben({ subject: betreff, text, dateien: [new File([r.data], name, { type: 'application/pdf' })] });
 }
 function printLetter(asPDF){
   if (letterHasGaps(LD) && !confirm('Es gibt noch gelb markierte Stellen bzw. keinen Empfänger. Trotzdem ' + (asPDF ? 'als PDF speichern' : 'drucken') + '?')) return;
@@ -2542,7 +2565,7 @@ const ACT = {
   finMonth: d => { UI.finMonth = mshift(UI.finMonth, Number(d.id)); render(); },
   toggleAutoContracts: () => { S.settings.autoContracts = S.settings.autoContracts === false; save(); render(); },
   insPh: d => { const ta = $('#briefBody'); const ins = '{' + d.id + '}'; const s = ta.selectionStart, e = ta.selectionEnd; ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e); ta.selectionStart = ta.selectionEnd = s + ins.length; ta.focus(); ta.dispatchEvent(new Event('input')); },
-  saveLetter: () => saveLetter(false), printLetter: () => printLetter(false), pdfLetter: () => printLetter(true),
+  saveLetter: () => saveLetter(false), printLetter: () => printLetter(false), pdfLetter: () => printLetter(true), mailLetter: () => mailLetter(),
   saveTpl: () => { const n = prompt('Name der Vorlage:', LD.subject ? LD.subject.slice(0, 50) : ''); if (!n) return; const t = {id:'c_' + uid(), name:n, subject:LD.subject, body:LD.body, custom:true}; S.templates.push(t); LD.templateId = t.id; save(); toast('Vorlage gespeichert'); render(); },
   delTpl: d => { if (confirm('Vorlage löschen?')) { remove('templates', d.id); render(); } },
   dupLetter: d => { const l = clone(S.letters.find(x => x.id === d.id)); l.id = uid(); l.date = today(); if (l.markeId) { l.markeId = ''; l.markeImg = ''; } /* Kopie nie mit derselben Internetmarke */ l.updated = new Date().toISOString(); S.letters.push(l); save(); location.hash = '#/brief/' + l.id; },
@@ -3684,7 +3707,9 @@ async function gSync(manual){
     S.events = S.events || []; S.gDeleted = S.gDeleted || [];
     for (const gid of [...S.gDeleted]) { const r = await window.officeHome.gDelete(gid); if (r.ok) S.gDeleted = S.gDeleted.filter(x => x !== gid); }
     for (const e of S.events.filter(x => x.gDirty)) {
-      const r = await window.officeHome.gUpsert(gEventBody(e), e.googleId || null);
+      let r = await window.officeHome.gUpsert(gEventBody(e), e.googleId || null);
+      // Termin liegt nicht (mehr) im gewählten Kalender (z. B. nach Kalenderwechsel gelöscht) → neu anlegen statt Abbruch
+      if (!r.ok && e.googleId && /not found|404|notFound/i.test(r.message || '')) r = await window.officeHome.gUpsert(gEventBody(e), null);
       if (!r.ok) throw new Error(r.message);
       e.googleId = r.id; e.gUpdated = r.updated; e.gDirty = false;
     }
@@ -3826,6 +3851,7 @@ function calCardHTML(){
     <div><b>Google Kalender (beide Richtungen)</b>
       <p class="small muted" style="margin:4px 0 10px">Termine aus Home Office erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.</p>
       ${g.connected ? `<p><span class="badge green">verbunden</span> ${esc(g.email || '')} ${g.drive ? '<span class="badge green">Drive</span>' : '<span class="badge amber">ohne Drive</span>'}<br>${g.drive ? '' : '<span class="small">Für Vollmacht-Links: in der Google Cloud Console die <b>Google Drive API</b> aktivieren, dann hier „Trennen“ und neu verbinden.</span><br>'}<span class="small muted">Letzter Abgleich: ${calCfg().gLastSync ? new Date(calCfg().gLastSync).toLocaleString('de-DE') : 'noch nie'}${GS.msg ? ' · Fehler: ' + esc(GS.msg) : ''}</span></p>
+        ${gKalWahlHTML(g)}
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="gSyncNow">${icon('update')}Jetzt abgleichen</button><button class="btn dan" data-act="gDisconnect">${icon('schliessen')}Trennen</button></div>`
       : `${g.hasClient ? '<p><span class="badge">Zugang eingetragen</span></p>' : `<ol class="small" style="padding-left:18px;margin:0 0 10px">${stepList.map(s => `<li style="margin-bottom:4px">${s}</li>`).join('')}</ol>`}
         <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
@@ -3840,6 +3866,38 @@ function calCardHTML(){
     <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="bgSet" data-id="autostart" ${!BG || (BG.tray && BG.autostart) ? 'checked' : ''} ${BG && !BG.tray ? 'disabled' : ''}>Mit Windows starten (unsichtbar)</label></div></div>`;
 }
 function calCardUpd(){ const c = $('#calCard'); if (c) c.innerHTML = calCardHTML(); }
+/* Zielkalender in Google: Auswahl (z. B. eigener Kalender „Home Office“). Neu-, Änderungs- und Abholabgleich laufen nur über diesen Kalender. */
+function gKalWahlHTML(g){
+  if (!g.liste) return `<p class="small" style="margin:0 0 10px">Kalender: <b>${esc(g.calName || 'Hauptkalender')}</b><br><span class="muted">Um einen anderen Kalender (z. B. „Home Office“) zu wählen: einmal „Trennen“ und neu verbinden.</span></p>`;
+  if (!GS.kal) { if (!GS.kalLaedt) { GS.kalLaedt = true; window.officeHome.gKalender().then(r => { GS.kalLaedt = false; GS.kal = r.ok ? r.items : []; GS.kalFehler = r.ok ? '' : r.message; calCardUpd(); }); } return '<p class="small muted" style="margin:0 0 10px">Kalender werden geladen …</p>'; }
+  const akt = g.calId || 'primary';
+  return `<div class="fld" style="margin:0 0 10px"><label class="small">Kalender für Home Office (Handy zeigt ihn mit)</label>
+    <select id="gKal" onchange="ACT.gKalWahl({}, this)" style="padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);font:inherit;max-width:100%">
+      ${GS.kal.map(k => `<option value="${esc(k.primary ? 'primary' : k.id)}" ${(k.primary ? 'primary' : k.id) === akt ? 'selected' : ''}>${esc(k.name)}${k.primary ? ' (Hauptkalender)' : ''}</option>`).join('')}</select>
+    ${GS.kalFehler ? `<div class="small" style="color:var(--danger)">${esc(GS.kalFehler)}</div>` : ''}</div>`;
+}
+// Wechsel: Einstellung speichern, eigene Termine in den neuen Kalender verschieben, Google-Termine des alten Kalenders aus der Liste nehmen, dann abgleichen
+async function gKalWechsel(neuId, name){
+  const alt = (GS.status && GS.status.calId) || 'primary'; if (neuId === alt) return;
+  await window.officeHome.gKalenderSetzen(neuId, name); calCfg().gKalGewaehlt = true;
+  let ok = 0, neu = 0;
+  for (const e of (S.events || []).filter(x => x.googleId && x.source !== 'google')) {
+    const r = await window.officeHome.gMove(e.googleId, alt, neuId);
+    if (r.ok) { e.gUpdated = r.updated || e.gUpdated; ok++; } else { e.googleId = ''; e.gUpdated = ''; e.gDirty = true; neu++; }
+  }
+  S.events = (S.events || []).filter(x => !(x.source === 'google' && x.googleId));
+  S.gDeleted = []; save(); await gRefreshStatus(); calCardUpd();
+  toast('Kalender gewechselt' + (ok ? ' · ' + ok + ' Termin(e) verschoben' : '') + (neu ? ' · ' + neu + ' neu angelegt' : ''));
+  await gSync(true);
+}
+// Einmalig: gibt es einen Kalender „Home Office“ und wurde noch nichts gewählt → automatisch nehmen
+async function gKalAuto(){
+  if (!gConnected() || !GS.status.liste || calCfg().gKalGewaehlt || (GS.status.calId && GS.status.calId !== 'primary')) return false;
+  const r = await window.officeHome.gKalender(); if (!r.ok) return false; GS.kal = r.items;
+  const k = r.items.find(x => !x.primary && /^\s*home[\s-]*office\s*$/i.test(x.name)); calCfg().gKalGewaehlt = true; save();
+  if (!k) return false;
+  await gKalWechsel(k.id, k.name); return true;
+}
 
 Object.assign(ACT, {
   calView: d => { UI.calView = d.id; render(); },
@@ -3861,8 +3919,13 @@ Object.assign(ACT, {
     const r = await window.officeHome.gSetClient(id, sec); if (!r.ok) return alert(r.message); await gRefreshStatus(); calCardUpd(); toast('Zugang gespeichert'); },
   gConnect: async () => { toast('Google-Anmeldung öffnet sich im Browser …'); const r = await window.officeHome.gConnect(); await gRefreshStatus();
     if (!r.ok) { calCardUpd(); return alert('Verbinden fehlgeschlagen: ' + r.message); }
-    (S.events || []).forEach(e => { if (e.source !== 'google') e.gDirty = true; }); save(); calCardUpd(); toast('Google Kalender verbunden'); gSync(true); },
-  gDisconnect: async () => { if (!confirm('Verbindung zu Google Kalender trennen? Die Termine bleiben in beiden Kalendern erhalten.')) return; await window.officeHome.gDisconnect(); await gRefreshStatus(); calCardUpd(); },
+    GS.kal = null; toast('Google Kalender verbunden');
+    if (await gKalAuto()) return; // hat schon verschoben und abgeglichen
+    (S.events || []).forEach(e => { if (e.source !== 'google') e.gDirty = true; }); save(); calCardUpd(); gSync(true); },
+  gKalWahl: (d, el) => { const v = el.value, k = (GS.kal || []).find(x => (x.primary ? 'primary' : x.id) === v);
+    if (!confirm('Home Office ab jetzt mit dem Kalender „' + (k ? k.name : v) + '“ abgleichen?\n\nDie Termine aus Home Office werden dorthin verschoben.')) { calCardUpd(); return; }
+    gKalWechsel(v, k && !k.primary ? k.name : ''); },
+  gDisconnect: async () => { if (!confirm('Verbindung zu Google Kalender trennen? Die Termine bleiben in beiden Kalendern erhalten.')) return; await window.officeHome.gDisconnect(); GS.kal = null; await gRefreshStatus(); calCardUpd(); },
   gSyncNow: () => gSync(true),
   bgSet: async (d, el) => { if (!window.officeHome.bgSet) return; const v = {}; v[d.id] = !(BG ? BG[d.id] : true); if (d.id === 'tray' && !v.tray) v.autostart = false;
     BG = await window.officeHome.bgSet(v); await window.officeHome.trayEnsure(); calCardUpd(); toast('Gespeichert'); }
@@ -3875,7 +3938,7 @@ async function initKalender(){
   try { BG = await window.officeHome.bgGet(); } catch (e) {}
   window.officeHome.onOpenCal(() => { location.hash = '#/calendar'; });
   schedReminders(); setInterval(schedReminders, 30 * 60 * 1000);
-  setTimeout(() => gSync(false), 8000); setInterval(() => gSync(false), 10 * 60 * 1000);
+  setTimeout(async () => { try { if (await gKalAuto()) return; } catch (e) {} gSync(false); }, 8000); setInterval(() => gSync(false), 10 * 60 * 1000);
   if (parseHash().route === 'calendar' || parseHash().route === 'settings') render();
 }
 

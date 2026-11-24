@@ -342,5 +342,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aufbauen); else aufbauen();
   window.ohCommand = { oeffnen, schliessen, frage: q => { oeffnen(); ausfuehren(q); },
     karte: id => { CMD.karte = id; CMD.run = null; if (!CMD.open) oeffnen(); else draw(); },
-    neuZeichnen: () => { if (CMD.open && !CMD.busy && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#cmdPanel input:not([type=checkbox]), #cmdPanel select'))) draw(); } };
+    neuZeichnen: () => { if (CMD.open && !CMD.busy && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#cmdPanel input:not([type=checkbox]), #cmdPanel select, #cmdPanel textarea'))) draw(); } };
 })();

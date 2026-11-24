@@ -121,6 +121,12 @@ ipcMain.handle('oh:savePDF', async (e, fileName) => {
   return { ok: true, path: target };
 });
 
+// PDF der aktuellen Druckansicht als Daten (ohne Dialog) – z. B. Brief als E-Mail-Anhang
+ipcMain.handle('oh:pdfDaten', async (e) => {
+  try { const data = await e.sender.printToPDF({ pageSize: 'A4', printBackground: true, preferCSSPageSize: true }); return { ok: true, data: new Uint8Array(data) }; }
+  catch (err) { return { ok: false, message: String(err && err.message || err) }; }
+});
+
 ipcMain.handle('oh:print', (e) => new Promise(res => {
   e.sender.print({ printBackground: true }, (ok, reason) => res({ ok, reason }));
 }));

@@ -208,6 +208,8 @@ Object.assign(W, {
   'Name und Anschrift zusätzlich oben im Briefkopf zeigen': 'إظهار الاسم والعنوان فوق برأس الرسالة كمان',
   'Aus = keine Wiederholung: Absender steht schon in der Rücksendezeile und im Infoblock.': 'مطفي = بدون تكرار: المرسل مكتوب أصلاً بسطر الإرجاع وبمربع المعلومات.',
   'Mit Bildern': 'مع الصور', 'Nur Text': 'نص بس', 'Bilder laden': 'تحميل الصور', 'Als Dokument': 'كمستند', 'Öffnen': 'فتح',
+  'Aufgabe hinzufügen': 'إضافة مهمة', 'An Gemini – Brief entwerfen': 'لـ Gemini – اكتب مسودة رسالة', 'Gemini schreibt den Entwurf …': 'Gemini عم يكتب المسودة …',
+  'Als Brief öffnen': 'افتح كرسالة', 'Brief öffnen': 'افتح الرسالة', 'Neu schreiben': 'اكتب من جديد', 'Noch einmal': 'مرة كمان', 'Entfernen': 'إزالة', 'Als E-Mail senden': 'إرسال كإيميل',
   'Bilder aus dem Internet sind blockiert (Schutz vor Werbe- und Zählpixeln).': 'صور الإنترنت مسكّرة (حماية من صور التتبع والإعلانات).',
   'Bilder und Anhänge werden aus dem Postfach nachgeladen …': 'عم ننزّل الصور والمرفقات من الصندوق …',
   'Posteingang': 'الوارد', 'Gesendet': 'المرسل', 'Neu laden': 'إعادة تحميل', 'Nicht mehr fragen': 'ما عاد تسألني', 'Ans Büro': 'للمكتب', 'Alle auswählen': 'تحديد الكل',

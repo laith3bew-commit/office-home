@@ -93,19 +93,15 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
       return { ok: true };
     } catch (err) { return { ok: false, message: errText(err) }; }
   });
-  ipcMain.handle('oh:kiAnalyze', async (e, doc) => {
-    try {
+  // Gemeinsame Gemini-Abfrage (Dateien + Text → JSON) mit automatischem Modellwechsel
+  async function geminiJSON(teile, prompt, temperature) {
       const key = secrets().gemini; if (!key) return { ok: false, message: 'Kein Gemini-Schlüssel eingetragen (Einstellungen → Kalender & KI).' };
       let model = modellGespeichert();
       if (!model) { model = await neuestesModell(key) || ALT_MODELL; speichereModell(model); }
-      // Eine Datei (mime/data) oder mehrere (parts) und/oder ein E-Mail-Text (text)
-      const teile = (Array.isArray(doc.parts) ? doc.parts : doc.data ? [{ mime: doc.mime, data: doc.data }] : []).map(p => ({ mime: p.mime, data: Buffer.from(p.data) }));
       const summe = teile.reduce((s, p) => s + p.data.length, 0);
       if (summe > 18 * 1024 * 1024) return { ok: false, message: 'Dateien sind zu groß für die KI (zusammen über 18 MB).' };
-      if (!teile.length && !doc.text) return { ok: false, message: 'Nichts zum Lesen.' };
-      const ctxText = doc.text ? `\n\nE-Mail (Absender: ${String(doc.von || '').slice(0, 200)}, Betreff: ${String(doc.betreff || '').slice(0, 300)}):\n${String(doc.text).slice(0, 20000)}\n\nBerücksichtige E-Mail-Text und alle Anhänge zusammen.` : '';
-      const body = { contents: [{ parts: [...teile.map(p => ({ inline_data: { mime_type: p.mime, data: p.data.toString('base64') } })), { text: PROMPT(doc.ctx || { persons: [], today: '' }) + ctxText }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } };
+      const body = { contents: [{ parts: [...teile.map(p => ({ inline_data: { mime_type: p.mime, data: p.data.toString('base64') } })), { text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json', temperature: temperature == null ? 0.1 : temperature } };
       const frage = mdl => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(mdl)}:generateContent`, {
         method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) });
       let r = await frage(model), j = await r.json().catch(() => ({}));
@@ -123,17 +119,67 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
       const text = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || '').join('');
       let out; try { out = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch (err) { return { ok: false, message: 'Antwort der KI war kein gültiges JSON.' }; }
       return { ok: true, result: out, model };
+  }
+  const teileAus = doc => (Array.isArray(doc.parts) ? doc.parts : doc.data ? [{ mime: doc.mime, data: doc.data }] : []).map(p => ({ mime: p.mime, data: Buffer.from(p.data) }));
+  const mailKontext = doc => doc.text ? `\n\nE-Mail (Absender: ${String(doc.von || '').slice(0, 200)}, Betreff: ${String(doc.betreff || '').slice(0, 300)}):\n${String(doc.text).slice(0, 20000)}\n\nBerücksichtige E-Mail-Text und alle Anhänge zusammen.` : '';
+  ipcMain.handle('oh:kiAnalyze', async (e, doc) => {
+    try {
+      // Eine Datei (mime/data) oder mehrere (parts) und/oder ein E-Mail-Text (text)
+      const teile = teileAus(doc);
+      if (!teile.length && !doc.text) return { ok: false, message: 'Nichts zum Lesen.' };
+      return await geminiJSON(teile, PROMPT(doc.ctx || { persons: [], today: '' }) + mailKontext(doc));
+    } catch (err) { return { ok: false, message: errText(err) }; }
+  });
+  // Auftrag zu einem Eingang (z. B. „Antwort schreiben“) → Briefentwurf. Nur Entwurf – Leon prüft, ändert und verschickt selbst.
+  const PROMPT_BRIEF = c => `Du bist die Schreibkraft im Familienbüro „Home Office“. Heute ist ${c.today}.
+Absender ist ${c.absender || 'der Bevollmächtigte'}${c.person ? ', der im Namen und in Vollmacht von ' + c.person + ' handelt' : ''}.
+Vorliegend: das Schreiben bzw. die E-Mail (Dateien/Text oben) und die bisherige Auswertung:
+${JSON.stringify(c.analyse || {}).slice(0, 6000)}
+
+AUFTRAG VON LEON: ${String(c.auftrag || '').slice(0, 2000)}
+
+Schreibe dazu einen Brief auf Deutsch (sachlich, höflich, klar, wie ein deutscher Geschäftsbrief nach DIN 5008).
+Regeln:
+- Nur den Brieftext: keine Absender- oder Empfängeranschrift, kein Datum, keine Unterschrift, keine Grußformel im Feld "text".
+- Aktenzeichen, Kundennummern, Beträge und Daten nur verwenden, wenn sie in den Unterlagen stehen. Was fehlt oder Leon entscheiden muss, in eckige Klammern setzen, z. B. [Datum einsetzen].
+${c.person ? '- Im ersten Satz einmal erwähnen, dass du in Vollmacht für ' + c.person + ' schreibst – nicht öfter.\n' : ''}- Bezug nehmen auf das Schreiben (Datum/Betreff, wenn bekannt).
+- Den Auftrag genau umsetzen; nichts zusagen oder bestätigen, was Leon nicht verlangt hat.
+Antworte NUR mit JSON:
+{"betreff": "kurzer Betreff (mit Aktenzeichen, falls vorhanden)", "anrede": "z. B. Sehr geehrte Frau X, / Sehr geehrte Damen und Herren,", "text": "Brieftext mit Absätzen (\\n\\n)", "gruss": "Mit freundlichen Grüßen",
+ "empfaenger": "Name der Stelle/Person, an die der Brief geht", "empfaenger_anschrift": "Anschrift mehrzeilig (\\n), falls bekannt, sonst leer", "email": "E-Mail-Adresse des Empfängers, falls im Schreiben genannt, sonst leer",
+ "hinweis": "kurzer Hinweis an Leon auf Deutsch, was er prüfen oder ergänzen muss (leer, wenn nichts)"}`;
+  ipcMain.handle('oh:kiSchreiben', async (e, doc) => {
+    try {
+      if (!String(doc.auftrag || '').trim()) return { ok: false, message: 'Bitte einen Auftrag eingeben.' };
+      return await geminiJSON(teileAus(doc), PROMPT_BRIEF(doc.ctx || {}) + mailKontext(doc) + '\n\nAUFTRAG (noch einmal): ' + String(doc.auftrag).slice(0, 2000), 0.4);
     } catch (err) { return { ok: false, message: errText(err) }; }
   });
 
   // ---------- Google Kalender (OAuth für Desktop-Apps, Loopback + PKCE) ----------
   // drive.file: nur Dateien, die Home Office selbst anlegt (Vollmacht-Freigabe)
-  const SCOPE = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file';
+  // calendarlist.readonly: nur die Liste der Kalender lesen, damit der Kalender „Home Office“ gewählt werden kann
+  const SCOPE = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/drive.file';
   let gToken = null; // {access, exp}
   const gClient = () => { const s = secrets(); return { id: s.gClientId || '', secret: s.gClientSecret || '', refresh: s.gRefresh || '' }; };
+  // Zielkalender: gewählt (prefs.gCalId) oder der Hauptkalender des Kontos
+  const calId = () => readJson('oh-prefs.json', {}).gCalId || 'primary';
+  const evPfad = (id, cal) => '/calendars/' + encodeURIComponent(cal || calId()) + '/events' + (id ? '/' + encodeURIComponent(id) : '');
 
   ipcMain.handle('oh:gStatus', () => { const c = gClient(); const p = readJson('oh-prefs.json', {});
-    return { hasClient: !!(c.id && c.secret), connected: !!c.refresh, email: p.gEmail || '', drive: !!c.refresh && /drive\.file/.test(p.gScope || '') }; });
+    return { hasClient: !!(c.id && c.secret), connected: !!c.refresh, email: p.gEmail || '', drive: !!c.refresh && /drive\.file/.test(p.gScope || ''),
+      liste: !!c.refresh && /calendarlist/.test(p.gScope || ''), calId: p.gCalId || 'primary', calName: p.gCalName || '' }; });
+  // Alle Kalender, in die geschrieben werden darf (Besitzer/Bearbeiter)
+  ipcMain.handle('oh:gKalender', async () => {
+    try { const j = await gApi('GET', '/users/me/calendarList', null, { minAccessRole: 'writer', maxResults: '250' });
+      return { ok: true, items: (j.items || []).map(k => ({ id: k.id, name: k.summaryOverride || k.summary || k.id, primary: !!k.primary, farbe: k.backgroundColor || '' })) }; }
+    catch (err) { return { ok: false, message: /insufficient|scope/i.test(errText(err)) ? 'Für die Kalender-Auswahl bitte Google einmal trennen und neu verbinden.' : errText(err) }; }
+  });
+  ipcMain.handle('oh:gKalenderSetzen', (e, id, name) => { const p = readJson('oh-prefs.json', {}); if (!id || id === 'primary') { delete p.gCalId; delete p.gCalName; } else { p.gCalId = String(id); p.gCalName = String(name || ''); } writeJson('oh-prefs.json', p); return { ok: true }; });
+  // Termin von einem Kalender in einen anderen verschieben (gleiche Termin-ID bleibt erhalten)
+  ipcMain.handle('oh:gMove', async (e, googleId, von, nach) => {
+    try { const j = await gApi('POST', evPfad(googleId, von) + '/move', null, { destination: nach }); return { ok: true, id: j.id, updated: j.updated }; }
+    catch (err) { return { ok: false, message: errText(err) }; }
+  });
   ipcMain.handle('oh:gSetClient', (e, id, secret) => {
     try { setSecret('gClientId', String(id || '').trim()); setSecret('gClientSecret', String(secret || '').trim()); return { ok: true }; }
     catch (err) { return { ok: false, message: errText(err) }; }
@@ -205,18 +251,18 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
       const items = []; let pageToken = '';
       for (let i = 0; i < 20; i++) {
         const q = { timeMin, timeMax, singleEvents: 'true', showDeleted: 'false', maxResults: '250', orderBy: 'startTime' }; if (pageToken) q.pageToken = pageToken;
-        const j = await gApi('GET', '/calendars/primary/events', null, q);
+        const j = await gApi('GET', evPfad(), null, q);
         items.push(...(j.items || [])); pageToken = j.nextPageToken || ''; if (!pageToken) break;
       }
       return { ok: true, items };
     } catch (err) { return { ok: false, message: errText(err) }; }
   });
   ipcMain.handle('oh:gUpsert', async (e, ev, googleId) => {
-    try { const j = googleId ? await gApi('PATCH', '/calendars/primary/events/' + encodeURIComponent(googleId), ev) : await gApi('POST', '/calendars/primary/events', ev); return { ok: true, id: j.id, updated: j.updated }; }
+    try { const j = googleId ? await gApi('PATCH', evPfad(googleId), ev) : await gApi('POST', evPfad(), ev); return { ok: true, id: j.id, updated: j.updated }; }
     catch (err) { return { ok: false, message: errText(err) }; }
   });
   ipcMain.handle('oh:gDelete', async (e, googleId) => {
-    try { await gApi('DELETE', '/calendars/primary/events/' + encodeURIComponent(googleId)); return { ok: true }; }
+    try { await gApi('DELETE', evPfad(googleId)); return { ok: true }; }
     catch (err) { return { ok: false, message: errText(err) }; }
   });
 

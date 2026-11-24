@@ -144,6 +144,14 @@
       <div class="small muted" id="mkMsg" style="margin-top:8px"></div></div>`;
   }
 
+  // Für andere Bereiche (Brief-Editor „Als E-Mail senden“): Fenster „Neue E-Mail“ mit Vorbelegung
+  window.ohMailSchreiben = async vor => {
+    if (!DESKTOP) return;
+    await konten();
+    if (!(MU.konten || []).length) { if (confirm('Es ist noch kein E-Mail-Konto verbunden. Jetzt im Bereich „E-Mail“ verbinden?')) location.hash = '#/mail'; return; }
+    schreiben(vor || {});
+  };
+
   /* ---------- Neue E-Mail / Antwort ---------- */
   function schreiben(vor) {
     vor = vor || {};
@@ -159,7 +167,9 @@
       <div class="fld"><button type="button" class="btn sm" id="mfFile">${icon('hochladen')}Datei vom Computer anhängen</button> <span class="small muted" id="mfFiles"></span></div>
     </form><div class="acts"><span class="sp"></span><button class="btn" data-m="x">Abbrechen</button><button class="btn pri" data-m="send">${icon('mail')}Senden</button></div></div>`;
     document.body.appendChild(bg);
-    const extra = [];
+    const extra = [...(vor.dateien || [])]; // z. B. Brief als PDF aus dem Brief-Editor
+    if (extra.length) bg.querySelector('#mfFiles').textContent = extra.map(x => '📎 ' + x.name).join(', ');
+    if (!vor.to) setTimeout(() => { const t = bg.querySelector('#mfTo'); if (t) t.focus(); }, 50);
     bg.querySelector('#mfFile').addEventListener('click', async () => { const f = await pickFile(''); if (f) { extra.push(f); bg.querySelector('#mfFiles').textContent = extra.map(x => x.name).join(', '); } });
     bg.addEventListener('click', async e => {
       const b = e.target.closest('[data-m]'); if (!b) return; if (b.dataset.m === 'x') return bg.remove();

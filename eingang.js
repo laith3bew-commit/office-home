@@ -195,7 +195,7 @@
       <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="nochmal" data-id="${it.id}">Noch einmal lesen</button><button class="btn sm" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Verwerfen</button></div></div>`;
     const neuStart = it.typ === 'demo' ? `<button class="btn sm" data-cmd="eg" data-ea="neustart" data-id="${it.id}">${icon('update')}Aufgabe neu starten</button>` : '';
     const demoMem = it.typ === 'demo' && (S.demoGedaechtnis || []).some(x => x.eg === it.id) ? `<div class="cmdlbl" style="margin:6px 0 4px">Demo-Gedächtnis (nur Probe)</div><ul class="egerg">${S.demoGedaechtnis.filter(x => x.eg === it.id).map(x => `<li><span class="small muted">${new Date(x.at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span> ${esc(x.text)}</li>`).join('')}</ul>` : '';
-    if (it.status === 'erledigt') return `<div class="egkarte"><div class="eghead">${dot('gruen')}<b>${esc(it.titel)}</b></div><ul class="egerg">${(it.ergebnis || []).map(l => `<li>${esc(l)}</li>`).join('')}</ul>${demoMem}${neuStart ? `<div class="acts">${neuStart}</div>` : ''}</div>`;
+    if (it.status === 'erledigt') return `<div class="egkarte" data-eg="${it.id}"><div class="eghead">${dot('gruen')}<b>${esc(it.titel)}</b></div><ul class="egerg">${(it.ergebnis || []).map(l => `<li>${esc(l)}</li>`).join('')}</ul>${demoMem}${neuStart ? `<div class="acts">${neuStart}</div>` : ''}${auftragHTML(it)}</div>`;
     if (it.status !== 'vorschlag') return `<div class="egkarte"><div class="eghead"><i class="egdot bau"></i><b>${esc(it.titel)}</b></div><div class="small muted">${it.status === 'liest' ? 'Gemini liest gerade …' + (it.typ === 'demo' ? ' Schau ins Büro: Sekretärin und Archiv sind dran.' : '') : it.status === 'frage' ? 'Die Sekretärin hat dir im Büro eine Frage gestellt – bitte dort antworten.' : 'Wartet in der Reihe.'}</div>${demoMem}${neuStart ? `<div class="acts">${neuStart}</div>` : ''}</div>`;
     return `<div class="egkarte" data-eg="${it.id}"><div class="eghead">${dot(it.prio, true)}<b>${esc(it.titel)}</b></div>
       <div class="egmeta small">${esc([it.von || k.absender, k.art, k.wichtigkeit && 'Wichtigkeit: ' + k.wichtigkeit].filter(Boolean).join(' · '))}</div>
@@ -203,7 +203,60 @@
       <label class="small egper">Gehört zu <select data-egp="1">${['', ...S.persons.map(p => p.id)].map(v => `<option value="${v}" ${v === (it.personId || '') ? 'selected' : ''}>${v ? esc(getPerson(v).role) : 'Allgemein'}</option>`).join('')}</select></label>
       <div class="egsteps">${it.schritte.map(s => `<label class="egstep"><input type="checkbox" data-egs="${s.id}" ${s.an ? 'checked' : ''}><span><b>${esc(s.text)}</b>${s.sub ? `<small>${esc(s.sub)}</small>` : ''}</span>${dot(s.farbe)}</label>`).join('')}</div>
       <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">${icon('erledigt')}Bestätigen</button><button class="btn sm" data-cmd="eg" data-ea="spaeter" data-id="${it.id}">Später</button><button class="btn sm dan" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Verwerfen</button>${it.docIds[0] ? `<button class="btn sm" data-cmd="eg" data-ea="doc" data-id="${it.id}">${icon('auge')}Datei</button>` : ''}</div>
-      <div class="small muted">Nichts wird eingetragen, bevor du bestätigst.${it.typ === 'demo' ? ' (Probe – nur Demo-Daten)' : ''}</div>${demoMem}</div>`;
+      <div class="small muted">Nichts wird eingetragen, bevor du bestätigst.${it.typ === 'demo' ? ' (Probe – nur Demo-Daten)' : ''}</div>${demoMem}${auftragHTML(it)}</div>`;
+  }
+
+  /* ---------- „Aufgabe hinzufügen“: eigener Auftrag an Gemini → Briefentwurf im Command → Brief → E-Mail ----------
+     Gemini schreibt nur einen Entwurf. Leon liest ihn hier, öffnet ihn als Brief, ändert ihn und verschickt ihn selbst. */
+  function auftragHTML(it) {
+    if (it.typ === 'demo' || it.typ === 'mailwahl' || MODE === 'demo') return '';
+    const A = it.auftraege || [];
+    return `<div class="egauf"><div class="cmdlbl" style="margin:4px 0 6px">${icon('plus')} Aufgabe hinzufügen</div>
+      ${A.map(a => auftragZeile(it, a)).join('')}
+      <textarea data-egauf="1" rows="2" placeholder="z. B. Antwort-E-Mail schreiben: Unterlagen kommen bis Freitag, bitte Frist verlängern"></textarea>
+      <div class="acts"><button class="btn sm" data-cmd="eg" data-ea="auftrag" data-id="${it.id}">${icon('ki')}An Gemini – Brief entwerfen</button></div></div>`;
+  }
+  function auftragZeile(it, a) {
+    const ea = (x, l, cls, ic) => `<button class="btn sm ${cls || ''}" data-cmd="eg" data-ea="${x}:${a.id}" data-id="${it.id}">${ic ? icon(ic) : ''}${l}</button>`;
+    const kopf = `<div class="small muted" style="margin-bottom:4px">Auftrag: „${esc(kurz(a.text, 160))}“</div>`;
+    if (a.status === 'liest') return `<div class="egentw">${kopf}<div class="eghead" style="font-size:13px"><i class="egdot bau"></i><span>Gemini schreibt den Entwurf …</span></div></div>`;
+    if (a.status === 'fehler') return `<div class="egentw">${kopf}<div class="small" style="color:var(--danger)">${esc(a.fehler || 'Fehler')}</div><div class="acts">${ea('aufnochmal', 'Noch einmal', 'pri')}${ea('aufweg', 'Entfernen', 'dan')}</div></div>`;
+    const e = a.ergebnis || {};
+    return `<div class="egentw">${kopf}<div class="egbrief"><b>${esc(e.betreff || '(ohne Betreff)')}</b>${e.empfaenger ? `<div class="small muted">an ${esc(e.empfaenger)}</div>` : ''}
+        <div class="egbtext">${esc([e.anrede, e.text, e.gruss].filter(Boolean).join('\n\n'))}</div></div>
+      ${e.hinweis ? `<div class="small" style="color:var(--warn,#B7791F);margin-top:4px">${icon('info')} ${esc(e.hinweis)}</div>` : ''}
+      <div class="acts">${ea('aufbrief', a.letterId && S.letters.some(l => l.id === a.letterId) ? 'Brief öffnen' : 'Als Brief öffnen', 'pri', 'brief')}${ea('aufnochmal', 'Neu schreiben', '', 'update')}${ea('aufweg', 'Verwerfen', 'dan')}</div></div>`;
+  }
+  async function entwurfSchreiben(it, a) {
+    a.status = 'liest'; a.fehler = ''; save(); zeichne();
+    try {
+      const m = it.mailId ? M().find(x => x.id === it.mailId) : null, P = getPerson(it.personId);
+      const parts = await teileVon(it), text = m ? await mailText(m) : '';
+      const k = it.ki || {};
+      const r = await window.officeHome.kiSchreiben({ parts, text, von: m ? (m.fromName ? m.fromName + ' <' + m.from + '>' : m.from) : '', betreff: m ? m.subject : '', auftrag: a.text,
+        ctx: { today: today(), absender: (S.settings.me && S.settings.me.name) || 'der Bevollmächtigte', person: P ? personName(P) + ' (' + P.role + ')' : '', auftrag: a.text,
+          analyse: { titel: it.titel, absender: k.absender || it.von, art: k.art, anliegen: k.anliegen, zusammenfassung: k.zusammenfassung, aktenzeichen: k.aktenzeichen, fristen: k.fristen, zahlungen: k.zahlungen } } });
+      if (!r || !r.ok) throw new Error((r && r.message) || 'Gemini hat nicht geantwortet.');
+      a.ergebnis = r.result || {}; a.status = 'fertig';
+      melde({ typ: 'ki', title: 'Briefentwurf fertig: ' + kurz(a.ergebnis.betreff || it.titel, 60), lines: ['Bitte lesen und als Brief öffnen.'], link: 'cmd:' + it.id });
+    } catch (e) { a.status = 'fehler'; a.fehler = String(e && e.message || e); }
+    save(); zeichne();
+  }
+  const zeichne = () => { try { if (window.ohCommand && window.ohCommand.neuZeichnen) window.ohCommand.neuZeichnen(); } catch (e) {} };
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9äöüß]+/g, ' ').trim();
+  // Entwurf → Brief im Editor (Empfänger aus dem Adressbuch, wenn der Name passt)
+  function briefAus(it, a) {
+    if (a.letterId && S.letters.some(l => l.id === a.letterId)) { location.hash = '#/brief/' + a.letterId; return; }
+    const e = a.ergebnis || {}, q = new URLSearchParams(); if (it.personId) q.set('person', it.personId);
+    const L = newLetter(q); delete L.isNew;
+    const n = norm(e.empfaenger), c = n && S.contacts.find(x => norm(x.name) === n || (norm(x.name).length > 3 && (n.includes(norm(x.name)) || norm(x.name).includes(n))));
+    if (c) { L.contactId = c.id; L.recipient = contactAddress(c); } else L.recipient = [e.empfaenger, e.empfaenger_anschrift].filter(Boolean).join('\n');
+    L.subject = String(e.betreff || ''); L.salutation = String(e.anrede || L.salutation); L.body = String(e.text || ''); L.closing = String(e.gruss || L.closing);
+    if (!it.personId) L.mode = 'self';
+    if (it.ki && it.ki.aktenzeichen && !L.ref) L.ref = String(it.ki.aktenzeichen).slice(0, 80);
+    L.eingangId = it.id; L.updated = new Date().toISOString();
+    S.letters.push(L); a.letterId = L.id; save();
+    location.hash = '#/brief/' + L.id;
   }
   // „Nicht mehr fragen“: Mail bleibt im Posteingang (nichts wird gelöscht), wird aber nicht bearbeitet und in keiner Auswahl mehr angeboten
   function mailsNichtFragen(ids) {
@@ -228,6 +281,20 @@
     const it = L().find(x => x.id === id); if (!it) return;
     const box = panel && panel.querySelector(`[data-eg="${id}"]`);
     const ids = box ? [...box.querySelectorAll('[data-egs]')].filter(x => x.checked).map(x => x.dataset.egs) : it.schritte.filter(s => s.an).map(s => s.id);
+    // Aufträge (eigene Aufgaben an Gemini) – Häkchen und Person vorher merken, damit das Neuzeichnen nichts zurücksetzt
+    if (/^(auftrag|aufnochmal|aufweg|aufbrief)/.test(a)) {
+      if (box && it.status === 'vorschlag' && it.typ !== 'mailwahl') { it.schritte.forEach(s => { s.an = ids.includes(s.id); }); const sel = box.querySelector('[data-egp]'); if (sel) it.personId = sel.value; }
+      const [art, aid] = a.split(':'); it.auftraege = it.auftraege || []; const au = it.auftraege.find(x => x.id === aid);
+      if (art === 'auftrag') {
+        const t = box && box.querySelector('[data-egauf]'), text = t ? t.value.trim() : '';
+        if (!text) { toast('Bitte zuerst aufschreiben, was Gemini tun soll.'); if (t) t.focus(); return 'bleib'; }
+        const neuA = { id: uid(), text, at: new Date().toISOString(), status: 'liest' }; it.auftraege.push(neuA); entwurfSchreiben(it, neuA); return;
+      }
+      if (!au) return;
+      if (art === 'aufnochmal') { entwurfSchreiben(it, au); return; }
+      if (art === 'aufweg') { it.auftraege = it.auftraege.filter(x => x !== au); save(); return; }
+      if (art === 'aufbrief') { briefAus(it, au); if (window.ohCommand) window.ohCommand.schliessen(); return 'bleib'; }
+    }
     if (a === 'nichtfragen' && it.typ === 'mailwahl') {
       if (!ids.length) { toast('Bitte zuerst E-Mails markieren.'); return 'bleib'; }
       const mids = it.schritte.filter(s => ids.includes(s.id)).map(s => s.d.mailId);
@@ -275,9 +342,12 @@
       const zeile = el.closest(ZEILE);
       if (!zeile) return;                                                            // lose Knöpfe/Links ohne eigene Zeile: kein Punkt
       if (zeile !== el && zeile.hasAttribute('data-id') && zeile.dataset.id !== el.dataset.id) return; // Link in einer fremden Zeile (z. B. Dokument im Termin)
-      const host = zeile.tagName === 'TR' ? zeile.firstElementChild : zeile; if (!host) return;
-      if (host.querySelector(':scope > .egnew')) return;
+      if (zeile.querySelector('.egnew')) return;
       const i = document.createElement('i'); i.className = 'egdot egnew ' + (o.neu.farbe !== 'gruen' ? 'puls' : ''); i.style.setProperty('--c', FARBE[o.neu.farbe] || FARBE.gruen); i.title = 'Neu aus dem Eingang';
+      // bevorzugt direkt vor dem Titel der Zeile (wie ein Aufzählungspunkt), sonst am Zeilenanfang
+      const titel = ['.kt', '.ttl', 'h4', 'b', 'strong'].map(s => [...zeile.querySelectorAll(s)].find(t => !t.closest('button, .badge, .chip, .pill'))).find(Boolean);
+      if (titel) { i.classList.add('inl'); titel.prepend(i); return; }
+      const host = zeile.tagName === 'TR' ? zeile.firstElementChild : zeile; if (!host) return;
       host.classList.add('eghost'); host.appendChild(i);
     });
     main.querySelectorAll('.eghost').forEach(h => { if (!h.querySelector(':scope > .egnew')) h.classList.remove('eghost'); });
