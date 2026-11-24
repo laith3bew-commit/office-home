@@ -53,12 +53,16 @@ module.exports = function setupMail({ app, ipcMain, safeStorage }) {
       date: (m.date || internalDate || new Date()).toISOString(), html, voll: true,
       text: String(m.text || (html ? html.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ') : '')).replace(/\n{3,}/g, '\n\n').slice(0, 60000), atts };
   }
-  // Eine einzelne Mail (z. B. ältere ohne Bilder/Anhänge) vollständig nachladen
-  ipcMain.handle('oh:mailEinzeln', async (e, id, uid) => {
+  const sentPfad = async c => { const boxes = await c.list(); return (boxes.find(b => b.specialUse === '\\Sent') || boxes.find(b => /^(sent|gesendet)/i.test(b.name)) || {}).path; };
+  // Eine einzelne Mail vollständig laden (Posteingang: ältere ohne Bilder/Anhänge; ordner 'gesendet': Mail aus „Gesendet“ öffnen)
+  ipcMain.handle('oh:mailEinzeln', async (e, id, uid, ordner) => {
     const a = konten().find(x => x.id === id); if (!a) return { ok: false, message: 'Konto nicht gefunden.' };
     const c = imap(a);
     try {
-      await c.connect(); const lock = await c.getMailboxLock('INBOX'); let r = null;
+      await c.connect();
+      const box = ordner === 'gesendet' ? await sentPfad(c) : 'INBOX';
+      if (!box) { await c.logout(); return { ok: false, message: 'Im Postfach wurde kein Ordner „Gesendet“ gefunden.' }; }
+      const lock = await c.getMailboxLock(box); let r = null;
       try { const msg = await c.fetchOne(String(uid), { source: true, internalDate: true }, { uid: true }); if (msg && msg.source && msg.source.length <= 40 * 1024 * 1024) r = await zerlege(msg.source, msg.internalDate); }
       finally { lock.release(); }
       await c.logout();

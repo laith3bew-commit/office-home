@@ -5,6 +5,13 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.16.4', datum: '2026-11-25', de: [
+        'E-Mail → Gesendet: Bilder und Dateien (z. B. PDF) in gesendeten E-Mails öffnen – mit Vorschaubildern, Bildbetrachter, „Als Dokument“ und eingebetteten Bildern wie im Posteingang.',
+        'Die gesendete E-Mail wird beim Anklicken aus dem Postfach geladen und belegt keinen Platz im Programm.'
+      ], ar: [
+        'البريد ← المرسل: فتح الصور والملفات (متل PDF) بالإيميلات المرسلة – مع صور مصغرة وعارض صور و«كمستند» والصور المضمنة متل الوارد.',
+        'الإيميل المرسل بينحمّل من البريد لما تضغط عليه وما بياخد مساحة بالبرنامج.'
+      ] },
     { v: '2.16.3', datum: '2026-11-24', de: [
         'Punkte „Neu aus dem Eingang“ sitzen jetzt überall an derselben Stelle: am Anfang der Zeile (bei Notizen oben in der Ecke). Im Kalender bekommen auch Termine und Fristen ihren Punkt.',
         'Büro: Die Leuchtringe der Mitarbeiter verschwinden nicht mehr unter Teppichen und Bodenflächen.',
