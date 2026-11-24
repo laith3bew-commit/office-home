@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Büro</title>
+<!-- Office Home · Büro: 3D-Großraumbüro mit 8 Mitarbeitern.
+     Figuren nach Swipii Worker3D (Heike-Kühn-Design-System) und dem HM-Team-Büro, Farben Leon Brand Kit v1,
+     Raumaufteilung nach Leons Referenzbild (Besprechung hinten links, Lounge Mitte, Arbeitsplätze hinten rechts,
+     Küche vorne links, Empfang + Glasbüro der Leitung vorne rechts).
+     Läuft eigenständig (Demo) oder in Office Home (iframe, Daten per postMessage). -->
+<style>
+  @font-face { font-family:"Manrope"; src:url("fonts/manrope-latin-400-normal.woff2") format("woff2"); font-weight:400; }
+  @font-face { font-family:"Manrope"; src:url("fonts/manrope-latin-600-normal.woff2") format("woff2"); font-weight:600; }
+  @font-face { font-family:"Manrope"; src:url("fonts/manrope-latin-700-normal.woff2") format("woff2"); font-weight:700; }
+  @font-face { font-family:"Kalam"; src:url("fonts/kalam-latin-400-normal.woff2") format("woff2"); font-weight:400; }
+  :root { --mitternacht:#1B2A44; --stahl:#4F6785; --nebel:#A9B8CA; --papier:#F4F0E8; --linie:#E2DCD0;
+          --bg:#F4F0E8; --ink:#1B2A44; --muted:#4F6785; --glas:rgba(255,255,255,.82); --glasrand:rgba(255,255,255,.95); }
+  :root[data-theme=dunkel] { --bg:#0F1726; --ink:#F4F0E8; --muted:#A9B8CA; --linie:rgba(169,184,202,.2); --glas:rgba(27,42,68,.78); --glasrand:rgba(169,184,202,.25); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; overflow:hidden; background:var(--bg); color:var(--ink); font:400 14px/1.5 "Manrope", "Segoe UI", system-ui, sans-serif; }
+  #szene { position:absolute; inset:0; } #szene canvas { display:block; outline:none; }
+  .glas { background:var(--glas); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid var(--glasrand); box-shadow:0 6px 18px rgba(11,18,32,.14); }
+  header { position:absolute; top:14px; left:14px; right:14px; display:flex; gap:10px; align-items:center; pointer-events:none; z-index:6; }
+  .marke { display:flex; align-items:center; gap:10px; padding:7px 16px 7px 8px; border-radius:18px; pointer-events:auto; }
+  .marke svg { width:34px; height:34px; } h1 { margin:0; font:400 26px/1 "Kalam", cursive; }
+  .chip { padding:6px 12px; border-radius:999px; font-size:12px; color:var(--muted); pointer-events:auto; display:flex; gap:6px; align-items:center; }
+  .chip i { width:7px; height:7px; border-radius:50%; background:#4F6785; display:inline-block; }
+  .sp { flex:1; }
+  .btn { pointer-events:auto; border:1px solid var(--glasrand); background:var(--glas); color:var(--ink); border-radius:999px; padding:7px 13px; font:600 12.5px "Manrope", sans-serif; cursor:pointer; display:inline-flex; gap:6px; align-items:center; backdrop-filter:blur(14px); }
+  .btn svg { width:16px; height:16px; }
+  #log { position:absolute; top:70px; right:14px; width:300px; max-height:calc(100% - 160px); overflow:hidden; border-radius:18px; padding:12px 14px; z-index:5; }
+  #log h2, .panel h2 { margin:0 0 8px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  #log ul { list-style:none; margin:0; padding:0; } #log li { display:grid; grid-template-columns:8px 1fr; gap:8px; padding:6px 0; border-top:1px solid var(--linie); font-size:12.5px; }
+  #log li:first-child { border-top:0; } #log li i { width:8px; height:8px; border-radius:50%; margin-top:6px; } #log li small { display:block; color:var(--muted); font-size:11px; }
+  #fragen { position:absolute; top:70px; left:14px; width:320px; border-radius:18px; padding:12px 14px; z-index:5; display:none; }
+  #fragen.an { display:block; } .frage { padding:8px 0; border-top:1px solid var(--linie); font-size:13px; } .frage:first-of-type { border-top:0; }
+  .frage .opts { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .schild { position:absolute; left:0; top:0; pointer-events:none; text-align:center; z-index:3; }
+  .schild .k { display:inline-flex; flex-direction:column; align-items:center; padding:4px 10px; border-radius:12px; white-space:nowrap; }
+  .schild .n { font-weight:700; font-size:12.5px; line-height:1.25; } .schild .r { font-size:10.5px; color:var(--muted); }
+  .schild .s { font-size:11px; display:flex; gap:5px; align-items:center; color:var(--muted); max-width:230px; overflow:hidden; text-overflow:ellipsis; }
+  .schild .s b { width:7px; height:7px; border-radius:50%; flex:none; }
+  .schild.fern .r, .schild.fern .s { display:none; }
+  .blase { position:absolute; left:0; top:0; z-index:4; pointer-events:none; padding:6px 11px; border-radius:14px 14px 14px 4px; font-size:12.5px; max-width:240px; transition:opacity .3s; background:var(--papier); color:#1B2A44; box-shadow:0 6px 16px rgba(11,18,32,.18); }
+  .blase.lang { max-width:340px; }
+  .panel { position:absolute; bottom:18px; left:50%; transform:translateX(-50%); width:min(460px, calc(100% - 28px)); border-radius:20px; padding:14px 18px; z-index:7; display:none; }
+  .panel.an { display:block; } .panel .kopf { display:flex; gap:12px; align-items:center; }
+  .panel .av { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; color:#F4F0E8; } .panel .av svg { width:22px; height:22px; --icon-dot:#A9B8CA; }
+  .panel h3 { margin:0; font-size:16px; } .panel .sub { color:var(--muted); font-size:12.5px; }
+  .panel ul { margin:10px 0; padding-left:18px; font-size:12.5px; } .panel .acts { display:flex; gap:8px; }
+  .menu { position:absolute; top:62px; right:14px; width:280px; border-radius:18px; padding:14px; z-index:8; display:none; font-size:13px; }
+  .menu.an { display:block; } .menu label { display:flex; gap:8px; align-items:center; padding:5px 0; } .menu select { font:inherit; padding:4px 8px; border-radius:8px; }
+  .drop { position:absolute; inset:0; z-index:9; display:none; align-items:center; justify-content:center; background:rgba(27,42,68,.25); font:400 28px "Kalam", cursive; color:#F4F0E8; }
+  .drop.an { display:flex; }
+  .tipp { position:absolute; bottom:14px; left:14px; font-size:11.5px; color:var(--muted); padding:4px 10px; border-radius:10px; z-index:4; }
+  svg.i { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; --icon-dot:#4F6785; }
+</style>
+</head>
+<body>
+<script src="i18n.js"></script>
+<div id="szene"></div>
+<header>
+  <div class="marke glas"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1B2A44"/><path d="M24 17v28h18" fill="none" stroke="#F4F0E8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 38.5v-7l5.5-4.6 5.5 4.6v7Z" fill="none" stroke="#A9B8CA" stroke-width="3.2" stroke-linejoin="round"/><circle cx="31.5" cy="17" r="3.2" fill="#A9B8CA"/></svg><h1>Büro</h1></div>
+  <span class="chip glas" id="stand"><i></i>Live · alle 5 Sekunden</span>
+  <span class="sp"></span>
+  <button class="btn" id="fensterBtn" style="display:none" title="Büro in einem eigenen Fenster öffnen, z. B. für den zweiten Bildschirm"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="10" rx="2.5"/><path d="M8 19h11a2 2 0 0 0 2-2V9"/></svg><span id="fensterTxt">In eigenem Fenster</span></button>
+  <button class="btn" id="tonBtn" title="Büro-Geräusche"></button>
+  <button class="btn" id="einstBtn" title="Einstellungen"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h8.6"/><path d="M17.4 7H20"/><circle cx="15" cy="7" r="2.2"/><path d="M4 12h2.6"/><path d="M11.4 12H20"/><circle cx="9" cy="12" r="2.2"/><path d="M4 17h10.6"/><path d="M19.4 17H20"/><circle cx="17" cy="17" r="2.2"/></svg></button>
+</header>
+<div id="fragen" class="glas"></div>
+<div id="log" class="glas"><h2>Letzte Ereignisse</h2><ul id="logListe"></ul></div>
+<div id="schilder"></div>
+<div class="panel glas" id="panel"></div>
+<div class="menu glas" id="menu">
+  <h2 style="margin:0 0 8px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Büro-Einstellungen</h2>
+  <label>Wenn das Büro nicht sichtbar ist<select id="optHinter"><option value="pause">3D anhalten, Mitarbeiter arbeiten weiter</option><option value="weiter">alles weiterlaufen lassen</option></select></label>
+  <label><input type="checkbox" id="optTon">Leise Büro-Geräusche</label>
+  <label>Grafik<select id="optQual"><option value="hoch">höchste Qualität</option><option value="mittel">ausgewogen</option><option value="leicht">leicht</option></select></label>
+  <label><input type="checkbox" id="optDreh" checked>Kamera dreht sich langsam</label>
+  <label>Über den Köpfen<select id="optSchild"><option value="name">Name</option><option value="rolle">Aufgabenbereich</option><option value="beides">Name und Aufgabenbereich</option></select></label>
+</div>
+<div class="drop" id="drop">Brief hier fallen lassen – er kommt in den Briefkasten</div>
+<div class="tipp glas">Ziehen = drehen · Mausrad = zoomen · Klick auf eine Person = Details · Dateien auf das Büro ziehen = Briefkasten</div>
+
+<script src="lib/three.min.js"></script>
+<script>
+(function () {
+"use strict";
+const V3 = THREE.Vector3, PI = Math.PI;
+const Q = new URLSearchParams(location.search);
+const BRUECKE = window.bueroBridge || null;                       // eigenes Fenster (Office Home Desktop)
+const FENSTER = !!BRUECKE;
+const IM_PROGRAMM = window.parent !== window || FENSTER;
+const anProgramm = m => { if (BRUECKE) BRUECKE.send(m); else if (window.parent !== window) parent.postMessage(m, "*"); };
+let THEMA = Q.get("theme") || "system";
+if (THEMA === "system") THEMA = matchMedia("(prefers-color-scheme: dark)").matches ? "dunkel" : "hell";
+document.documentElement.dataset.theme = THEMA;
+const DUNKEL = THEMA === "dunkel";
+
+/* ---------- Einstellungen (nur für diesen Rechner) ---------- */
+const EINST = Object.assign({ hinter: "pause", ton: true, qual: "hoch", dreh: true, schild: "beides" }, (() => { try { return JSON.parse(localStorage.getItem("oh-buero") || "{}"); } catch (e) { return {}; } })());
+const speichereEinst = () => { try { localStorage.setItem("oh-buero", JSON.stringify(EINST)); } catch (e) {} };
+
+/* ---------- Farben: Leon Brand Kit v1 ---------- */
+const F = DUNKEL ? {
+  klar: "#0F1726", boden: "#2A3344", holz: "#3A4150", wand: "#1E2A40", weiss: "#2E3B55", tisch: "#D8DEE6", teppich: "#2A3650", lounge: "#22324F", kueche: "#2B3242",
+  chef: "#26344F", glas: "#7D90A8", rahmen: "#0B1220", mitternacht: "#C9D3DE", sofa: "#3B5272", stahl: "#4F6785", nebel: "#A9B8CA", papier: "#F4F0E8",
+  pflanze: "#4E6B59", pflanze2: "#62806B", hose: "#16223A", licht: .78, sonne: .55, himmel: "#DCE4EE", erde: "#1B2A44"
+} : {
+  klar: "#F4F0E8", boden: "#CBC6BE", holz: "#E4DCCD", wand: "#F1EEE8", weiss: "#FBFAF7", tisch: "#FBFAF7", teppich: "#DAD7D1", lounge: "#D6DEE6", kueche: "#D3D0CA",
+  chef: "#A9B8CA", glas: "#CFDAE6", rahmen: "#2B3446", mitternacht: "#1B2A44", sofa: "#1B2A44", stahl: "#4F6785", nebel: "#A9B8CA", papier: "#F4F0E8",
+  pflanze: "#5F7F6A", pflanze2: "#7A9A80", hose: "#2A3A55", licht: .75, sonne: .62, himmel: "#FFFFFF", erde: "#B9B2A6"
+};
+const HAUT = ["#D9B396", "#C99A78", "#E3C1A6", "#B8876A", "#A87656"], HAAR = ["#3B302B", "#1F1B18", "#6B5444", "#2E2A2A", "#8A7462"];
+const STATUS = {
+  arbeitet: { farbe: "#4F6785", text: "arbeitet" }, rennt: { farbe: "#4F6785", text: "eilt zum Platz" },
+  wartet: { farbe: "#7A5C1E", text: "hat eine Frage" }, bereit: { farbe: "#A9B8CA", text: "bereit" }, frei: { farbe: "#C5CCD6", text: "Pause" }
+};
+
+/* ---------- Die 8 Mitarbeiter ---------- */
+const ICON = {
+  sekretariat: '<path d="M14 3.5H7.5A2.5 2.5 0 0 0 5 6v12a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18V8.5Z"/><path d="M14 3.5V7a1.5 1.5 0 0 0 1.5 1.5H19"/><path d="M8.6 13h6.8"/><path d="M8.6 16.5h3.8"/><circle cx="15" cy="16.5" r="1.1" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  termine: '<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3.5v3"/><path d="M16 3.5v3"/><path d="M3.5 9.5h17"/><circle cx="15.5" cy="15" r="1.2" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  finanzen: '<circle cx="12" cy="12" r="8.5"/><path d="M14.6 9.2a3.5 3.5 0 1 0 0 5.6"/><path d="M8 11h4.4"/><path d="M8 13h4.4"/><circle cx="16.4" cy="12" r="1" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  statistik: '<path d="M4 4v14.5A1.5 1.5 0 0 0 5.5 20H20"/><path d="M8.5 16.5v-3.5"/><path d="M12.5 16.5v-6"/><path d="M16.5 16.5v-8"/><circle cx="16.5" cy="5.4" r="1.1" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  fristen: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12"/><path d="M12 12l3.2 2"/><circle cx="12" cy="12" r="1.2" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  schreiben: '<path d="M16 4.6a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8l-4.1.7.7-4.1Z"/><path d="M14.4 6.2l3.4 3.4"/><path d="M12.5 20h5"/><circle cx="20.1" cy="20" r="1.1" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  archiv: '<path d="M3.5 7a2.5 2.5 0 0 1 2.5-2.5h3.2c.7 0 1.3.3 1.7.8l1 1.2c.4.5 1 .8 1.7.8H18a2.5 2.5 0 0 1 2.5 2.5v8.2a2.5 2.5 0 0 1-2.5 2.5H6a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M3.5 10.3h17"/><circle cx="7" cy="7.6" r="1.1" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
+  leitung: '<circle cx="9.5" cy="8.5" r="3.2"/><path d="M3.8 20v-.8a4.8 4.8 0 0 1 4.8-4.8h1.8a4.8 4.8 0 0 1 4.8 4.8v.8"/><path d="M15 5.6a3 3 0 0 1 0 5.8"/><path d="M17.6 14.6a4.6 4.6 0 0 1 2.6 4.2v1.2"/><circle cx="20.2" cy="5" r="1.1" fill="var(--icon-dot,#4F6785)" stroke="none"/>'
+};
+const TEAM = [
+  { id: "sekretariat", name: "Lena Krüger", rolle: "Sekretariat", bereiche: "Posteingang · prüft · Gemini · verteilt", route: "documents", kleid: "#4F6785", look: { haar: "dutt", acc: "headset", haut: 2, haarF: 0, arbeit: "tippen" } },
+  { id: "termine", name: "Jonas Weber", rolle: "Terminmanager", bereiche: "Kalender · Termine · Erinnerungen", route: "calendar", kleid: "#2E4468", look: { haar: "kurz", acc: "brille", haut: 0, haarF: 1, arbeit: "tippen" } },
+  { id: "finanzen", name: "Miriam Hoffmann", rolle: "Finanzexpertin", bereiche: "Finanzen · Finanzierung · Konten", route: "finance", kleid: "#7D90A8", look: { haar: "lang", acc: null, haut: 1, haarF: 2, arbeit: "analyse" } },
+  { id: "statistik", name: "David Schulz", rolle: "Statistik & Überblick", bereiche: "Statistik · Verträge & Fixkosten · Konten & Vermögen · Notizen · Monatsbericht", route: "stats", kleid: "#5F7591", look: { haar: "locken", acc: "brille", haut: 3, haarF: 3, arbeit: "analyse" } },
+  { id: "fristen", name: "Anna Lorenz", rolle: "Fristen & Aufgaben", bereiche: "Fristen · Aufgaben · Vorgänge", route: "tasks", kleid: "#3B5272", look: { haar: "seite", acc: null, haut: 2, haarF: 4, arbeit: "pruefen" } },
+  { id: "schreiben", name: "Felix Wagner", rolle: "Schreibbüro", bereiche: "Briefe · E-Mails · Vorlagen", route: "letters", kleid: "#A9B8CA", look: { haar: "kurz", acc: null, haut: 4, haarF: 1, arbeit: "tippen" } },
+  { id: "archiv", name: "Clara Neumann", rolle: "Archiv", bereiche: "Dokumente · Scanner · Kopien", route: "scan", kleid: "#C5D0DC", look: { haar: "dutt", acc: "brille", haut: 0, haarF: 2, arbeit: "pruefen" } },
+  { id: "leitung", name: "Martin Richter", rolle: "Büroleitung", bereiche: "Personen & Vollmachten · Adressbuch · Tresor", route: "persons", kleid: "#1B2A44", look: { haar: "kurz", acc: "brille", haut: 1, haarF: 4, arbeit: "pruefen" } }
+];
+
+/* ---------- Hilfen ---------- */
+const C = h => new THREE.Color(h);
+const matCache = {};
+function mat(farbe, opt) { const k = farbe + JSON.stringify(opt || {}); if (!matCache[k]) matCache[k] = new THREE.MeshStandardMaterial(Object.assign({ color: C(farbe), roughness: .85, metalness: .02 }, opt || {})); return matCache[k]; }
+function B(w, h, d, m, x, y, z, p, sch) { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), typeof m === "string" ? mat(m) : m); o.position.set(x, y, z); if (sch !== false) { o.castShadow = true; o.receiveShadow = true; } p.add(o); return o; }
+function Z(rt, rb, h, m, seg, x, y, z, p) { const o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 14), typeof m === "string" ? mat(m) : m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; p.add(o); return o; }
+function G(x, y, z, p, ry) { const g = new THREE.Group(); g.position.set(x || 0, y || 0, z || 0); if (ry) g.rotation.y = ry; if (p) p.add(g); return g; }
+function leinwand(w, h, malen) { const c = document.createElement("canvas"); c.width = w; c.height = h; malen(c.getContext("2d"), w, h); const t = new THREE.CanvasTexture(c); t.anisotropy = 8; return t; }
+const zufall = (a, b) => a + Math.random() * (b - a), wahl = a => a[Math.floor(Math.random() * a.length)];
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const svgIcon = (id, dot) => `<svg class="i" viewBox="0 0 24 24" style="--icon-dot:${dot || "#A9B8CA"}">${ICON[id]}</svg>`;
+
+/* ---------- Szene ---------- */
+const el = document.getElementById("szene");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setClearColor(C(F.klar));
+renderer.shadowMap.enabled = EINST.qual !== "leicht"; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(devicePixelRatio, EINST.qual === "hoch" ? 2 : 1.25));
+el.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+if (DUNKEL) scene.fog = new THREE.Fog(C(F.klar), 30, 70);
+const cam = new THREE.PerspectiveCamera(32, 1, .1, 200);
+scene.add(new THREE.HemisphereLight(C(F.himmel), C(F.erde), F.licht));
+const sonne = new THREE.DirectionalLight(C(DUNKEL ? "#C9D3DE" : "#FFFFFF"), F.sonne);
+sonne.position.set(-8, 18, 10); sonne.castShadow = true; sonne.shadow.mapSize.set(EINST.qual === "hoch" ? 4096 : 2048, EINST.qual === "hoch" ? 4096 : 2048); sonne.shadow.bias = -.0003; sonne.shadow.normalBias = .025;
+Object.assign(sonne.shadow.camera, { left: -14, right: 14, top: 11, bottom: -11, near: 1, far: 60 });
+scene.add(sonne);
+const lampen = [];
+function lampe(x, y, z, farbe, staerke, weite) { if (!DUNKEL) return; const l = new THREE.PointLight(C(farbe || "#FFE6C4"), staerke || .8, weite || 6, 2); l.position.set(x, y, z); scene.add(l); lampen.push(l); }
+
+/* ---------- Raum 20 × 14 m ---------- */
+const RX = 10, RZ = 7, WH = 2.8;
+const raum = G(0, 0, 0, scene);
+const dielen = leinwand(1024, 1024, (g, w, h) => {
+  const base = C(F.boden); g.fillStyle = F.boden; g.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 64) { let x = -Math.random() * 300; while (x < w) { const l = 220 + Math.random() * 260, d = Math.floor(Math.random() * 18) - 9;
+    g.fillStyle = `rgb(${Math.min(255, base.r * 255 + d)},${Math.min(255, base.g * 255 + d - 3)},${Math.min(255, base.b * 255 + d - 8)})`; g.fillRect(x, y, l - 3, 61); x += l; } }
+});
+dielen.wrapS = dielen.wrapT = THREE.RepeatWrapping; dielen.repeat.set(5, 3.5);
+const boden = new THREE.Mesh(new THREE.PlaneGeometry(RX * 2, RZ * 2), new THREE.MeshStandardMaterial({ map: dielen, roughness: .9 }));
+boden.rotation.x = -PI / 2; boden.receiveShadow = true; raum.add(boden);
+/* Bodenplatte (Sockel wie im Referenzbild) */
+B(RX * 2 + .3, .25, RZ * 2 + .3, DUNKEL ? "#0B1220" : "#E2DCD0", 0, -.13, 0, raum, false);
+let ebene = 0;   // jede Bodenfläche eine eigene Höhe → kein Flackern (z-fighting)
+function flaeche(w, d, x, z, farbe, rund) {
+  const geo = rund ? new THREE.CircleGeometry(w, 64) : new THREE.PlaneGeometry(w, d);
+  const t = new THREE.Mesh(geo, mat(farbe, { roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 - ebene, polygonOffsetUnits: -1 - ebene }));
+  t.rotation.x = -PI / 2; t.position.set(x, .01 + ebene * .008, z); ebene++; t.receiveShadow = true; raum.add(t); return t;
+}
+flaeche(6.8, 5.0, -6.6, 4.5, F.kueche);            // Küche vorne links
+flaeche(5.6, 4.6, -.4, .6, F.lounge);               // Lounge Mitte
+flaeche(1.35, 0, -1.2, 1.3, DUNKEL ? "#3B5272" : "#C5D0DC", true);
+flaeche(7.6, 4.6, 6.2, 4.7, F.chef);                // Empfang + Leitung vorne rechts
+flaeche(7.0, 4.2, -6.4, -4.8, F.teppich);           // Besprechung hinten links
+
+/* Wände: blenden aus, wenn sie zwischen Kamera und Raum stehen */
+const waende = [];
+function wand(w, h, d, x, z, nx, nz, farbe) { const m = new THREE.MeshStandardMaterial({ color: C(farbe || F.wand), roughness: .9, transparent: true }); const o = B(w, h, d, m, x, h / 2, z, raum); waende.push({ o, m, n: new V3(nx, 0, nz) }); return o; }
+wand(RX * 2 + .3, WH, .2, 0, -RZ - .1, 0, 1);
+wand(.2, WH, RZ * 2, RX + .1, 0, -1, 0);
+wand(.2, WH, RZ * 2, -RX - .1, 0, 1, 0);
+/* Fensterband hinten rechts und rechts */
+const fensterMat = new THREE.MeshBasicMaterial({ color: C(DUNKEL ? "#2E4468" : "#EAF0F6"), transparent: true, opacity: .9 });
+for (let i = 0; i < 6; i++) { const f = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6), fensterMat); f.position.set(1.4 + i * 1.45, 1.55, -RZ + .01); raum.add(f); }
+for (let i = 0; i < 5; i++) { const f = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6), fensterMat); f.rotation.y = -PI / 2; f.position.set(RX - .01, 1.55, -5.6 + i * 1.45); raum.add(f); }
+/* Holzlamellen + hängende Pflanzen in der Küche */
+{ const lm = new THREE.MeshStandardMaterial({ color: C(F.holz), roughness: .9, transparent: true }); waende.push({ o: { castShadow: true }, m: lm, n: new V3(1, 0, 0) });
+  for (let i = 0; i < 22; i++) B(.06, WH - .2, .05, lm, -RX + .25, (WH - .2) / 2, 2.2 + i * .22, raum); }
+
+/* Glaswände */
+const glasMat = new THREE.MeshStandardMaterial({ color: C(F.glas), transparent: true, opacity: DUNKEL ? .14 : .2, roughness: .1, metalness: .1, depthWrite: false });
+function glaswand(x1, z1, x2, z2) {
+  const dx = x2 - x1, dz = z2 - z1, l = Math.hypot(dx, dz), a = Math.atan2(dx, dz), g = G((x1 + x2) / 2, 0, (z1 + z2) / 2, raum, a);
+  const s = new THREE.Mesh(new THREE.BoxGeometry(.03, WH, l), glasMat); s.position.y = WH / 2; g.add(s);
+  B(.06, .06, l, F.rahmen, 0, WH - .03, 0, g); B(.06, .04, l, F.rahmen, 0, .02, 0, g);
+  const n = Math.max(1, Math.round(l / 1.4)); for (let i = 0; i <= n; i++) B(.05, WH, .05, F.rahmen, 0, WH / 2, -l / 2 + i * (l / n), g);
+}
+/* Besprechungsraum (hinten links), Tür vorne bei x −3.6…−2.8 */
+glaswand(-7.6, -RZ, -7.6, -2.5); glaswand(-7.6, -2.5, -3.6, -2.5); glaswand(-2.8, -2.5, -2.0, -2.5); glaswand(-2.0, -2.5, -2.0, -RZ);
+/* Glasbüro der Leitung (vorne rechts), Tür links bei z 3.0…3.9 */
+glaswand(6.6, 2.6, RX, 2.6); glaswand(6.6, 2.6, 6.6, 3.0); glaswand(6.6, 3.9, 6.6, RZ);
+
+/* Pflanzen */
+function pflanze(x, z, s, topf, p) {
+  const g = G(x, 0, z, p || raum); s = s || 1; B(.42 * s, .45 * s, .42 * s, topf || F.rahmen, 0, .225 * s, 0, g);
+  for (let i = 0; i < 7; i++) { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(zufall(.16, .27) * s, 0), mat(i % 2 ? F.pflanze : F.pflanze2, { flatShading: true }));
+    b.position.set(zufall(-.17, .17) * s, (.55 + zufall(0, .6)) * s, zufall(-.17, .17) * s); b.castShadow = true; g.add(b); }
+  return g;
+}
+[[-9.3, -6.3, 1.1], [-2.5, -2.0, .8], [2.6, -6.3, 1.1], [9.3, -6.3, 1.2], [9.3, 1.9, 1.0], [-3.2, 6.3, 1.0], [5.6, 2.1, .9], [9.4, 6.5, .8], [-2.4, -.6, .8]].forEach(([x, z, s]) => pflanze(x, z, s));
+for (let i = 0; i < 5; i++) { const h = new THREE.Mesh(new THREE.IcosahedronGeometry(.3, 0), mat(i % 2 ? F.pflanze : F.pflanze2, { flatShading: true })); h.scale.set(1.2, .7, .6); h.position.set(-RX + .25, 2.35, 2.6 + i * 1.0); raum.add(h); }
+
+/* ---------- Möbel ---------- */
+function stuhl(x, z, ry, farbe, p) { const g = G(x, 0, z, p || raum, ry); Z(.22, .22, .03, F.rahmen, 5, 0, .04, 0, g); Z(.022, .022, .38, F.rahmen, 6, 0, .24, 0, g);
+  B(.46, .07, .44, farbe || F.nebel, 0, .46, 0, g); B(.44, .48, .06, farbe || F.nebel, 0, .76, -.22, g).rotation.x = -.1; return g; }
+function sofa(x, z, breite, ry, farbe) { const g = G(x, 0, z, raum, ry);
+  B(breite, .42, .85, farbe || F.sofa, 0, .21, 0, g); B(breite, .45, .2, farbe || F.sofa, 0, .62, -.33, g);
+  B(.18, .55, .85, farbe || F.sofa, -breite / 2 + .09, .28, 0, g); B(.18, .55, .85, farbe || F.sofa, breite / 2 - .09, .28, 0, g);
+  for (let i = 0; i < Math.round(breite / .9); i++) B(.42, .34, .12, F.papier, -breite / 2 + .55 + i * .9, .62, -.18, g).rotation.x = -.25; return g; }
+
+/* Besprechung: ovaler Tisch, 8 Stühle, Bildschirm, Sideboard */
+const ovT = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .05, 40), mat(DUNKEL ? "#1B2A44" : F.rahmen)); ovT.scale.set(1.8, 1, .85); ovT.position.set(-4.8, .74, -4.8); ovT.castShadow = true; raum.add(ovT);
+Z(.1, .14, .72, F.rahmen, 10, -5.6, .36, -4.8, raum); Z(.1, .14, .72, F.rahmen, 10, -4.0, .36, -4.8, raum);
+const MEET = [];
+for (let i = 0; i < 8; i++) { const a = (i / 8) * PI * 2 + PI / 8, x = -4.8 + Math.cos(a) * 2.35, z = -4.8 + Math.sin(a) * 1.35, ry = Math.atan2(-4.8 - x, -4.8 - z);
+  stuhl(x, z, ry, DUNKEL ? "#3B5272" : F.rahmen); MEET.push({ pos: [x, z], face: ry, appr: [x + (x + 4.8) * .25, z + (z + 4.8) * .3] }); }
+B(1.9, .55, .4, F.rahmen, -4.8, .28, -6.7, raum); { const tv = B(1.5, .85, .05, F.rahmen, -2.3, 1.45, -4.8, raum); tv.rotation.y = -PI / 2;
+  const sc = new THREE.Mesh(new THREE.PlaneGeometry(1.4, .76), new THREE.MeshBasicMaterial({ color: C(DUNKEL ? "#2E4468" : "#DCE4EE") })); sc.position.set(-2.33, 1.45, -4.8); sc.rotation.y = -PI / 2; raum.add(sc); }
+/* Stehtisch mit Pinnwand (hinten ganz links) */
+B(.9, .04, 1.6, F.rahmen, -8.8, 1.05, -4.4, raum); [[-8.8, -5.1], [-8.8, -3.7]].forEach(([x, z]) => B(.05, 1.03, .05, F.rahmen, x, .52, z, raum));
+B(.04, 1.0, 1.8, F.weiss, -RX + .05, 1.6, -4.4, raum);
+[["#4F6785", -3.9, 1.75], ["#A9B8CA", -4.5, 1.45], [F.papier, -4.9, 1.8], ["#C5D0DC", -4.2, 1.35]].forEach(([c, z, y]) => B(.01, .26, .26, c, -RX + .08, y, z, raum, false));
+lampe(-4.8, 2.4, -4.8, "#FFE6C4", 1.1, 7);
+
+/* Lounge: Sofa, runder Teppich mit Sesseln, Sitzstufen, Stehlampe */
+sofa(-.2, -1.15, 3.0, 0); Z(.32, .32, .4, F.stahl, 16, 1.7, .2, -.2, raum);
+B(4.0, .45, .7, F.holz, -.6, .225, -2.0, raum); B(3.0, .9, .45, F.holz, -.6, .45, -2.25, raum);
+[[-2.0, -2.0], [-1.0, -2.0], [.6, -2.25]].forEach(([x, z], i) => B(.38, .08, .38, i % 2 ? F.stahl : F.rahmen, x, i === 2 ? .93 : .49, z, raum));
+function sessel(x, z, ry) { const g = G(x, 0, z, raum, ry); B(.62, .34, .6, F.stahl, 0, .28, 0, g); B(.62, .6, .12, F.stahl, 0, .66, -.26, g); [-.25, .25].forEach(a => [-.22, .22].forEach(b => Z(.02, .02, .12, F.rahmen, 6, a, .06, b, g))); }
+sessel(-1.8, 1.3, PI / 2); sessel(-.6, 1.3, -PI / 2);
+Z(.32, .32, .04, DUNKEL ? "#A9B8CA" : "#F4F0E8", 24, -1.2, .45, 1.3, raum); Z(.04, .06, .44, F.rahmen, 8, -1.2, .22, 1.3, raum);
+Z(.14, .14, .03, F.rahmen, 16, -2.3, .02, 2.2, raum); Z(.012, .012, 1.7, F.rahmen, 6, -2.3, .85, 2.2, raum); Z(.2, .14, .2, F.rahmen, 16, -2.1, 1.72, 2.0, raum);
+lampe(-1.2, 1.9, 1.3, "#FFE6C4", .9, 5);
+/* Whiteboard auf Rollen */
+{ const g = G(1.6, 0, 1.8, raum, -.6); B(1.0, 1.2, .03, F.weiss, 0, 1.28, 0, g); B(1.08, .05, .07, F.rahmen, 0, .66, 0, g); B(1.08, .04, .07, F.rahmen, 0, 1.9, 0, g);
+  [-.54, .54].forEach(x => { B(.04, 1.92, .05, F.rahmen, x, .96, 0, g); B(.06, .04, .5, F.rahmen, x, .02, 0, g); }); }
+
+/* Küche: Theke an der linken Wand mit Kaffeemaschine, Insel mit Hockern, Bistrotische */
+B(.65, .92, 3.4, F.holz, -9.6, .46, 3.8, raum); B(.66, .03, 3.4, F.weiss, -9.6, .93, 3.8, raum);
+B(.7, 1.3, 1.2, DUNKEL ? "#3B4252" : "#D7D3CC", -9.6, 2.0, 3.8, raum);
+B(.36, .45, .34, F.rahmen, -9.55, 1.18, 3.2, raum); B(.1, .05, .2, F.stahl, -9.36, 1.02, 3.2, raum); lampe(-9.0, 1.8, 3.6, "#FFE6C4", .8, 4);
+[3.9, 4.1, 4.3].forEach(z => Z(.045, .04, .09, F.papier, 10, -9.45, .98, z, raum));
+B(1.7, .05, .7, F.holz, -6.9, 1.02, 4.6, raum); B(1.6, 1.0, .05, F.rahmen, -6.9, .5, 4.95, raum); [-7.7, -6.1].forEach(x => B(.05, 1.0, .65, F.rahmen, x, .5, 4.6, raum));
+[-7.5, -6.9, -6.3].forEach(x => { Z(.16, .16, .03, F.rahmen, 12, x, .7, 3.9, raum); Z(.02, .02, .7, F.rahmen, 6, x, .35, 3.9, raum); });
+function bistro(x, z) { Z(.45, .45, .04, F.rahmen, 24, x, .74, z, raum); Z(.03, .03, .72, F.rahmen, 6, x, .36, z, raum); Z(.22, .22, .02, F.rahmen, 12, x, .01, z, raum); }
+bistro(-5.0, 5.6); bistro(-8.0, 6.2);
+stuhl(-5.62, 5.6, PI / 2, F.rahmen); stuhl(-4.38, 5.6, -PI / 2, F.rahmen); stuhl(-8.6, 6.2, PI / 2, F.rahmen); stuhl(-7.4, 6.2, -PI / 2, F.rahmen);
+
+/* Archiv-Schränke rechts + Sideboards hinten */
+for (let i = 0; i < 4; i++) { B(.5, 2.0, .9, DUNKEL ? "#3B5272" : "#C5D0DC", RX - .35, 1.0, -3.2 + i * .95, raum); B(.02, .1, .3, F.rahmen, RX - .62, 1.1, -3.2 + i * .95, raum); }
+B(2.4, .7, .45, F.sofa, 5.4, .35, -6.65, raum); B(1.8, .7, .45, F.sofa, 8.3, .35, -6.65, raum);
+[[4.8, -6.6], [5.2, -6.6], [8.0, -6.6]].forEach(([x, z]) => B(.12, .3, .26, F.papier, x, .85, z, raum));
+/* Telefonkabine */
+{ const g = G(3.0, 0, -6.2, raum); B(1.0, 2.2, 1.0, DUNKEL ? "#3B4252" : "#5A6273", 0, 1.1, 0, g); const tür = new THREE.Mesh(new THREE.PlaneGeometry(.8, 1.9), glasMat); tür.position.set(0, 1.0, .51); g.add(tür); }
+
+/* Empfang: Briefkasten am Eingang, Sideboard, Whiteboard */
+B(1.4, .03, .05, F.rahmen, 2.4, .02, RZ, raum); // Eingangsschwelle
+const briefkasten = G(1.9, 0, 6.5, raum);
+B(.5, .62, .4, F.stahl, 0, .95, 0, briefkasten); B(.06, .62, .06, F.rahmen, 0, .32, 0, briefkasten); B(.34, .03, .05, F.rahmen, 0, 1.12, .21, briefkasten);
+const kastenUmschlag = B(.3, .02, .2, F.papier, 0, 1.28, 0, briefkasten); kastenUmschlag.visible = false;
+B(1.6, .6, .4, F.weiss, 3.8, .3, 6.6, raum); pflanze(3.3, 6.6, .4, F.weiss).position.y = .62;
+
+/* Tresor im Glasbüro (Tür öffnet sich mit dem Tresor in Office Home) */
+const tresor = G(9.45, 0, 6.35, raum, -PI / 2 - .3);
+B(.8, 1.1, .7, DUNKEL ? "#2E3B55" : "#3B4252", 0, .55, 0, tresor);
+const tresorTuerAchse = G(-.38, 0, .36, tresor); const tresorTuer = B(.74, 1.0, .06, F.stahl, .37, .55, 0, tresorTuerAchse);
+Z(.1, .1, .04, F.rahmen, 16, .52, .6, .04, tresorTuerAchse).rotation.x = PI / 2;
+let tresorOffen = false;
+
+/* ---------- Arbeitsplätze ---------- */
+const PLATZ = {
+  sekretariat: { seat: [4.2, 4.6], face: 0, appr: [4.2, 3.4], node: 12 },
+  termine: { seat: [4.6, -4.3], face: 0, appr: [4.6, -5.3], node: 4 },
+  finanzen: { seat: [6.4, -4.3], face: 0, appr: [6.4, -5.3], node: 5 },
+  statistik: { seat: [8.2, -4.3], face: 0, appr: [8.2, -5.3], node: 6 },
+  fristen: { seat: [4.6, -1.9], face: PI, appr: [4.6, -.9], node: 8 },
+  schreiben: { seat: [6.4, -1.9], face: PI, appr: [6.4, -.9], node: 9 },
+  archiv: { seat: [8.2, -1.9], face: PI, appr: [8.2, -.9], node: 10 },
+  leitung: { seat: [8.4, 4.6], face: 0, appr: [8.4, 3.4], node: 14, chef: true }
+};
+function iconTextur(id, hell) {
+  const img = new Image(); const t = new THREE.Texture(); t.anisotropy = 8;
+  const farbe = hell ? "#1B2A44" : "#F4F0E8";
+  img.onload = () => { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.fillStyle = hell ? "#F4F0E8" : "#1B2A44"; g.beginPath(); g.roundRect(0, 0, 128, 128, 30); g.fill(); g.drawImage(img, 22, 22, 84, 84); t.image = c; t.needsUpdate = true; };
+  img.src = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${farbe}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="--icon-dot:#A9B8CA">${ICON[id].replace(/var\(--icon-dot,#4F6785\)/g, "#7D90A8")}</svg>`);
+  return t;
+}
+TEAM.forEach(t => {
+  const p = PLATZ[t.id], g = G(p.seat[0], 0, p.seat[1], raum, p.face); p.bildschirme = [];
+  const w = p.chef ? 1.8 : 1.5;
+  B(w, .04, .72, F.tisch, 0, .74, .65, g); [-w / 2 + .05, w / 2 - .05].forEach(x => { B(.05, .72, .05, F.rahmen, x, .36, .65, g); B(.05, .04, .64, F.rahmen, x, .02, .65, g); });
+  if (!p.chef && t.id !== "sekretariat") B(w, .36, .03, F.sofa, 0, .92, 1.01, g);
+  if (t.id === "sekretariat") { B(w + .1, 1.08, .06, F.holz, 0, .54, 1.03, g); }
+  [-.28, .28].forEach(x => { B(.16, .015, .12, F.rahmen, x, .77, .82, g); B(.03, .2, .03, F.rahmen, x, .86, .85, g); B(.5, .3, .025, F.rahmen, x, 1.05, .84, g);
+    const s = new THREE.Mesh(new THREE.PlaneGeometry(.46, .26), new THREE.MeshBasicMaterial({ color: C(STATUS.frei.farbe) })); s.position.set(x, 1.05, .826); s.rotation.y = PI; g.add(s); p.bildschirme.push(s.material); });
+  B(.42, .015, .14, F.rahmen, 0, .77, .5, g); B(.07, .012, .1, F.rahmen, .3, .77, .5, g);
+  /* Bereichs-Icon als Tischaufsteller */
+  const schild = new THREE.Mesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshBasicMaterial({ map: iconTextur(t.id, !DUNKEL), transparent: true }));
+  schild.position.set(-.55, .88, .4); schild.rotation.y = PI; schild.rotation.x = -.25; g.add(schild); B(.2, .02, .06, F.rahmen, -.55, .77, .42, g);
+  const ablage = G(.55, .77, .45, g); p.ablage = []; for (let i = 0; i < 4; i++) { const a = B(.22, .012, .3, F.papier, 0, i * .014, 0, ablage, false); a.visible = false; p.ablage.push(a); }
+  const st = stuhl(0, 0, 0, t.kleid, g); p.stuhl = st;
+  lampe(p.seat[0], 1.9, p.seat[1] + (p.face === 0 ? .7 : -.7), "#DCE4EE", .5, 3);
+});
+
+/* ---------- Wegenetz ---------- */
+const NODES = {
+  0: [-3.2, -2.0], 1: [-3.2, -3.4], 2: [2.8, -1.9], 3: [2.8, -5.3], 4: [4.6, -5.3], 5: [6.4, -5.3], 6: [8.2, -5.3], 7: [3.4, -.9], 8: [4.6, -.9], 9: [6.4, -.9], 10: [8.2, -.9],
+  11: [2.8, 2.4], 12: [4.2, 3.4], 13: [6.1, 3.45], 14: [7.0, 3.45], 15: [2.6, 6.0], 16: [-2.6, 2.6], 17: [-6.0, 2.4], 18: [-8.3, 2.4], 19: [-5.0, 4.6], 20: [-.2, -.2],
+  21: [2.0, -.2], 22: [-1.2, 2.4], 23: [-8.0, -2.2]
+};
+const KANTEN = [[0, 1], [0, 2], [0, 23], [2, 3], [3, 4], [4, 5], [5, 6], [2, 7], [7, 8], [8, 9], [9, 10], [7, 11], [7, 21], [21, 20], [21, 11], [11, 12], [12, 13], [13, 14], [11, 15], [11, 22], [22, 16], [16, 17], [17, 18], [17, 19], [17, 23]];
+const NACH = {}; Object.keys(NODES).forEach(k => (NACH[k] = [])); KANTEN.forEach(([a, b]) => { NACH[a].push(b); NACH[b].push(a); });
+function weg(von, nach) {
+  const dist = {}, vor = {}, offen = new Set(Object.keys(NODES).map(Number)); offen.forEach(k => (dist[k] = Infinity)); dist[von] = 0;
+  while (offen.size) { let u = null; offen.forEach(k => { if (u === null || dist[k] < dist[u]) u = k; }); offen.delete(u); if (u === nach) break;
+    NACH[u].forEach(v => { const a = NODES[u], b = NODES[v], d = dist[u] + Math.hypot(a[0] - b[0], a[1] - b[1]); if (d < dist[v]) { dist[v] = d; vor[v] = u; } }); }
+  const p = [nach]; let k = nach; while (k !== von && vor[k] !== undefined) { k = vor[k]; p.unshift(k); } return p.map(n => NODES[n]);
+}
+const ORTE = [
+  { id: "kaffee1", pos: [-8.95, 3.2], face: -PI / 2, appr: [-8.3, 3.2], node: 18, akt: "kaffee" },
+  { id: "kaffee2", pos: [-8.95, 4.0], face: -PI / 2, appr: [-8.3, 4.0], node: 18, akt: "kaffee" },
+  { id: "sofa1", pos: [-1.1, -.95], face: 0, appr: [-1.1, -.4], node: 20, akt: "handy" },
+  { id: "sofa2", pos: [-.2, -.95], face: 0, appr: [-.2, -.4], node: 20, akt: "handy" },
+  { id: "sofa3", pos: [.7, -.95], face: 0, appr: [.7, -.4], node: 20, akt: "handy" },
+  { id: "sessel1", pos: [-1.8, 1.3], face: PI / 2, appr: [-1.8, 2.2], node: 22, akt: "sessel", paar: "sessel2", sitz: true },
+  { id: "sessel2", pos: [-.6, 1.3], face: -PI / 2, appr: [-.6, 2.2], node: 22, akt: "sessel", paar: "sessel1", sitz: true },
+  { id: "steh1", pos: [-8.75, -3.55], face: PI, appr: [-8.0, -3.55], node: 23, akt: "steh", paar: "steh2" },
+  { id: "steh2", pos: [-8.75, -5.25], face: 0, appr: [-8.0, -5.25], node: 23, akt: "steh", paar: "steh1" },
+  { id: "bistro1", pos: [-5.62, 5.6], face: PI / 2, appr: [-5.62, 4.85], node: 19, akt: "bistro", paar: "bistro2", sitz: true },
+  { id: "bistro2", pos: [-4.38, 5.6], face: -PI / 2, appr: [-4.38, 4.85], node: 19, akt: "bistro", paar: "bistro1", sitz: true },
+  { id: "fenster", pos: [7.3, -6.2], face: PI, appr: [7.3, -5.6], node: 5, akt: "fenster" }
+];
+const ORT = {}; ORTE.forEach(o => (ORT[o.id] = o));
+const MEET_ORTE = MEET.map((m, i) => ({ id: "meet" + i, pos: m.pos, face: m.face, appr: m.appr, node: 1, akt: "meeting", sitz: true }));
+const BRIEFKASTEN_ORT = { id: "briefkasten", pos: [2.35, 6.1], face: PI * .75, appr: [2.6, 5.6], node: 15, akt: "post" };
+
+/* ---------- Figuren ---------- */
+function baueFigur(t) {
+  const L = Object.assign({ haar: "kurz", acc: null, haut: 0, haarF: 0, arbeit: "tippen" }, t.look);
+  const skin = mat(HAUT[L.haut], { flatShading: true }), hair = mat(HAAR[L.haarF], { flatShading: true }), cloth = mat(t.kleid, { flatShading: true }), pants = mat(F.hose, { flatShading: true }), dunkel = mat(F.rahmen);
+  const root = G(0, 0, 0, scene), huefte = G(0, .95, 0, root);
+  const zyl = (rt, rb, h, m, p, y) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 8), m); o.position.y = y; o.castShadow = true; p.add(o); return o; };
+  const kasten = (w, h, d, m, p, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = true; p.add(o); return o; };
+  kasten(.32, .14, .2, pants, huefte, 0, 0, 0);
+  const bein = sx => { const ob = G(sx * .09, -.02, 0, huefte); zyl(.065, .055, .42, pants, ob, -.21); const kn = G(0, -.42, 0, ob); zyl(.05, .045, .45, pants, kn, -.225); kasten(.1, .06, .22, dunkel, kn, 0, -.46, .05); return { ob, kn }; };
+  const lb = bein(-1), rb = bein(1), rumpf = G(0, .05, 0, huefte);
+  zyl(.17, .15, .5, cloth, rumpf, .27); kasten(.4, .1, .22, cloth, rumpf, 0, .5, 0); zyl(.05, .055, .08, skin, rumpf, .58);
+  if (t.id === "leitung") { kasten(.05, .3, .01, mat(F.papier), rumpf, 0, .32, .155); kasten(.035, .22, .012, mat("#A9B8CA"), rumpf, 0, .3, .162); }
+  const kopf = G(0, .7, 0, rumpf);
+  const hk = new THREE.Mesh(new THREE.IcosahedronGeometry(.12, 1), skin); hk.scale.set(1, 1.12, 1); hk.castShadow = true; kopf.add(hk);
+  const kappe = new THREE.Mesh(new THREE.SphereGeometry(.128, 10, 8, 0, PI * 2, 0, PI * .52), hair); kappe.position.set(0, .018, -.012); kappe.rotation.x = -.25; kopf.add(kappe);
+  kasten(.21, .14, .08, hair, kopf, 0, -.02, -.08);
+  if (L.haar === "dutt") { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(.06, 0), hair); b.position.set(0, .1, -.1); kopf.add(b); }
+  if (L.haar === "lang") kasten(.23, .26, .07, hair, kopf, 0, -.1, -.1);
+  if (L.haar === "seite") kasten(.14, .04, .16, hair, kopf, .05, .115, .01).rotation.z = -.3;
+  if (L.haar === "locken") kappe.scale.setScalar(1.14);
+  if (L.acc === "brille") { [-1, 1].forEach(sx => kasten(.06, .035, .01, dunkel, kopf, sx * .047, .015, .12)); kasten(.04, .008, .008, dunkel, kopf, 0, .018, .12); }
+  if (L.acc === "headset") { const band = new THREE.Mesh(new THREE.TorusGeometry(.135, .012, 5, 12, PI), dunkel); band.rotation.y = PI / 2; band.position.y = .015; kopf.add(band);
+    [-1, 1].forEach(sx => { const e = new THREE.Mesh(new THREE.CylinderGeometry(.042, .042, .03, 8), dunkel); e.rotation.z = PI / 2; e.position.set(sx * .135, 0, 0); kopf.add(e); }); }
+  const arm = sx => { const sh = G(sx * .21, .47, 0, rumpf); zyl(.045, .04, .28, cloth, sh, -.14); const el = G(0, -.28, 0, sh); zyl(.038, .034, .26, skin, el, -.13); const hand = G(0, -.28, 0, el); kasten(.06, .07, .05, skin, hand, 0, 0, 0); return { sh, el, hand }; };
+  const la = arm(-1), ra = arm(1);
+  const tasse = new THREE.Mesh(new THREE.CylinderGeometry(.04, .035, .09, 10), mat(F.papier)); tasse.position.set(0, -.02, .04); ra.hand.add(tasse);
+  const handy = new THREE.Mesh(new THREE.BoxGeometry(.08, .012, .15), mat(F.rahmen)); handy.position.set(0, -.03, .05); ra.hand.add(handy);
+  const akte = new THREE.Mesh(new THREE.BoxGeometry(.24, .03, .32), mat("#A9B8CA")); akte.position.set(0, -.04, .1); la.hand.add(akte);
+  /* Status-Kristall über dem Kopf (wie Swipii) */
+  const orbMat = new THREE.MeshBasicMaterial({ color: C(STATUS.frei.farbe), transparent: true });
+  const orb = new THREE.Mesh(new THREE.OctahedronGeometry(.07, 0), orbMat); orb.position.y = 2.05; root.add(orb);
+  const treffer = new THREE.Mesh(new THREE.BoxGeometry(.65, 1.9, .65), new THREE.MeshBasicMaterial({ visible: false })); treffer.position.y = .95; root.add(treffer);
+  const P = { hy: .95, lean: 0, kx: 0, ky: 0, kz: 0, lob: 0, rob: 0, lkn: 0, rkn: 0, lsh: 0, rsh: 0, lshz: 0, rshz: 0, lel: 0, rel: 0 };
+  return { root, kopf, treffer, orb, orbMat, P, L,
+    zeige(req) { tasse.visible = req === "tasse"; handy.visible = req === "handy"; akte.visible = req === "akte"; },
+    setze(z, k) { for (const n in P) if (z[n] !== undefined) P[n] += (z[n] - P[n]) * k;
+      huefte.position.y = P.hy; rumpf.rotation.x = P.lean; kopf.rotation.set(P.kx, P.ky, P.kz);
+      lb.ob.rotation.x = P.lob; rb.ob.rotation.x = P.rob; lb.kn.rotation.x = P.lkn; rb.kn.rotation.x = P.rkn;
+      la.sh.rotation.x = P.lsh; ra.sh.rotation.x = P.rsh; la.sh.rotation.z = -.06 + P.lshz; ra.sh.rotation.z = .06 + P.rshz; la.el.rotation.x = P.lel; ra.el.rotation.x = P.rel; } };
+}
+const SITZ = { hy: .52, lob: -PI / 2, rob: -PI / 2, lkn: PI / 2, rkn: PI / 2, lshz: 0, rshz: 0 };
+const STEH = { hy: .95, lob: 0, rob: 0, lkn: 0, rkn: 0, lshz: 0, rshz: 0 };
+function haltung(name, t, L) {
+  const s = (f, a) => Math.sin(t * f) * a;
+  switch (name) {
+    case "gehen": case "rennen": case "tragen": { const r = name === "rennen", ph = t * (r ? 13 : 7.5), o = Math.sin(ph) * (r ? .8 : .5);
+      const z = { hy: .95 + Math.abs(Math.sin(ph)) * (r ? .06 : .025), lean: r ? .2 : .04, kx: .05, ky: 0, kz: 0, lob: o, rob: -o, lkn: Math.max(0, Math.sin(ph + 1.7)) * (r ? 1.3 : .8), rkn: Math.max(0, -Math.sin(ph + 1.7)) * (r ? 1.3 : .8), lsh: -o * .9, rsh: o * .9, lshz: 0, rshz: 0, lel: r ? -1.4 : -.25, rel: r ? -1.4 : -.25 };
+      if (name === "tragen") Object.assign(z, { lsh: -.9, lel: -.6 }); return z; }
+    case "arbeit":
+      if (L.arbeit === "analyse") return Object.assign({}, SITZ, { lean: .2, kx: .15 + s(1.3, .05), ky: s(.9, .3), kz: 0, lsh: -1.0, rsh: -.9 + s(2.2, .1), lel: -.7, rel: -.8 });
+      if (L.arbeit === "pruefen") return Object.assign({}, SITZ, { lean: .05, kx: .4 + s(1.6, .05), ky: -.1, kz: 0, lsh: -1.2, rsh: -.8, lel: -1.2, rel: -.9 + Math.max(0, Math.sin(t * 6)) * -.25 });
+      return Object.assign({}, SITZ, { lean: .14, kx: .2 + s(3, .03), ky: s(.7, .08), kz: 0, lsh: -.95, rsh: -.95, lel: -.75 + s(15, .12), rel: -.75 + Math.cos(t * 15) * .12 });
+    case "melden": return Object.assign({}, SITZ, { lean: -.1, kx: -.25, ky: s(.8, .15), kz: 0, lsh: -.6, rsh: -2.9, rshz: .2 + s(3.2, .15), lel: -.7, rel: -.15 });
+    case "bereit": return Object.assign({}, SITZ, { lean: 0, kx: .1, ky: s(.5, .1), kz: 0, lsh: -.8, rsh: -.8, lel: -.7, rel: -.7 });
+    case "platz": return Object.assign({}, SITZ, { lean: -.18, kx: -.05 + s(.4, .04), ky: s(.35, .4), kz: 0, lsh: -.4, rsh: -.4, lel: -.9, rel: -.9 });
+    case "kaffee": { const sl = Math.max(0, Math.sin(t * .9)) > .85; return Object.assign({}, STEH, { lean: 0, kx: sl ? -.3 : .1, ky: s(.4, .2), kz: 0, lsh: -.35, rsh: sl ? -1.2 : -.45, lel: -.3, rel: sl ? -2.1 : -1.6 }); }
+    case "handy": return Object.assign({}, SITZ, { hy: .47, lean: -.05, kx: .55, ky: 0, kz: 0, lsh: -.55, rsh: -.6, lel: -1.5, rel: -1.55 + s(4, .05) });
+    case "reden-sitz": return Object.assign({}, SITZ, { hy: .5, lean: .06, kx: s(1.7, .08), ky: s(.6, .1), kz: 0, lsh: -.5 + s(2.1, .25), rsh: -.6 + s(1.7, .3), lel: -1.0 + s(2.5, .2), rel: -1.1 });
+    case "zuhoeren": return Object.assign({}, SITZ, { lean: .1, kx: .05 + s(.7, .05), ky: s(.3, .2), kz: 0, lsh: -.7, rsh: -.7, lel: -1.1, rel: -1.1 });
+    case "reden-steh": return Object.assign({}, STEH, { lean: 0, kx: s(1.7, .08), ky: s(.6, .12), kz: 0, lsh: -.3 + s(2.1, .3), rsh: -.5 + s(1.6, .35), lel: -.9 + s(2.4, .25), rel: -1.0 });
+    case "fenster": return Object.assign({}, STEH, { lean: -.03, kx: -.1, ky: s(.25, .35), kz: 0, lsh: .15, rsh: .15, lel: -.3, rel: -.3 });
+    case "uebergeben": return Object.assign({}, STEH, { lean: .1, kx: .25, ky: 0, kz: 0, lsh: -1.2, rsh: -.2, lel: -.4, rel: -.2 });
+    default: return Object.assign({}, STEH, { lean: 0, kx: 0, ky: s(.4, .2), kz: 0, lsh: 0, rsh: 0, lel: -.1, rel: -.1 });
+  }
+}
+
+/* ---------- Mitarbeiter-Zustand ---------- */
+const schilderEl = document.getElementById("schilder");
+const leute = TEAM.map(t => {
+  const platz = PLATZ[t.id], fig = baueFigur(t);
+  const sitzOrt = { id: "platz-" + t.id, pos: platz.seat, face: platz.face, appr: platz.appr, node: platz.node, akt: "platz", sitz: true };
+  fig.root.position.set(platz.seat[0], 0, platz.seat[1]); fig.root.rotation.y = platz.face;
+  const div = document.createElement("div"); div.className = "schild";
+  div.innerHTML = `<div class="k glas"><span class="n">${esc(t.name)}</span><span class="r">${esc(t.rolle)}</span><span class="s"><b></b><span class="st"></span></span></div>`;
+  schilderEl.appendChild(div);
+  return Object.assign({}, t, { fig, div, platz, sitzOrt, ort: sitzOrt, ziel: null, route: [], status: "frei", akt: "platz", bis: performance.now() / 1000 + zufall(1, 6), partner: null, richtung: platz.face,
+    aufgaben: [], aktuell: null, erledigt: [], blase: null, eilig: false, auftrag: null });
+});
+const L_ = id => leute.find(m => m.id === id);
+
+function routeNach(m, ziel) {
+  const von = m.ort, pts = []; if (von) pts.push(von.appr);
+  const start = von ? von.node : naechster(m.fig.root.position);
+  weg(start, ziel.node).forEach(p => pts.push(p)); pts.push(ziel.appr); pts.push(ziel.pos);
+  if (m.ort && m.ort.belegt === m.id) m.ort.belegt = null;
+  m.ort = null; m.ziel = ziel; m.route = pts.map(p => new V3(p[0], 0, p[1])); if (ziel.belegt !== undefined || ORTE.includes(ziel) || MEET_ORTE.includes(ziel)) ziel.belegt = m.id;
+}
+function naechster(pos) { let b = 0, bd = Infinity; Object.keys(NODES).forEach(k => { const n = NODES[k], d = Math.hypot(n[0] - pos.x, n[1] - pos.z); if (d < bd) { bd = d; b = +k; } }); return b; }
+function loesePartner(m) { if (m.partner) { const p = m.partner; m.partner = null; if (p.partner === m) { p.partner = null; p.bis = 0; } } }
+
+const PLAUDER = [
+  ["Noch einen Kaffee?", "Gern, mit Milch."], ["Heute ist viel Post gekommen.", "Ich hab's gesehen – Lena ist schon dran."], ["Wie war dein Wochenende?", "Ruhig. Endlich mal ausgeschlafen."],
+  ["Die Kontoauszüge stimmen diesen Monat.", "Sehr gut, dann ist der Bericht schnell fertig."], ["Hast du die neue Vorlage gesehen?", "Ja, der Briefkopf ist jetzt viel klarer."],
+  ["Der Bescheid läuft bald ab.", "Ich setz mir eine Erinnerung."], ["Die Pflanze braucht Wasser.", "Ich kümmere mich drum."], ["Wer macht heute den Abwasch?", "Ich war gestern dran!"],
+  ["Gibt's was Neues vom Jobcenter?", "Noch nicht, aber die Frist ist notiert."], ["Schöne Aussicht heute.", "Ja, endlich wieder Sonne."]
+];
+const ALLEIN = { kaffee: ["Erst mal Kaffee.", "Ahh, frisch gemahlen."], handy: ["Kurz die Nachrichten lesen.", "Fünf Minuten Pause."], fenster: ["Schönes Wetter da draußen.", "Kurz durchatmen."] };
+
+function neueAktivitaet(m, jetzt) {
+  loesePartner(m);
+  const frei = o => !o.belegt;
+  const andere = leute.filter(x => x !== m && x.status === "frei" && !x.partner && x.ort && !x.route.length && !x.auftrag);
+  const w = [];
+  if (ORTE.some(o => o.akt === "kaffee" && frei(o))) w.push("kaffee", "kaffee");
+  if (ORTE.some(o => o.akt === "handy" && frei(o))) w.push("handy", "handy");
+  if (frei(ORT.fenster)) w.push("fenster");
+  w.push("platz", "platz");
+  const paare = [["sessel1", "sessel2"], ["steh1", "steh2"], ["bistro1", "bistro2"]].filter(([a, b]) => frei(ORT[a]) && frei(ORT[b]));
+  if (andere.length && paare.length) w.push("reden", "reden", "reden");
+  const wahlW = wahl(w);
+  if (wahlW === "reden") {
+    const p = wahl(andere), paar = wahl(paare); m.partner = p; p.partner = m; const dauer = zufall(16, 28);
+    [[m, ORT[paar[0]]], [p, ORT[paar[1]]]].forEach(([x, o]) => { x.akt = o.akt; routeNach(x, o); x.bis = jetzt + dauer; });
+    m.gespraech = { satz: wahl(PLAUDER), start: jetzt + 0, schritt: 0 }; p.gespraech = null; return;
+  }
+  if (wahlW === "platz") { m.akt = "platz"; if (m.ort !== m.sitzOrt) routeNach(m, m.sitzOrt); m.bis = jetzt + zufall(14, 26); return; }
+  const o = wahl(ORTE.filter(x => x.akt === wahlW && frei(x))); m.akt = wahlW; routeNach(m, o); m.bis = jetzt + zufall(18, 34);
+  m.solo = { satz: wahl(ALLEIN[wahlW] || ["…"]), gezeigt: false };
+}
+function zumPlatz(m, eilig) { loesePartner(m); m.akt = "platz"; m.eilig = !!eilig; m.gespraech = null; if (m.ort === m.sitzOrt || m.ziel === m.sitzOrt) return; routeNach(m, m.sitzOrt); }
+
+function poseFuer(m) {
+  if (m.route.length) return m.auftrag && m.auftrag.traegt ? "tragen" : m.eilig ? "rennen" : "gehen";
+  if (m.auftrag && m.auftrag.phase === "uebergabe") return "uebergeben";
+  if (m.ort === m.sitzOrt) { if (m.status === "wartet") return "melden"; if (m.status === "arbeitet") return "arbeit"; if (m.status === "bereit") return "bereit"; return "platz"; }
+  if (!m.ort) return "stehen";
+  if (m.akt === "meeting") return m.id === "leitung" ? "reden-sitz" : "zuhoeren";
+  return { kaffee: "kaffee", handy: "handy", sessel: "reden-sitz", bistro: "reden-sitz", steh: "reden-steh", fenster: "fenster", post: "uebergeben" }[m.akt] || "stehen";
+}
+function statusText(m) {
+  if (m.akt === "meeting") return m.id === "leitung" ? "leitet die Morgenbesprechung" : "in der Morgenbesprechung";
+  if (m.auftrag) return m.auftrag.text;
+  if (m.status === "wartet") return "hat eine Frage an dich";
+  if (m.status !== "frei") return (m.aktuell ? m.aktuell.text : STATUS[m.status].text) + (m.route.length ? " · eilt zum Platz" : "");
+  if (m.route.length) return m.akt === "platz" ? "geht zum Platz" : "unterwegs";
+  return { kaffee: "macht Kaffee", handy: "Pause auf dem Sofa", sessel: "plaudert", bistro: "plaudert", steh: "plaudert", fenster: "schaut aus dem Fenster", platz: "am Platz" }[m.akt] || "Pause";
+}
+
+/* ---------- Sprechblasen ---------- */
+const blasen = [];
+function sag(m, text, dauer, lang) {
+  if (m.blase) m.blase.el.remove();
+  const el = document.createElement("div"); el.className = "blase" + (lang ? " lang" : ""); el.textContent = text; document.body.appendChild(el);
+  m.blase = { el, bis: performance.now() / 1000 + (dauer || 4) }; blasen.push(m);
+}
+
+/* ---------- Informationsfluss: Lichtlinie mit Partikeln ---------- */
+const fluesse = [];
+function fluss(von, nach, farbe) {
+  const a = new V3(von.platz.seat[0], 1.15, von.platz.seat[1]), b = new V3(nach.platz.seat[0], 1.15, nach.platz.seat[1]);
+  const mitte = a.clone().add(b).multiplyScalar(.5); mitte.y = 2.6 + a.distanceTo(b) * .12;
+  const kurve = new THREE.QuadraticBezierCurve3(a, mitte, b);
+  /* Leuchtband: heller Kern + zwei weiche Hüllen, additiv gemischt → Glow */
+  const glowFarbe = C(DUNKEL ? "#A9B8CA" : "#4F6785");
+  const linie = new THREE.Group();
+  [[.012, .95], [.045, .28], [.11, .1]].forEach(([r, op]) => linie.add(new THREE.Mesh(new THREE.TubeGeometry(kurve, 64, r, 8, false),
+    new THREE.MeshBasicMaterial({ color: glowFarbe, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false }))));
+  if (!DUNKEL) linie.children.forEach(m => { m.material.blending = THREE.NormalBlending; });
+  scene.add(linie);
+  const punkte = []; for (let i = 0; i < 9; i++) { const p = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW_TEX, color: glowFarbe, transparent: true, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending, depthWrite: false }));
+    p.scale.setScalar(.42); scene.add(p); punkte.push(p); }
+  fluesse.push({ kurve, linie, punkte, t0: performance.now() / 1000, dauer: 5 });
+}
+const GLOW_TEX = leinwand(128, 128, (g, w, h) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.25, "rgba(255,255,255,.85)"); r.addColorStop(.6, "rgba(255,255,255,.25)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, w, h); });
+
+/* ---------- Ereignisse ---------- */
+const logListe = document.getElementById("logListe"), LOG = [];
+function log(m, text) {
+  LOG.unshift({ m, text, zeit: new Date() }); LOG.length = Math.min(LOG.length, 14);
+  logListe.innerHTML = LOG.map(e => `<li><i style="background:${e.m ? e.m.kleid : "#A9B8CA"}"></i><div>${esc(e.text)}<small>${e.m ? esc(e.m.name) + " · " : ""}${e.zeit.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}</small></div></li>`).join("");
+}
+
+/* ---------- Aufgaben ---------- */
+// Aufgabe: {text, dauer, weiter: [{an, text, traegt}], frage}
+function gibAufgabe(id, a) {
+  const m = L_(id); if (!m) return;
+  m.aufgaben.push(a);
+  if (meeting) return;                       // während der Morgenbesprechung wird nur gesammelt
+  if (m.status === "frei" || m.status === "bereit") starteNaechste(m);
+}
+function starteNaechste(m) {
+  const a = m.aufgaben.shift(); if (!a) { m.status = "bereit"; m.aktuell = null; m.bis = performance.now() / 1000 + zufall(6, 12); return; }
+  m.aktuell = a; m.status = "arbeitet"; m.fertigUm = null; zumPlatz(m, true); m.akt = "platz";
+  ton("start");
+}
+function aufgabeFertig(m) {
+  const a = m.aktuell; if (!a) return;
+  m.erledigt.unshift({ text: a.text, zeit: new Date() }); m.erledigt.length = Math.min(m.erledigt.length, 6);
+  log(m, a.fertig || ("Erledigt: " + a.text));
+  m.platz.ablage.forEach((x, i) => (x.visible = i < Math.min(4, m.erledigt.length)));
+  if (a.frage) { m.status = "wartet"; m.aktuell = { text: "wartet auf deine Antwort" }; zeigeFrage(m, a.frage); notify("Frage von " + m.name, a.frage.text); ton("frage"); return; }
+  (a.weiter || []).forEach((w, i) => setTimeout(() => {
+    const ziel = L_(w.an); if (!ziel) return;
+    fluss(m, ziel, m.kleid);
+    if (w.traegt) bringe(m, ziel, w);
+    else gibAufgabe(w.an, { text: w.text, dauer: w.dauer || zufall(5, 9), weiter: w.weiter, fertig: w.fertig });
+  }, i * 900));
+  if (!(a.weiter || []).some(w => w.traegt)) starteNaechste(m);
+}
+/* Akte persönlich zum Kollegen bringen */
+function bringe(m, ziel, w) {
+  if (meeting) return gibAufgabe(w.an, { text: w.text, dauer: w.dauer || zufall(5, 9), fertig: w.fertig, weiter: w.weiter });
+  const zielOrt = { id: "bei-" + ziel.id, pos: [ziel.platz.appr[0], ziel.platz.appr[1]], face: Math.atan2(ziel.platz.seat[0] - ziel.platz.appr[0], ziel.platz.seat[1] - ziel.platz.appr[1]), appr: ziel.platz.appr, node: ziel.platz.node, akt: "post" };
+  m.auftrag = { text: "bringt die Akte zu " + ziel.name.split(" ")[0], traegt: true, phase: "hin", ziel, w };
+  m.status = "arbeitet"; m.eilig = false; routeNach(m, zielOrt);
+}
+
+/* ---------- Fragen des Sekretariats ---------- */
+const fragenEl = document.getElementById("fragen"), FRAGEN = [];
+function zeigeFrage(m, f) { FRAGEN.push({ m, f }); malFragen(); }
+function malFragen() {
+  fragenEl.classList.toggle("an", FRAGEN.length > 0);
+  fragenEl.innerHTML = `<h2 style="margin:0 0 6px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Rückfragen an dich (${FRAGEN.length})</h2>` +
+    FRAGEN.map((q, i) => `<div class="frage"><b>${esc(q.m.name)}:</b> ${esc(q.f.text)}<div class="opts">${q.f.optionen.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${esc(o)}</button>`).join("")}</div></div>`).join("");
+  if (IM_PROGRAMM) anProgramm({ typ: "buero-fragen", anzahl: FRAGEN.length });
+}
+fragenEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-q]"); if (!b) return;
+  const q = FRAGEN.splice(+b.dataset.q, 1)[0]; malFragen();
+  const antwort = q.f.optionen[+b.dataset.o];
+  log(q.m, "Antwort erhalten: " + antwort); sag(q.m, "Danke, ich mache weiter!", 3);
+  if (IM_PROGRAMM && q.f.id) anProgramm({ typ: "buero-antwort", id: q.f.id, antwort });
+  q.m.status = "arbeitet"; q.m.aktuell = { text: "arbeitet nach deiner Antwort weiter" };
+  setTimeout(() => { if (FRAGEN.some(x => x.m === q.m)) { q.m.status = "wartet"; q.m.aktuell = { text: "wartet auf deine Antwort" }; return; }
+    const w = q.f.danach || []; q.m.aktuell = { text: "verteilt die Aufgaben", weiter: w, dauer: 0, fertig: "Rückfrage geklärt: " + antwort }; aufgabeFertig(q.m); }, 2500);
+});
+function notify(titel, text) { try { if ("Notification" in window && Notification.permission === "granted" && document.hidden) new Notification(window.ohT ? window.ohT(titel) : titel, { body: window.ohT ? window.ohT(text) : text }); } catch (e) {} }
+
+/* ---------- Szenarien (Demo – im Programm kommen echte Ereignisse) ---------- */
+const DEMO = [
+  () => ({ an: "sekretariat", text: "liest „Einladung Jobcenter“ mit Gemini", post: true, fertig: "Brief gelesen: Termin + Ansprechpartnerin gefunden",
+    weiter: [{ an: "termine", text: "trägt den Termin am 02.12. ein", fertig: "Termin 02.12., 09:30 eingetragen" },
+      { an: "leitung", text: "ergänzt Frau Weber im Adressbuch", fertig: "Frau Weber ins Adressbuch übernommen" },
+      { an: "archiv", traegt: true, text: "legt den Brief ab", fertig: "Brief im Archiv abgelegt" }] }),
+  () => ({ an: "sekretariat", text: "prüft einen Kontoauszug (CSV)", post: true, fertig: "Kontoauszug geprüft – 42 Buchungen",
+    weiter: [{ an: "finanzen", text: "ordnet 42 Buchungen zu", fertig: "Buchungen zugeordnet, 2 auffällig", weiter: [{ an: "statistik", text: "aktualisiert die Monatsstatistik", fertig: "Monatsstatistik aktualisiert" }] }] }),
+  () => ({ an: "sekretariat", text: "liest einen Bescheid der Pflegekasse", post: true, fertig: "Bescheid gelesen – eine Stelle ist unklar",
+    frage: { text: "Der Bescheid nennt keinen Namen – gehört er zu Vater oder Mutter?", optionen: ["Vater", "Mutter"],
+      danach: [{ an: "fristen", text: "notiert die Widerspruchsfrist", fertig: "Widerspruchsfrist bis 04.12. notiert" }, { an: "schreiben", text: "bereitet einen Widerspruch vor", fertig: "Entwurf Widerspruch liegt bereit" }] } }),
+  () => ({ an: "fristen", text: "prüft die Fristen der Woche", fertig: "3 Fristen diese Woche, 1 überfällig", weiter: [{ an: "termine", text: "plant Erinnerungen ein", fertig: "Erinnerungen für die Woche gesetzt" }] }),
+  () => ({ an: "statistik", text: "prüft Verträge und Kündigungsfristen", fertig: "Hausratversicherung: kündbar bis 10.12.", weiter: [{ an: "schreiben", text: "schreibt die Kündigung vor", fertig: "Kündigung als Entwurf gespeichert" }] }),
+  () => ({ an: "archiv", text: "sortiert neue Scans", fertig: "4 Scans als Dokumente abgelegt" })
+];
+function demoSchritt() {
+  const s = wahl(DEMO)();
+  if (s.post) { kastenUmschlag.visible = true; log(null, "Neuer Brief im Briefkasten"); holePost(s); }
+  else gibAufgabe(s.an, s);
+}
+/* Sekretariat holt die Post am Briefkasten */
+const postStapel = [];
+function holePost(aufgabe) {
+  const m = L_("sekretariat"); kastenUmschlag.visible = true;
+  if (meeting || m.auftrag || m.status === "wartet" || m.status === "arbeitet") { postStapel.push(aufgabe); return; }
+  m.auftrag = { text: "holt die Post", phase: "hin", post: aufgabe }; m.status = "arbeitet"; m.eilig = true; routeNach(m, BRIEFKASTEN_ORT);
+}
+
+/* ---------- Morgenbesprechung ---------- */
+let meeting = null;
+function morgenbesprechung(zusammenfassung) {
+  const jetzt = performance.now() / 1000;
+  meeting = { bis: jetzt + 26, start: jetzt, text: zusammenfassung };
+  leute.forEach((m, i) => { loesePartner(m); if (m.auftrag && m.auftrag.post) postStapel.unshift(m.auftrag.post); if (m.auftrag && m.auftrag.w) m.aufgaben.unshift(Object.assign({}, m.auftrag.w));
+    if (m.aktuell && m.status === "arbeitet") m.aufgaben.unshift(m.aktuell);
+    m.auftrag = null; m.aktuell = null; m.status = "frei"; m.fertigUm = null; m.gespraech = null; m.akt = "meeting"; m.eilig = false; routeNach(m, MEET_ORTE[i]); });
+  log(L_("leitung"), "Morgenbesprechung beginnt");
+}
+function endeMeeting() { meeting = null; leute.forEach(m => { m.akt = "platz"; m.ort && (m.ort.belegt = null); routeNach(m, m.sitzOrt); m.bis = performance.now() / 1000 + zufall(4, 10); if (m.aufgaben.length) starteNaechste(m); });
+  if (postStapel.length) setTimeout(() => holePost(postStapel.shift()), 3000); }
+
+/* ---------- Kamera: frei drehen + langsames Kreisen ---------- */
+const ZIEL = new V3(.4, 0, .3); let az = -.38, pol = .92, rad = 25, zielRad = 25; let ruheSeit = 0, fokus = null;
+const dom = renderer.domElement; let zug = null;
+dom.addEventListener("pointerdown", e => { zug = { x: e.clientX, y: e.clientY, az, pol, bewegt: false }; dom.setPointerCapture(e.pointerId); });
+dom.addEventListener("pointermove", e => {
+  if (zug) { const dx = e.clientX - zug.x, dy = e.clientY - zug.y; if (Math.hypot(dx, dy) > 4) zug.bewegt = true; az = zug.az - dx * .006; pol = Math.min(1.35, Math.max(.35, zug.pol - dy * .005)); ruheSeit = performance.now() / 1000; }
+  hover(e);
+});
+dom.addEventListener("pointerup", e => { if (zug && !zug.bewegt) klick(e); zug = null; });
+dom.addEventListener("wheel", e => { e.preventDefault(); zielRad = Math.min(48, Math.max(7, zielRad * (1 + Math.sign(e.deltaY) * .1))); ruheSeit = performance.now() / 1000; }, { passive: false });
+const ray = new THREE.Raycaster(), maus = new THREE.Vector2();
+function strahl(e) { const r = dom.getBoundingClientRect(); maus.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1); ray.setFromCamera(maus, cam); return ray.intersectObjects(leute.map(m => m.fig.treffer), false)[0]; }
+function hover(e) { dom.style.cursor = strahl(e) ? "pointer" : zug ? "grabbing" : "grab"; }
+function klick(e) { const t = strahl(e); if (t) { fokus = leute.find(m => m.fig.treffer === t.object); zeigePanel(fokus); } else { fokus = null; panel.classList.remove("an"); } }
+
+/* ---------- Infopanel ---------- */
+const panel = document.getElementById("panel");
+function zeigePanel(m) {
+  panel.classList.add("an");
+  panel.innerHTML = `<div class="kopf"><div class="av" style="background:${m.kleid}">${svgIcon(m.id)}</div><div style="flex:1"><h3>${esc(m.name)}</h3><div class="sub">${esc(m.rolle)} · ${esc(m.bereiche)}</div></div>
+    <button class="btn" id="pzu" title="schließen">✕</button></div>
+    <p style="margin:10px 0 0"><b>Jetzt:</b> ${esc(statusText(m))}${m.aufgaben.length ? ` · noch ${m.aufgaben.length} Aufgabe(n)` : ""}</p>
+    ${m.erledigt.length ? `<ul>${m.erledigt.map(x => `<li>${esc(x.text)} <span style="color:var(--muted)">· ${x.zeit.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}</span></li>`).join("")}</ul>` : '<p class="sub">Heute noch nichts erledigt.</p>'}
+    <div class="acts"><button class="btn" id="poffen">Bereich öffnen</button><button class="btn" id="pfolgen">Kamera folgen</button></div>`;
+  panel.querySelector("#pzu").onclick = () => { fokus = null; panel.classList.remove("an"); };
+  panel.querySelector("#poffen").onclick = () => { if (IM_PROGRAMM) anProgramm({ typ: "buero-oeffnen", route: m.route }); else alert("Öffnet in Office Home: " + m.route); };
+  panel.querySelector("#pfolgen").onclick = () => { fokus = m; };
+}
+
+/* ---------- Ton (leise, mit WebAudio erzeugt) ---------- */
+let audio = null;
+function ton(art) {
+  if (!EINST.ton) return; try { audio = audio || new AudioContext(); } catch (e) { return; }
+  if (audio.state === "suspended") return;
+  const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime;
+  const f = { start: 660, frage: 880, klick: 2200, post: 520 }[art] || 600;
+  o.type = art === "klick" ? "square" : "sine"; o.frequency.setValueAtTime(f, t); if (art === "frage") o.frequency.setValueAtTime(1100, t + .12);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(art === "klick" ? .008 : .035, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + (art === "klick" ? .03 : .35));
+  o.connect(g).connect(audio.destination); o.start(t); o.stop(t + .4);
+}
+addEventListener("pointerdown", () => { try { audio = audio || new AudioContext(); audio.resume(); } catch (e) {} }, { once: true });
+const tonBtn = document.getElementById("tonBtn");
+const tonIcon = () => (tonBtn.innerHTML = EINST.ton ? '<svg class="i" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5V5.5L7.5 9.5Z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>' : '<svg class="i" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5V5.5L7.5 9.5Z"/><path d="M16 9.5l5 5"/><path d="M21 9.5l-5 5"/></svg>');
+tonIcon(); tonBtn.onclick = () => { EINST.ton = !EINST.ton; speichereEinst(); tonIcon(); syncMenu(); };
+
+/* ---------- Eigenes Fenster ---------- */
+const fensterBtn = document.getElementById("fensterBtn");
+if (FENSTER) { fensterBtn.style.display = ""; document.getElementById("fensterTxt").textContent = "Zurück ins Programm"; fensterBtn.title = "Fenster schließen – das Büro erscheint wieder in Office Home"; document.title = "Büro – Office Home"; }
+fensterBtn.onclick = () => anProgramm({ typ: FENSTER ? "buero-zurueck" : "buero-fenster" });
+if (IM_PROGRAMM) setTimeout(() => anProgramm({ typ: "buero-hallo" }), 300);
+
+/* ---------- Einstellungen-Menü ---------- */
+const menu = document.getElementById("menu");
+document.getElementById("einstBtn").onclick = () => menu.classList.toggle("an");
+function malSchilder() { leute.forEach(m => { const n = m.div.querySelector(".n"), r = m.div.querySelector(".r");
+  n.textContent = EINST.schild === "rolle" ? m.rolle : m.name; r.textContent = EINST.schild === "beides" ? m.rolle : EINST.schild === "rolle" ? m.name.split(" ")[0] : ""; r.style.display = r.textContent && EINST.schild !== "name" ? "" : "none"; }); }
+malSchilder();
+function syncMenu() { document.getElementById("optSchild").value = EINST.schild; document.getElementById("optHinter").value = EINST.hinter; document.getElementById("optTon").checked = EINST.ton; document.getElementById("optQual").value = EINST.qual; document.getElementById("optDreh").checked = EINST.dreh; }
+syncMenu();
+menu.addEventListener("change", () => {
+  const altQ = EINST.qual; EINST.hinter = document.getElementById("optHinter").value; EINST.ton = document.getElementById("optTon").checked; EINST.qual = document.getElementById("optQual").value; EINST.dreh = document.getElementById("optDreh").checked; EINST.schild = document.getElementById("optSchild").value;
+  speichereEinst(); tonIcon(); malSchilder(); if (altQ !== EINST.qual) location.reload();
+});
+
+/* ---------- Dateien auf den Briefkasten ziehen ---------- */
+const drop = document.getElementById("drop");
+addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("an"); });
+addEventListener("dragleave", e => { if (e.target === drop) drop.classList.remove("an"); });
+addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("an");
+  const dateien = [...(e.dataTransfer.files || [])]; if (!dateien.length) return;
+  if (FENSTER) Promise.all(dateien.map(async d => ({ name: d.name, type: d.type, data: await d.arrayBuffer() }))).then(liste => anProgramm({ typ: "buero-dateien", dateien: liste }));
+  else if (IM_PROGRAMM) anProgramm({ typ: "buero-dateien", dateien });
+  dateien.forEach(d => { log(null, "Neuer Brief im Briefkasten: " + d.name); holePost({ an: "sekretariat", text: "liest „" + d.name + "“ mit Gemini", fertig: "„" + d.name + "“ gelesen und verteilt", weiter: [{ an: "archiv", traegt: true, text: "legt den Brief ab", fertig: "Brief im Archiv abgelegt" }] }); });
+});
+
+/* ---------- Daten aus Office Home (alle 5 Sekunden) ---------- */
+let letzterStand = 0;
+addEventListener("message", e => empfang(e.data || {}));
+if (BRUECKE) BRUECKE.on(d => empfang(d || {}));
+function empfang(d) {
+  if (d.typ === "buero-ereignis" && d.aufgabe) { if (d.aufgabe.post) holePost(d.aufgabe); else gibAufgabe(d.aufgabe.an, d.aufgabe); }
+  if (d.typ === "buero-stand") { letzterStand = Date.now(); if (typeof d.tresorOffen === "boolean") tresorOffen = d.tresorOffen; if (d.begruessung && !begruesst) begruessen(d.begruessung); if (d.morgen && !meeting) morgenbesprechung(d.morgen); }
+  if (d.typ === "buero-sichtbar") sichtbar = !!d.sichtbar;
+  if (d.typ === "buero-frage" && d.frage) {
+    const m = L_("sekretariat"); if (m.aktuell && m.status === "arbeitet") m.aufgaben.unshift(m.aktuell);
+    m.auftrag = null; m.status = "wartet"; m.aktuell = { text: "wartet auf deine Antwort" }; m.fertigUm = null; zumPlatz(m, true);
+    zeigeFrage(m, d.frage); log(m, "Rückfrage: " + d.frage.text); notify("Frage von " + m.name, d.frage.text); ton("frage");
+  }
+  if (d.typ === "buero-stand" && d.fensterMoeglich && !FENSTER) fensterBtn.style.display = "";
+}
+let sichtbar = true, begruesst = false;
+function begruessen(text) { begruesst = true; const m = L_("sekretariat"); sag(m, text, 9, true); log(m, "Begrüßung: " + text); }
+setInterval(() => {
+  const s = document.getElementById("stand");
+  s.innerHTML = `<i style="background:${IM_PROGRAMM && Date.now() - letzterStand > 12000 ? "#7A5C1E" : "#4F6785"}"></i>Live · ${new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · ${leute.filter(m => m.status === "arbeitet").length} arbeiten`;
+  if (IM_PROGRAMM) anProgramm({ typ: "buero-tick" });
+}, 5000);
+if (!IM_PROGRAMM) {
+  setTimeout(() => begruessen("Guten Morgen! 2 neue Briefe im Kasten, 1 Frist heute und 3 Termine diese Woche."), 1500);
+  if (Q.get("meeting") === "1") setTimeout(() => morgenbesprechung("Heute: Jobcenter-Termin vorbereiten, Widerspruch Pflegekasse bis Freitag, Kontoauszug prüfen."), 2500);
+  setTimeout(demoSchritt, Q.get("schnell") ? 1500 : 9000); setInterval(demoSchritt, Q.get("schnell") ? 9000 : 26000);
+}
+
+/* ---------- Größe ---------- */
+function groesse() { const w = el.clientWidth, h = el.clientHeight; renderer.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+new ResizeObserver(groesse).observe(el); groesse();
+
+/* ---------- Schleife ---------- */
+const tmp = new V3(), v = new V3(), camBlick = new V3(), zielBlick = new V3();
+let vorher = performance.now(), T = 0, pausiert = false, simVorher = performance.now();
+document.addEventListener("visibilitychange", () => { vorher = performance.now(); });
+function verhalten(sek, dt) {
+  leute.forEach(m => {
+    /* Aufgaben-Fortschritt */
+    if (m.status === "arbeitet" && m.aktuell && m.ort === m.sitzOrt && !m.auftrag) {
+      if (!m.fertigUm) { m.fertigUm = sek + (m.aktuell.dauer || zufall(6, 10)); }
+      else if (sek > m.fertigUm) { m.fertigUm = null; aufgabeFertig(m); }
+      if (Math.random() < dt * 6) ton("klick");
+    }
+    if (m.status === "frei" && !m.route.length && !m.auftrag && !meeting && sek > m.bis) neueAktivitaet(m, sek);
+    if (m.status === "bereit" && sek > m.bis && !m.aufgaben.length) { m.status = "frei"; m.bis = sek + zufall(2, 6); }
+    /* Gehen */
+    const r = m.fig.root;
+    if (m.route.length) {
+      const z = m.route[0]; tmp.set(z.x - r.position.x, 0, z.z - r.position.z); const d = tmp.length();
+      if (d < (m.route.length > 2 ? .45 : .06)) { m.route.shift(); if (!m.route.length) { m.ort = m.ziel; m.ziel = null; angekommen(m, sek); } }
+      else {
+        const soll = m.eilig ? 2.5 : 1.2; m.tempo = (m.tempo || 0) + (soll - (m.tempo || 0)) * Math.min(1, dt * 3);   // sanft anlaufen
+        const rest = m.route.reduce((s, p, i) => s + (i ? p.distanceTo(m.route[i - 1]) : d), 0);
+        const v = Math.max(.35, Math.min(m.tempo, rest * 1.6));                                                         // sanft abbremsen
+        r.position.addScaledVector(tmp.normalize(), Math.min(d, v * dt)); m.richtung = Math.atan2(tmp.x, tmp.z);
+      }
+    } else { m.tempo = 0; if (m.ort) m.richtung = m.ort.face; }
+    /* Gespräche: abwechselnd Sprechblasen */
+    if (m.gespraech && m.partner && m.ort && m.partner.ort && !m.route.length && !m.partner.route.length) {
+      const g = m.gespraech; if (!g.naechst) g.naechst = sek + 1;
+      if (sek > g.naechst && g.schritt < 2) { sag(g.schritt === 0 ? m : m.partner, g.satz[g.schritt], 4); g.schritt++; g.naechst = sek + 4.5; }
+    }
+    if (m.solo && m.ort && !m.route.length && !m.solo.gezeigt && Math.random() < dt * .4) { sag(m, m.solo.satz, 3.5); m.solo.gezeigt = true; }
+  });
+  { const s = L_("sekretariat"); if (postStapel.length && !meeting && !s.auftrag && (s.status === "frei" || s.status === "bereit") && !s.aufgaben.length) holePost(postStapel.shift());
+    kastenUmschlag.visible = postStapel.length > 0 || !!(s.auftrag && s.auftrag.post); }
+  if (meeting) {
+    const alle = leute.every(m => m.ort && m.akt === "meeting" && !m.route.length);
+    if ((alle || sek - meeting.start > 40) && !meeting.gesagt) { meeting.gesagt = true; sag(L_("leitung"), meeting.text, 12, true); meeting.bis = sek + 14; }
+    if (meeting.gesagt && sek > meeting.bis) endeMeeting();
+  }
+}
+function angekommen(m, sek) {
+  const a = m.auftrag; if (!a) return;
+  if (a.post) { kastenUmschlag.visible = false; ton("post"); a.text = "bringt die Post zum Platz"; a.traegt = true; const post = a.post; m.auftrag = null; m.status = "frei";
+    m.aufgaben.unshift(post); starteNaechste(m); m.akteDabei = true; return; }
+  if (a.phase === "hin") { a.phase = "uebergabe"; a.bis = sek + 1.6; a.text = "übergibt die Akte"; sag(m, "Hier, für dich!", 2.5);
+    setTimeout(() => { const w = a.w; m.auftrag = null; gibAufgabe(w.an, { text: w.text, dauer: w.dauer || zufall(5, 9), fertig: w.fertig, weiter: w.weiter }); zumPlatz(m, false); if (m.aufgaben.length) starteNaechste(m); else { m.status = "bereit"; m.aktuell = null; m.bis = sek + 8; } }, 1600); }
+}
+function schleife(jetzt) {
+  requestAnimationFrame(schleife);
+  const dt = Math.min(.05, Math.max(0, (jetzt - vorher) / 1000)); vorher = jetzt; T += dt; const sek = jetzt / 1000;
+  /* Bewegung im gleichen Takt wie das Bild → weich (ohne Ruckeln zwischen zwei Rechenschritten) */
+  if (jetzt - simVorher < 250) { verhalten(sek, dt); simVorher = jetzt; }
+  const anhalten = (document.hidden || !sichtbar) && EINST.hinter === "pause";
+  if (anhalten) return;
+  leute.forEach(m => {
+    const r = m.fig.root; let dr = m.richtung - r.rotation.y; while (dr > PI) dr -= 2 * PI; while (dr < -PI) dr += 2 * PI; r.rotation.y += dr * Math.min(1, dt * 6);
+    const pose = poseFuer(m);
+    m.fig.zeige(pose === "kaffee" ? "tasse" : pose === "handy" ? "handy" : (pose === "tragen" || pose === "uebergeben" || (m.akteDabei && pose === "rennen")) ? "akte" : null);
+    if (m.ort === m.sitzOrt) m.akteDabei = false;
+    m.fig.setze(haltung(pose, T + m.id.length * 1.7, m.fig.L), Math.min(1, dt * (pose === "gehen" || pose === "rennen" || pose === "tragen" ? 12 : 5)));
+    const sitzt = m.ort === m.sitzOrt; m.platz.stuhl.position.z += ((sitzt ? 0 : -.3) - m.platz.stuhl.position.z) * Math.min(1, dt * 3);
+    const st = m.status === "arbeitet" && m.route.length && !m.auftrag ? "rennt" : m.status, farbe = C(STATUS[st].farbe);
+    m.platz.bildschirme.forEach(b => { b.color.copy(sitzt || m.status !== "frei" ? farbe : C(DUNKEL ? "#16223A" : "#D8D3C9")); if (m.status === "arbeitet" && sitzt) b.color.multiplyScalar(.85 + Math.sin(T * 8) * .15); });
+    m.fig.orbMat.color.copy(farbe); m.fig.orb.rotation.y += dt * (m.status === "arbeitet" ? 3 : .8); m.fig.orb.position.y = 2.05 + Math.sin(T * 2 + m.id.length) * .03 + (pose.startsWith("arbeit") || ["platz", "melden", "bereit", "handy", "reden-sitz", "zuhoeren"].includes(pose) ? -.43 : 0);
+    m.fig.orbMat.opacity = m.status === "wartet" ? .4 + .6 * Math.abs(Math.sin(T * 3)) : m.status === "frei" ? .45 : 1;
+  });
+  /* Tresortür */
+  tresorTuerAchse.rotation.y += ((tresorOffen ? -1.6 : 0) - tresorTuerAchse.rotation.y) * Math.min(1, dt * 2);
+  /* Briefumschlag schwebt */
+  if (kastenUmschlag.visible) { kastenUmschlag.position.y = 1.28 + Math.sin(T * 3) * .04; kastenUmschlag.rotation.y += dt; }
+  /* Informationsflüsse */
+  for (let i = fluesse.length - 1; i >= 0; i--) {
+    const f = fluesse[i], t = sek - f.t0, k = t / f.dauer;
+    const aus = Math.min(1, (1 - k) * 3, t * 3), puls = .85 + .15 * Math.sin(t * 6);
+    f.punkte.forEach((p, j) => { const u = ((t * .5) + j / f.punkte.length) % 1; f.kurve.getPoint(u, p.position); p.scale.setScalar((.22 + .3 * Math.sin(u * PI)) * puls); p.material.opacity = aus; });
+    f.linie.children.forEach((m, j) => { m.material.opacity = [.95, .28, .1][j] * aus * puls; });
+    if (k >= 1) { scene.remove(f.linie); f.linie.children.forEach(m => m.geometry.dispose()); f.punkte.forEach(p => scene.remove(p)); fluesse.splice(i, 1); }
+  }
+  /* Kamera */
+  if (EINST.dreh && !zug && !fokus && sek - ruheSeit > 6) az += dt * .025;
+  rad += (zielRad - rad) * Math.min(1, dt * 4);
+  if (fokus) { zielBlick.copy(fokus.fig.root.position).setY(.9); } else zielBlick.copy(ZIEL);
+  camBlick.lerp(zielBlick, Math.min(1, dt * 2.5));
+  const rr = fokus ? Math.min(rad, 9) : rad;
+  cam.position.set(camBlick.x + rr * Math.sin(pol) * Math.sin(az), camBlick.y + rr * Math.cos(pol), camBlick.z + rr * Math.sin(pol) * Math.cos(az)); cam.lookAt(camBlick);
+  /* Wände zwischen Kamera und Raum ausblenden */
+  const blick = tmp.set(cam.position.x, 0, cam.position.z).normalize();
+  waende.forEach(w => { const ziel = blick.dot(w.n) < -.25 ? .1 : 1; w.m.opacity += (ziel - w.m.opacity) * Math.min(1, dt * 4); w.o.castShadow = w.m.opacity > .5; w.m.depthWrite = w.m.opacity > .5; });
+  renderer.render(scene, cam);
+  /* Namensschilder und Sprechblasen */
+  const W = el.clientWidth, H = el.clientHeight, fern = rad > 20 && !fokus;
+  leute.forEach(m => {
+    m.fig.kopf.getWorldPosition(v); v.y += .55; v.project(cam);
+    const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H;
+    m.div.className = "schild" + (fern ? " fern" : ""); m.div.style.opacity = v.z > 1 ? 0 : fokus && fokus !== m ? .35 : 1;
+    m.div.querySelector("b").style.background = STATUS[m.status].farbe; const txt = statusText(m), stel = m.div.querySelector(".st"); if (stel.textContent !== txt) stel.textContent = txt;
+    m.div.style.transform = `translate(${Math.round(sx - m.div.offsetWidth / 2)}px,${Math.round(sy - m.div.offsetHeight)}px)`;
+    if (m.blase) { if (sek > m.blase.bis) { m.blase.el.remove(); m.blase = null; } else { m.fig.kopf.getWorldPosition(v); v.y += .25; v.x += .25; v.project(cam);
+      m.blase.el.style.transform = `translate(${Math.round((v.x + 1) / 2 * W + 10)}px,${Math.round((1 - v.y) / 2 * H - m.div.offsetHeight - m.blase.el.offsetHeight - 4)}px)`; m.blase.el.style.opacity = v.z > 1 ? 0 : 1; } }
+  });
+}
+requestAnimationFrame(schleife);
+/* Die Mitarbeiter leben unabhängig vom Zeichnen weiter (auch wenn das Büro nicht sichtbar ist) */
+/* Nur wenn kein Bild gezeichnet wird (Büro versteckt), rechnet ein Zeitgeber weiter. */
+setInterval(() => { const jetzt = performance.now(); if (jetzt - simVorher < 300) return; let rest = Math.min(2, (jetzt - simVorher) / 1000); simVorher = jetzt;
+  while (rest > 0) { const d = Math.min(.05, rest); rest -= d; verhalten(jetzt / 1000, d); } }, 40);
+window.BUERO = { leute, demoSchritt, morgenbesprechung, gibAufgabe, holePost, setzeKamera: (a, p, r, x, z) => { az = a; pol = p; zielRad = rad = r; if (x !== undefined) { ZIEL.set(x, 0, z); camBlick.copy(ZIEL); } ruheSeit = performance.now() / 1000 + 9999; }, fluss: (a, b) => fluss(L_(a), L_(b), L_(a).kleid), sag: (id, t) => sag(L_(id), t, 30, true) };
+})();
+</script>
+</body>
+</html>

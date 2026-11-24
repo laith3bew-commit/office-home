@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Office Home</title>
-<script>try{document.documentElement.dataset.theme=localStorage.getItem('oh-theme')||'system'}catch(e){document.documentElement.dataset.theme='system'}</script>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('oh-theme')||'system'}catch(e){document.documentElement.dataset.theme='system'}try{if(localStorage.getItem('oh-lang')==='ar'){document.documentElement.dir='rtl'}}catch(e){}</script>
 <style>
 @font-face{font-family:'Manrope';src:url('fonts/manrope-latin-300-normal.woff2') format('woff2');font-weight:300;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Manrope';src:url('fonts/manrope-latin-ext-300-normal.woff2') format('woff2');font-weight:300;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
@@ -184,6 +184,30 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 @font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-Italic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
 @font-face{font-family:'Courier Prime';src:url('fonts/CourierPrime-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic;font-display:swap}
+@font-face{font-family:'IBM Plex Sans Arabic';src:url('fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2') format('woff2');font-weight:400;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'IBM Plex Sans Arabic';src:url('fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2') format('woff2');font-weight:500;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'IBM Plex Sans Arabic';src:url('fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2') format('woff2');font-weight:600;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:'IBM Plex Sans Arabic';src:url('fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2') format('woff2');font-weight:700;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+/* ---------- Arabisch (rechts nach links) ---------- */
+html[dir=rtl] body{font-family:'Manrope','IBM Plex Sans Arabic',"Segoe UI",system-ui,sans-serif}
+html[dir=rtl] h1,html[dir=rtl] .logo,html[dir=rtl] .modal h3,html[dir=rtl] .note h4{font-family:'Kalam','IBM Plex Sans Arabic',"Segoe Print",cursive}
+html[dir=rtl] h1{font-weight:600;font-size:30px}
+html[dir=rtl] .modal h3{font-weight:600;font-size:22px}
+html[dir=rtl] .nav .grp{letter-spacing:0}
+html[dir=rtl] .nav a.on::after,html[dir=rtl] .nav a .cnt,html[dir=rtl] .nav a.on .cnt,html[dir=rtl] .search,html[dir=rtl] .card h3 .r,html[dir=rtl] .pvwarn{margin-left:0;margin-right:auto}
+html[dir=rtl] .nav a.on:has(.cnt)::after{margin-left:0;margin-right:6px}
+html[dir=rtl] .search svg{left:auto;right:12px}
+html[dir=rtl] .search input{padding-left:12px;padding-right:36px}
+html[dir=rtl] .pvhint{margin-left:0;margin-right:8px}
+html[dir=rtl] .kcard{border-left:1px solid var(--line);border-right:4px solid var(--c-1)}
+html[dir=rtl] .notice ul{padding-left:0;padding-right:30px}
+html[dir=rtl] svg.i[data-i=pfeil-links],html[dir=rtl] svg.i[data-i=pfeil-rechts]{transform:scaleX(-1)}
+html[dir=rtl] input,html[dir=rtl] textarea,html[dir=rtl] select{unicode-bidi:plaintext}
+html[dir=rtl] input[type=date],html[dir=rtl] input[type=month],html[dir=rtl] input[type=time],html[dir=rtl] input[type=number],html[dir=rtl] input[type=email]{direction:ltr;text-align:right}
+/* Briefe, Berichte, Druck und Diagramme bleiben links nach rechts */
+html[dir=rtl] .letter,html[dir=rtl] .report,html[dir=rtl] #print-root,html[dir=rtl] .dstile .pv,html[dir=rtl] .pv .paper{direction:ltr;text-align:left}
+html[dir=rtl] .letter,html[dir=rtl] .report{font-family:var(--lf,Arial),Arial,sans-serif}
+html[dir=rtl] .langsw button{font-family:'Manrope','IBM Plex Sans Arabic',sans-serif}
 .letter [data-ed]{cursor:text;border-radius:2px;outline:1px dashed transparent;outline-offset:1mm;transition:outline-color .15s}
 .letter [data-ed]:hover{outline-color:#A9B8CA}
 .letter [data-ed]:focus{outline:2px solid #4F6785;background:#EEF1F5;white-space:pre-wrap}
@@ -373,6 +397,7 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 </style>
 </head>
 <body>
+<script src="i18n.js"></script>
 <div class="app">
   <aside class="side">
     <div class="logo"><svg width="36" height="36" viewBox="0 0 200 200" aria-hidden="true"><rect x="6" y="6" width="188" height="188" rx="48" fill="#F4F0E8"/><path d="M84 64 V132 H124" fill="none" stroke="#1B2A44" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124" cy="70" r="9" fill="#4F6785"/></svg>Office Home</div>
@@ -503,7 +528,7 @@ const ICONS = {
 };
 // alte Namen → neue Icons
 const ICON_ALT = {"home": "dashboard", "folder": "vorgaenge", "clock": "fristen", "file": "dokumente", "receipt": "vertraege", "wallet": "konten", "note": "notizen", "book": "adressbuch", "pen": "bearbeiten", "users": "personen", "sliders": "einstellungen", "print": "drucken", "save": "speichern", "lock": "schloss", "scan": "scanner", "phone": "handy", "cal": "kalender", "chart": "statistik", "trend": "trend-hoch", "upload": "hochladen", "euro": "finanzen"};
-const icon = n => `<svg class="i" viewBox="0 0 24 24">${ICONS[n] || ICONS[ICON_ALT[n]] || ''}</svg>`;
+const icon = n => `<svg class="i" data-i="${n}" viewBox="0 0 24 24">${ICONS[n] || ICONS[ICON_ALT[n]] || ''}</svg>`;
 
 // ---------- Datenbank (IndexedDB, lokal) ----------
 const DB = {
@@ -895,7 +920,7 @@ const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenze
 
 // ---------- Navigation ----------
 const NAV = [
-  {grp:'Übersicht'}, {r:'dashboard', l:'Dashboard', i:'dashboard'}, {r:'calendar', l:'Kalender', i:'kalender', cnt:() => { const T = today(); return byPerson(S.events || []).filter(e => !e.done && e.date === T).length; }}, {r:'stats', l:'Statistik', i:'statistik'}, {r:'finance', l:'Finanzen', i:'finanzen'},
+  {grp:'Übersicht'}, {r:'office', l:'Büro', i:'alle', cnt:() => BU.fragen}, {r:'dashboard', l:'Dashboard', i:'dashboard'}, {r:'calendar', l:'Kalender', i:'kalender', cnt:() => { const T = today(); return byPerson(S.events || []).filter(e => !e.done && e.date === T).length; }}, {r:'stats', l:'Statistik', i:'statistik'}, {r:'finance', l:'Finanzen', i:'finanzen'},
   {grp:'Arbeiten'}, {r:'cases', l:'Vorgänge', i:'vorgaenge'}, {r:'tasks', l:'Fristen & Aufgaben', i:'fristen', cnt:() => byPerson(S.tasks).filter(t => !t.done && t.due && daysUntil(t.due) <= 0).length},
   {r:'letters', l:'Brief schreiben', i:'brief'}, {r:'documents', l:'Dokumente', i:'dokumente'}, {r:'scan', l:'Scanner', i:'scanner', cnt:() => (S.scans || []).length},
   {grp:'Überblick behalten'}, {r:'contracts', l:'Verträge & Fixkosten', i:'vertraege'}, {r:'assets', l:'Konten & Vermögen', i:'konten'}, {r:'notes', l:'Notizen', i:'notizen'}, {r:'report', l:'Monatsbericht', i:'bericht'},
@@ -1902,7 +1927,8 @@ VIEWS.settings = () => {
   const s = S.settings, me = s.me, ls = s.letter;
   const inp = (k, l, v, t = 'text') => `<div class="fld"><label>${l}</label><input type="${t}" data-set="${k}" value="${esc(v)}"></div>`;
   return `<div class="head"><div class="grow"><h1>Einstellungen</h1></div></div>
-  <div class="card"><h3>Darstellung</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="themesw">${[['hell', 'Hell'], ['dunkel', 'Dunkel'], ['system', 'System']].map(([v, l]) => `<button class="${themeGet() === v ? 'on' : ''}" data-act="setTheme" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.</span></div></div>
+  <div class="card"><h3>Darstellung</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="themesw">${[['hell', 'Hell'], ['dunkel', 'Dunkel'], ['system', 'System']].map(([v, l]) => `<button class="${themeGet() === v ? 'on' : ''}" data-act="setTheme" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.</span></div>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px"><b class="small">Sprache der Bedienung</b><span class="themesw langsw no-i18n">${[['de', 'Deutsch'], ['ar', 'العربية']].map(([v, l]) => `<button class="${(window.OH_LANG || 'de') === v ? 'on' : ''}" data-act="setLang" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">Briefe, Vorlagen und Berichte bleiben immer Deutsch (DIN 5008).</span></div></div>
   <div class="grid g2">
     <div class="card"><h3>Meine Daten (Bevollmächtigter / Absender)</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       ${inp('me.name', 'Vor- und Nachname', me.name)}${inp('me.phone', 'Telefon', me.phone)}${inp('me.street', 'Straße und Hausnummer', me.street)}${inp('me.email', 'E-Mail', me.email, 'email')}${inp('me.zip', 'PLZ', me.zip)}${inp('me.city', 'Ort', me.city)}
@@ -2018,6 +2044,7 @@ const ACT = {
   ckind: d => { UI.contactKind = d.id; render(); },
   setMode: d => setMode(d.id),
   setTheme: d => { themeSet(d.id); render(); },
+  setLang: d => { if ((window.OH_LANG || 'de') !== d.id && window.ohSetLang) window.ohSetLang(d.id); },
   demoReset: async () => { if (!confirm('Alle Demo-Daten durch einen frischen Beispiel-Datenbestand ersetzen? Deine echten Daten (Live) bleiben unberührt.')) return; S = buildDemoState(); await flushSave(); location.hash = '#/dashboard'; render(); toast('Demo-Daten neu erzeugt'); },
   briefWide: () => { UI.briefWide = !UI.briefWide; const b = $('.brief'); if (b) b.classList.toggle('wide', UI.briefWide); const btn = $('[data-act=briefWide]'); if (btn) btn.textContent = UI.briefWide ? 'Formular zeigen' : 'Große Vorschau'; if (AFTER.brief.upd) AFTER.brief.upd(); },
   stat: d => { const [k, v] = d.id.split(':'); UI[k] = /Year$/.test(k) ? Number(v) : v; render(); },
@@ -3055,7 +3082,7 @@ function miniMonthHTML(){
   const ym = UI.calDate.slice(0, 7), first = ym + '-01', start = weekStart(first), T = today(), last = dshift(addMonths(first, 1), -1);
   const has = new Set(calItems(start, dshift(weekStart(last), 6)).filter(i => i.kind !== 'zahlung').map(i => i.date));
   const ws = weekStart(UI.calDate);
-  let h = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><b>${monthLabel(ym)}</b><span style="flex:1"></span><button class="btn sm" data-act="calMini" data-id="-1">${icon('pfeil-links')}</button><button class="btn sm" data-act="calMini" data-id="1">${icon('pfeil-rechts')}</button></div><div class="mini">${WT.map(w => `<i>${w[0]}</i>`).join('')}`;
+  let h = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><b>${monthLabel(ym)}</b><span style="flex:1"></span><button class="btn sm" data-act="calMini" data-id="-1">${icon('pfeil-links')}</button><button class="btn sm" data-act="calMini" data-id="1">${icon('pfeil-rechts')}</button></div><div class="mini">${WT.map(w => `<i>${window.OH_LANG === 'ar' ? ({Mo:'ن', Di:'ث', Mi:'ر', Do:'خ', Fr:'ج', Sa:'س', So:'ح'})[w] : w[0]}</i>`).join('')}`;
   for (let d = start; d <= dshift(weekStart(last), 6); d = dshift(d, 1))
     h += `<button class="${d.slice(0, 7) !== ym ? 'out' : ''}${d === T ? ' today' : ''}${UI.calView === 'woche' && d >= ws && d <= dshift(ws, 6) ? ' sel' : ''}" data-act="calDay" data-id="${d}">${Number(d.slice(8))}${has.has(d) ? '<s></s>' : ''}</button>`;
   return h + '</div>';
@@ -3085,8 +3112,10 @@ function schedReminders(){
     for (const m of it.remind || []) {
       if (m === 60 && !it.time) continue;
       const at = base - m * 60000; if (at < now - 3600000 || at > lim) continue;
-      const when = (m === 60 ? 'In 1 Stunde' : m === 1440 ? 'Morgen' : 'In 1 Woche') + (it.time ? ' um ' + it.time : ' (' + fmtDate(it.date) + ')');
-      out.push({id:it.ref + '|' + it.date + '|' + (it.time || '') + '|' + m, at, ref:it.ref, title:KIND_L[it.kind] + ': ' + it.title + (p ? ' – ' + p.role : ''),
+      const AR = window.OH_LANG === 'ar', tr = s => (AR && window.ohT ? window.ohT(s) : s);
+      const when = AR ? (m === 60 ? 'بعد ساعة' : m === 1440 ? 'غداً' : 'بعد أسبوع') + (it.time ? ' – الساعة ' + it.time : ' (' + fmtDate(it.date) + ')')
+        : (m === 60 ? 'In 1 Stunde' : m === 1440 ? 'Morgen' : 'In 1 Woche') + (it.time ? ' um ' + it.time : ' (' + fmtDate(it.date) + ')');
+      out.push({id:it.ref + '|' + it.date + '|' + (it.time || '') + '|' + m, at, ref:it.ref, title:tr(KIND_L[it.kind]) + ': ' + it.title + (p ? ' – ' + tr(p.role) : ''),
         body:[when, it.note].filter(Boolean).join(' · ').slice(0, 240)});
     }
   }
@@ -3171,7 +3200,7 @@ async function kiDoc(d, manual){
   const mime = f.type || (f.blob && f.blob.type) || '';
   if (!/^(application\/pdf|image\/(jpeg|png|webp|heic|heif))$/.test(mime)) return manual && toast('Nur PDF und Bilder können gelesen werden.');
   toast('KI liest „' + d.title + '“ …');
-  const r = await window.officeHome.kiAnalyze({mime, data:new Uint8Array(await f.blob.arrayBuffer()), ctx:{today:today(), persons:S.persons.map(p => ({label:p.role, name:personName(p)}))}});
+  const r = await window.officeHome.kiAnalyze({mime, data:new Uint8Array(await f.blob.arrayBuffer()), ctx:{today:today(), lang:window.OH_LANG || 'de', persons:S.persons.map(p => ({label:p.role, name:personName(p)}))}});
   if (!r.ok) { d.ki = {at:new Date().toISOString(), ok:false, message:r.message}; save(); return noticeCard('KI konnte „' + d.title + '“ nicht lesen', [r.message]); }
   kiApply(d, r.result || {});
 }
@@ -3321,13 +3350,164 @@ async function initKalender(){
   if (parseHash().route === 'calendar' || parseHash().route === 'settings') render();
 }
 
+// ---------- Büro (Version 2.13): 3D-Büro mit 8 Mitarbeitern (buero.html im eingebetteten Fenster) ----------
+// Bestehende Bereiche bleiben unverändert. Das Büro beobachtet alle 5 Sekunden, was sich in den Daten geändert hat,
+// und gibt daraus den Mitarbeitern Aufgaben. Rückfragen des Sekretariats beantwortet Leon im Büro.
+const BU = {frame:null, geladen:false, snap:null, fragen:0, theme:'', sessionGruss:false, sichtbar:false, extern:false};
+const buTheme = () => { const t = themeGet(); return t === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dunkel' : 'hell') : t; };
+const buPost = m => { if (BU.extern) { if (BU.geladen) window.officeHome.bueroAnFenster(m); return; } if (BU.frame && BU.geladen) BU.frame.contentWindow.postMessage(m, '*'); };
+VIEWS.office = () => BU.extern ? `<div class="head"><div class="grow"><h1>${icon('alle')}Büro</h1></div></div>
+  <div class="card" style="max-width:640px"><h3>${icon('info')}Das Büro läuft in einem eigenen Fenster</h3>
+    <p style="margin-top:0">Du kannst das Fenster auf einen anderen Bildschirm ziehen und dort groß machen. Office Home merkt sich Bildschirm, Position und Größe für das nächste Mal.</p>
+    <p class="small muted">Die Mitarbeiter arbeiten dort weiter mit deinen Daten – Rückfragen erscheinen im Büro-Fenster und als Zahl neben „Büro“ hier im Menü.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="bueroVor">${icon('alle')}Büro-Fenster nach vorne holen</button><button class="btn" data-act="bueroZurueck">${icon('pfeil-links')}Zurück ins Programm holen</button></div></div>`
+  : `<div id="bueroPlatz" style="height:100%;min-height:300px"></div>`;
+AFTER.office = () => { if (!BU.extern) buZeigen(true); };
+function buFrame(){
+  if (BU.frame) return BU.frame;
+  const f = document.createElement('iframe'); f.id = 'bueroFrame'; f.title = 'Büro';
+  f.style.cssText = 'position:fixed;border:0;z-index:20;display:none;background:transparent';
+  BU.theme = buTheme(); f.src = 'buero.html?theme=' + BU.theme;
+  f.addEventListener('load', () => { BU.geladen = true; buTick(); if (BU.sichtbar) buPost({typ:'buero-sichtbar', sichtbar:true}); });
+  document.body.appendChild(f); BU.frame = f; return f;
+}
+function buPlatz(){ if (!BU.frame) return; const r = $('#main').getBoundingClientRect(); Object.assign(BU.frame.style, {left:r.left + 'px', top:r.top + 'px', width:r.width + 'px', height:r.height + 'px'}); }
+function buZeigen(an){
+  const f = buFrame(); BU.sichtbar = an; f.style.display = an ? 'block' : 'none'; if (an) buPlatz();
+  buPost({typ:'buero-sichtbar', sichtbar:an});
+  if (an) buGruss();
+}
+window.addEventListener('hashchange', () => { if (parseHash().route !== 'office' && BU.sichtbar) buZeigen(false); });
+window.addEventListener('resize', buPlatz);
+
+/* Schnappschuss der Daten – daraus werden Aufgaben */
+function buSnap(){
+  const ids = l => new Set((l || []).map(x => x.id));
+  return {mode:MODE, docs:ids(S.documents), events:ids(S.events), tasks:ids(S.tasks), done:new Set(S.tasks.filter(t => t.done).map(t => t.id)), bookings:ids(S.bookings),
+    letters:new Map((S.letters || []).map(l => [l.id, l.updated || ''])), contacts:ids(S.contacts), contracts:ids(S.contracts), notes:ids(S.notes), scans:ids(S.scans), assets:ids(S.assets), persons:ids(S.persons)};
+}
+const buKurz = (s, n = 42) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+function buDiff(){
+  const a = BU.snap, b = buSnap(); BU.snap = b;
+  if (!a || a.mode !== b.mode) return [];
+  const neu = (k, list) => (list || []).filter(x => !a[k].has(x.id));
+  const auf = [];
+  for (const d of neu('docs', S.documents)) auf.push({post:true, an:'sekretariat', text:'liest „' + buKurz(d.title) + '“' + (kiReady() && calCfg().ki !== false ? ' mit Gemini' : ''), fertig:'„' + buKurz(d.title) + '“ geprüft und verteilt',
+    weiter:[{an:'archiv', traegt:true, text:'legt „' + buKurz(d.title, 30) + '“ ab', fertig:'„' + buKurz(d.title) + '“ im Archiv abgelegt'}]});
+  const ev = neu('events', S.events), google = ev.filter(e => e.source === 'google');
+  if (google.length) auf.push({an:'termine', text:'übernimmt ' + google.length + ' Termin(e) aus Google', fertig:google.length + ' Termin(e) aus Google übernommen'});
+  for (const e of ev.filter(e => e.source !== 'google').slice(0, 4)) {
+    const t = {an:'termine', text:'trägt „' + buKurz(e.title, 34) + '“ am ' + fmtDate(e.date) + ' ein', fertig:'Termin „' + buKurz(e.title) + '“ (' + fmtDate(e.date) + (e.time ? ', ' + e.time : '') + ') eingetragen'};
+    auf.push(e.source === 'ki' ? {an:'sekretariat', text:'prüft den erkannten Termin', fertig:'Termin aus Dokument erkannt', weiter:[t]} : t);
+  }
+  for (const t of neu('tasks', S.tasks).slice(0, 4)) auf.push({an:'fristen', text:'notiert „' + buKurz(t.title, 34) + '“', fertig:'Frist „' + buKurz(t.title) + '“' + (t.due ? ' bis ' + fmtDate(t.due) : '') + ' notiert'});
+  for (const t of S.tasks.filter(t => t.done && !a.done.has(t.id) && a.tasks.has(t.id)).slice(0, 4)) auf.push({an:'fristen', text:'hakt „' + buKurz(t.title, 34) + '“ ab', fertig:'„' + buKurz(t.title) + '“ erledigt'});
+  const bk = neu('bookings', S.bookings);
+  if (bk.length) auf.push({an:'finanzen', text:'bucht ' + bk.length + ' neue Buchung(en)', fertig:bk.length + ' Buchung(en) verbucht', weiter:[{an:'statistik', text:'aktualisiert die Monatsstatistik', fertig:'Monatsstatistik aktualisiert'}]});
+  for (const l of (S.letters || []).filter(l => !a.letters.has(l.id) || a.letters.get(l.id) !== (l.updated || '')).slice(0, 3))
+    auf.push({an:'schreiben', text:(a.letters.has(l.id) ? 'überarbeitet' : 'schreibt') + ' „' + buKurz(letterSubject(l), 30) + '“', fertig:'Brief „' + buKurz(letterSubject(l)) + '“ gespeichert'});
+  for (const c of neu('contacts', S.contacts).slice(0, 3)) auf.push({an:'leitung', text:'nimmt „' + buKurz(c.contactPerson || c.name, 30) + '“ ins Adressbuch auf', fertig:'„' + buKurz(c.contactPerson ? c.contactPerson + ' (' + c.name + ')' : c.name) + '“ im Adressbuch'});
+  for (const p of neu('persons', S.persons)) auf.push({an:'leitung', text:'legt die Person „' + buKurz(p.role) + '“ an', fertig:'Person „' + buKurz(p.role) + '“ angelegt'});
+  for (const c of neu('contracts', S.contracts).slice(0, 3)) auf.push({an:'statistik', text:'erfasst den Vertrag „' + buKurz(c.provider, 30) + '“', fertig:'Vertrag „' + buKurz(c.provider) + '“ erfasst'});
+  for (const n of neu('notes', S.notes).slice(0, 2)) auf.push({an:'statistik', text:'legt die Notiz „' + buKurz(n.title, 30) + '“ ab', fertig:'Notiz „' + buKurz(n.title) + '“ abgelegt'});
+  for (const x of neu('assets', S.assets).slice(0, 2)) auf.push({an:'statistik', text:'erfasst „' + buKurz(x.name, 30) + '“', fertig:'„' + buKurz(x.name) + '“ bei Konten & Vermögen erfasst'});
+  const sc = neu('scans', S.scans); if (sc.length) auf.push({an:'archiv', text:'nimmt ' + sc.length + ' neuen Scan an', fertig:sc.length + ' Scan(s) im Scanner'});
+  return auf.length > 14 ? [{an:'leitung', text:'sichtet den neuen Datenbestand', fertig:'Datenbestand neu geladen (' + auf.length + ' Änderungen)'}] : auf;
+}
+/* Rückfragen des Sekretariats */
+function buFragen(){
+  const out = [];
+  for (const d of S.documents) {
+    if (!d.ki || d.bueroGefragt) continue;
+    if (d.ki.ok && !d.personId && S.persons.length > 1) { d.bueroGefragt = true; out.push({id:'person:' + d.id, text:'Für wen ist „' + buKurz(d.title) + '“?', optionen:[...S.persons.map(p => p.role), 'Allgemein']}); }
+    else if (!d.ki.ok) { d.bueroGefragt = true; out.push({id:'ki:' + d.id, text:'Ich konnte „' + buKurz(d.title) + '“ nicht lesen (' + buKurz(d.ki.message, 60) + '). Noch einmal versuchen?', optionen:['Noch einmal', 'Später']}); }
+  }
+  if (out.length) save();
+  return out;
+}
+/* Tägliche Prüfung (nur Hinweise, ändert nichts) */
+function buTagespruefung(){
+  const T = today(); let tag = ''; try { tag = localStorage.getItem('oh-buero-pruefung') || ''; } catch (e) {}
+  if (tag === T + MODE) return [];
+  try { localStorage.setItem('oh-buero-pruefung', T + MODE); } catch (e) {}
+  const auf = [], ueber = S.tasks.filter(t => !t.done && t.due && t.due < T), morgen = (S.events || []).filter(e => !e.done && e.date === dshift(T, 1));
+  const kuend = S.contracts.filter(c => { const i = contractInfo(c); return i.cancelBy && daysUntil(i.cancelBy) >= 0 && daysUntil(i.cancelBy) <= 14; });
+  const ohneP = S.documents.filter(d => !d.personId).length, pay = contractVirtual(T, dshift(T, 7));
+  auf.push({an:'fristen', text:'prüft alle Fristen', fertig:ueber.length ? ueber.length + ' Frist(en) überfällig – bitte ansehen' : 'Keine Frist überfällig'});
+  if (morgen.length) auf.push({an:'termine', text:'bereitet die Termine für morgen vor', fertig:'Morgen: ' + morgen.map(e => (e.time ? e.time + ' ' : '') + buKurz(e.title, 28)).join(' · ')});
+  if (kuend.length) auf.push({an:'statistik', text:'prüft Kündigungsfristen', fertig:'Bald kündbar: ' + kuend.map(c => buKurz(c.provider, 22) + ' bis ' + fmtDate(contractInfo(c).cancelBy)).join(' · ')});
+  if (pay.length) auf.push({an:'finanzen', text:'prüft die festen Zahlungen der Woche', fertig:pay.length + ' feste Zahlung(en) diese Woche, zusammen ' + eur(pay.reduce((s, b) => s + b.amount, 0))});
+  if (ohneP) auf.push({an:'archiv', text:'sichtet das Archiv', fertig:ohneP + ' Dokument(e) ohne Person – beim Bearbeiten zuordnen'});
+  return auf;
+}
+function buLage(){
+  const T = today(), sonntag = dshift(T, 6 - ((new Date(T + 'T12:00').getDay() + 6) % 7));
+  return {briefe:S.documents.filter(d => (d.added || '') === T).length, fristen:S.tasks.filter(t => !t.done && t.due && t.due <= T).length,
+    termineHeute:(S.events || []).filter(e => !e.done && e.date === T).length, termineWoche:(S.events || []).filter(e => !e.done && e.date >= T && e.date <= sonntag).length,
+    vorgaenge:S.cases.filter(c => c.status !== 'erledigt').length, naechster:(S.events || []).filter(e => !e.done && e.date >= T).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')))[0]};
+}
+function buGruss(){
+  if (!BU.geladen) return;
+  const L = buLage(), h = new Date().getHours(), gruss = h < 11 ? 'Guten Morgen!' : h < 18 ? 'Guten Tag!' : 'Guten Abend!';
+  const n = (x, e, m) => x + ' ' + (x === 1 ? e : m);
+  let morgen = ''; try { if (localStorage.getItem('oh-buero-morgen') !== today() + MODE) { localStorage.setItem('oh-buero-morgen', today() + MODE);
+    morgen = 'Heute: ' + n(L.termineHeute, 'Termin', 'Termine') + ', ' + n(L.fristen, 'Frist fällig', 'Fristen fällig') + ', ' + n(L.vorgaenge, 'offener Vorgang', 'offene Vorgänge') + '.' +
+      (L.naechster ? ' Als Nächstes: ' + buKurz(L.naechster.title, 40) + ' am ' + fmtDate(L.naechster.date) + (L.naechster.time ? ' um ' + L.naechster.time : '') + '.' : ''); } } catch (e) {}
+  const begruessung = BU.sessionGruss ? '' : gruss + ' ' + n(L.briefe, 'neuer Brief', 'neue Briefe') + ' heute, ' + n(L.fristen, 'Frist', 'Fristen') + ' fällig und ' + n(L.termineWoche, 'Termin', 'Termine') + ' diese Woche.';
+  BU.sessionGruss = true;
+  buPost({typ:'buero-stand', begruessung, morgen, tresorOffen:!!VT.key, fensterMoeglich:buFensterMoeglich()});
+}
+function buTick(){
+  if (!BU.frame && !BU.extern) return;
+  if (buTheme() !== BU.theme) { BU.theme = buTheme(); BU.geladen = false; if (BU.extern) window.officeHome.bueroTheme(BU.theme); else BU.frame.src = 'buero.html?theme=' + BU.theme; return; }
+  if (!BU.geladen) return;
+  const auf = [...buDiff(), ...buTagespruefung()];
+  auf.forEach((a, i) => setTimeout(() => buPost({typ:'buero-ereignis', aufgabe:a}), i * 1200));
+  buFragen().forEach(f => buPost({typ:'buero-frage', frage:f}));
+  buPost({typ:'buero-stand', tresorOffen:!!VT.key, fensterMoeglich:buFensterMoeglich()});
+}
+const buFensterMoeglich = () => DESKTOP && !!window.officeHome.bueroFenster;
+async function buFensterAuf(){
+  if (!buFensterMoeglich()) return toast('Ein eigenes Fenster gibt es nur im installierten Programm.');
+  const r = await window.officeHome.bueroFenster(buTheme()); if (!r || !r.ok) return;
+  BU.extern = true; BU.geladen = false; BU.theme = buTheme(); BU.sessionGruss = false;
+  if (BU.frame) { BU.frame.remove(); BU.frame = null; } BU.sichtbar = false;
+  if (parseHash().route === 'office') render();
+}
+function buFensterZu(){
+  BU.extern = false; BU.geladen = false; BU.fragen = 0; renderNav(parseHash().route);
+  buFrame(); if (parseHash().route === 'office') { render(); buZeigen(true); }
+}
+Object.assign(ACT, { bueroVor: () => window.officeHome.bueroFenster(buTheme()), bueroZurueck: () => window.officeHome.bueroZu() });
+window.addEventListener('message', e => { if (BU.frame && e.source === BU.frame.contentWindow) buEmpfang(e.data || {}); });
+function buEmpfang(d){
+  if (d.typ === 'buero-hallo') { BU.geladen = true; buGruss(); buTick(); if (BU.sichtbar || BU.extern) buPost({typ:'buero-sichtbar', sichtbar:true}); }
+  if (d.typ === 'buero-fenster') buFensterAuf();
+  if (d.typ === 'buero-dateien' && d.dateien && d.dateien.length && d.dateien[0] && d.dateien[0].data) d = Object.assign({}, d, {dateien:d.dateien.map(x => new File([x.data], x.name, {type:x.type}))});
+  if (d.typ === 'buero-oeffnen' && d.route) location.hash = '#/' + d.route;
+  if (d.typ === 'buero-fragen') { BU.fragen = Number(d.anzahl) || 0; renderNav(parseHash().route); }
+  if (d.typ === 'buero-dateien' && d.dateien && d.dateien.length) queueFiles([...d.dateien]);
+  if (d.typ === 'buero-antwort' && d.id) {
+    const [art, id] = String(d.id).split(':'), doc = S.documents.find(x => x.id === id); if (!doc) return;
+    if (art === 'person') { const p = S.persons.find(x => x.role === d.antwort); doc.personId = p ? p.id : ''; save(); render(); toast('„' + doc.title + '“: ' + (p ? p.role : 'Allgemein')); }
+    if (art === 'ki' && d.antwort === 'Noch einmal') { doc.bueroGefragt = false; kiDoc(doc, true); }
+  }
+}
+function initBuero(){
+  BU.snap = buSnap();
+  if (buFensterMoeglich()) { window.officeHome.onBueroVonFenster(d => buEmpfang(d || {})); window.officeHome.onBueroZu(() => buFensterZu()); }
+  setTimeout(buFrame, 2500);                 // Büro startet im Hintergrund – die Mitarbeiter arbeiten auch, wenn es nicht offen ist
+  setInterval(buTick, 5000);
+  if (parseHash().route === 'office') setTimeout(() => buZeigen(true), 2600);
+}
+
 // ---------- Start ----------
 (async () => {
   try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   document.body.classList.toggle('is-demo', MODE === 'demo');
-  themeSet(themeGet()); render(); initUpdates(); initMcp(); initScan(); initKalender();
+  themeSet(themeGet()); render(); initUpdates(); initMcp(); initScan(); initKalender(); initBuero();
   if (memCfg().root) { await memLoadStatus(); render(); }
 })();
 </script>

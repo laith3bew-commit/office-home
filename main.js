@@ -27,19 +27,27 @@ function applyAutostart() {
   const p = bgPrefs();
   app.setLoginItemSettings({ openAtLogin: !!(p.tray && p.autostart), args: ['--hidden'] });
 }
+// Sprache der Oberfläche (de/ar) – für Symbol neben der Uhr und Windows-Meldungen
+const AR = () => prefsRead().lang === 'ar';
+function trayMenu() {
+  if (!tray) return;
+  const a = AR();
+  tray.setToolTip(a ? 'Office Home – التذكيرات تعمل' : 'Office Home – Erinnerungen aktiv');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: a ? 'فتح Office Home' : 'Office Home öffnen', click: showWin },
+    { label: a ? 'التقويم' : 'Kalender', click: () => { showWin(); win.webContents.send('oh:openCal', ''); } },
+    { type: 'separator' },
+    { label: a ? 'إنهاء (لا مزيد من التذكيرات)' : 'Beenden (keine Erinnerungen mehr)', click: () => { quitting = true; app.quit(); } }
+  ]));
+}
 function makeTray() {
   if (tray) return;
   const img = nativeImage.createFromPath(path.join(__dirname, 'build', 'icon.png')).resize({ width: 16, height: 16 });
   tray = new Tray(img);
-  tray.setToolTip('Office Home – Erinnerungen aktiv');
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Office Home öffnen', click: showWin },
-    { label: 'Kalender', click: () => { showWin(); win.webContents.send('oh:openCal', ''); } },
-    { type: 'separator' },
-    { label: 'Beenden (keine Erinnerungen mehr)', click: () => { quitting = true; app.quit(); } }
-  ]));
+  trayMenu();
   tray.on('click', showWin);
 }
+ipcMain.handle('oh:setLang', (e, l) => { const p = prefsRead(); if (p.lang !== l) { p.lang = l === 'ar' ? 'ar' : 'de'; prefsWrite(p); trayMenu(); } return true; });
 ipcMain.handle('oh:bgGet', () => Object.assign(bgPrefs(), { packaged: app.isPackaged }));
 ipcMain.handle('oh:bgSet', (e, v) => {
   const p = prefsRead(); if (typeof v.tray === 'boolean') p.tray = v.tray; if (typeof v.autostart === 'boolean') p.autostart = v.autostart;
@@ -71,7 +79,8 @@ function createWindow() {
     e.preventDefault(); win.hide();
     const p = prefsRead();
     if (!p.trayHintShown && Notification.isSupported()) {
-      new Notification({ title: 'Office Home läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
+      new Notification(AR() ? { title: 'Office Home يعمل في الخلفية', body: 'التذكيرات ستستمر. الفتح أو الإنهاء من الرمز بجانب الساعة.' }
+        : { title: 'Office Home läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
       p.trayHintShown = true; prefsWrite(p);
     }
   });
@@ -362,6 +371,53 @@ app.on('will-quit', mcpStop);
 
 // ---------- Scanner (Drucker, Handy, Ordner, PDF) ----------
 require('./scan-main.js')({ app, ipcMain, dialog, BrowserWindow, getWin: () => win });
+
+// ---------- Büro im eigenen Fenster (z. B. auf dem zweiten Bildschirm) ----------
+// Das Hauptfenster bleibt für die Daten zuständig; Nachrichten laufen hier durch. Position und Größe werden gemerkt.
+let bueroWin = null;
+const bueroUrl = theme => ({ query: { theme: theme || 'system', fenster: '1' } });
+ipcMain.handle('oh:bueroFenster', (e, theme) => {
+  if (bueroWin && !bueroWin.isDestroyed()) { bueroWin.show(); bueroWin.focus(); return { ok: true }; }
+  const { screen } = require('electron');
+  const p = prefsRead(), alle = screen.getAllDisplays();
+  let b = p.bueroBounds;
+  const passt = b && alle.some(d => { const a = d.workArea; return b.x < a.x + a.width - 80 && b.x + b.width > a.x + 80 && b.y < a.y + a.height - 80 && b.y + b.height > a.y + 40; });
+  if (!passt) {   // erstes Mal oder Bildschirm fehlt: auf den anderen Bildschirm, sonst neben das Hauptfenster
+    const haupt = win && !win.isDestroyed() ? screen.getDisplayMatching(win.getBounds()) : screen.getPrimaryDisplay();
+    const a = (alle.find(d => d.id !== haupt.id) || haupt).workArea;
+    b = { x: a.x + 40, y: a.y + 40, width: Math.max(800, Math.min(1600, a.width - 80)), height: Math.max(560, Math.min(1000, a.height - 80)) };
+  }
+  bueroWin = new BrowserWindow(Object.assign({}, b, {
+    minWidth: 640, minHeight: 420, title: 'Büro – Office Home', autoHideMenuBar: true,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
+    icon: path.join(__dirname, 'build', 'icon.png'),
+    webPreferences: { preload: path.join(__dirname, 'buero-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
+  }));
+  if (passt && p.bueroMax) bueroWin.maximize();
+  bueroWin.loadFile(path.join(__dirname, 'buero.html'), bueroUrl(theme));
+  bueroWin.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  bueroWin.webContents.on('will-navigate', ev => ev.preventDefault());
+  const merken = () => {
+    if (!bueroWin || bueroWin.isDestroyed()) return;
+    const q = prefsRead(); q.bueroMax = bueroWin.isMaximized();
+    if (!bueroWin.isMaximized() && !bueroWin.isFullScreen() && !bueroWin.isMinimized()) q.bueroBounds = bueroWin.getBounds();
+    prefsWrite(q);
+  };
+  ['moved', 'resized', 'maximize', 'unmaximize'].forEach(ev => bueroWin.on(ev, merken));
+  bueroWin.on('close', merken);
+  bueroWin.on('closed', () => { bueroWin = null; if (win && !win.isDestroyed()) win.webContents.send('oh:bueroZu'); });
+  return { ok: true };
+});
+ipcMain.on('oh:bueroAnFenster', (e, m) => { if (bueroWin && !bueroWin.isDestroyed()) bueroWin.webContents.send('oh:bueroMsg', m); });
+ipcMain.on('oh:bueroVonFenster', (e, m) => {
+  if (!m) return;
+  if (m.typ === 'buero-zurueck') { if (bueroWin && !bueroWin.isDestroyed()) bueroWin.close(); showWin(); return; }
+  if (m.typ === 'buero-oeffnen' || m.typ === 'buero-dateien') showWin();
+  if (win && !win.isDestroyed()) win.webContents.send('oh:bueroVonFenster', m);
+});
+ipcMain.handle('oh:bueroZu', () => { if (bueroWin && !bueroWin.isDestroyed()) bueroWin.close(); return true; });
+ipcMain.handle('oh:bueroTheme', (e, theme) => { if (bueroWin && !bueroWin.isDestroyed()) bueroWin.loadFile(path.join(__dirname, 'buero.html'), bueroUrl(theme)); return true; });
+ipcMain.handle('oh:bueroOffen', () => !!(bueroWin && !bueroWin.isDestroyed()));
 
 // ---------- Kalender: Gemini, Google Kalender, Erinnerungen ----------
 require('./kalender-main.js')({ app, ipcMain, shell, safeStorage, Notification, getWin: () => win, showWin });

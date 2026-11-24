@@ -36,7 +36,7 @@ module.exports = function setupKalender({ app, ipcMain, shell, safeStorage, Noti
 Heute ist ${ctx.today}. Personen, für die er handelt (genau so zurückgeben): ${ctx.persons.map(p => `"${p.label}" (${p.name})`).join(', ') || 'keine'}.
 Antworte NUR mit JSON nach diesem Schema, ohne Erklärungen:
 {
- "zusammenfassung": "2–3 Sätze auf Deutsch: worum geht es, was wird verlangt, bis wann",
+ "zusammenfassung": "${ctx.lang === 'ar' ? '2–3 Sätze auf einfachem Hocharabisch (Ziffern 0–9, Datum wie 24.11.2026); deutsche Amtsbegriffe in Klammern dahinter, z. B. اعتراض (Widerspruch): worum geht es, was wird verlangt, bis wann' : '2–3 Sätze auf Deutsch: worum geht es, was wird verlangt, bis wann'}",
  "person": "Bezeichnung der betroffenen Person aus der Liste oder leer",
  "absender": "Name der Behörde / Firma / Praxis",
  "kontakte": [ { "organisation": "Behörde/Firma", "abteilung": "Abteilung, Fachbereich oder Team", "name": "Vor- und Nachname der zuständigen Person mit Anrede (z. B. Frau Anna Weber) oder leer",

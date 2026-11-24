@@ -52,6 +52,15 @@ contextBridge.exposeInMainWorld('officeHome', {
   bgGet: () => ipcRenderer.invoke('oh:bgGet'),
   bgSet: (v) => ipcRenderer.invoke('oh:bgSet', v),
   trayEnsure: () => ipcRenderer.invoke('oh:trayEnsure'),
+  setLang: (l) => ipcRenderer.invoke('oh:setLang', l),
+  // Büro im eigenen Fenster
+  bueroFenster: (theme) => ipcRenderer.invoke('oh:bueroFenster', theme),
+  bueroAnFenster: (m) => ipcRenderer.send('oh:bueroAnFenster', m),
+  bueroZu: () => ipcRenderer.invoke('oh:bueroZu'),
+  bueroTheme: (theme) => ipcRenderer.invoke('oh:bueroTheme', theme),
+  bueroOffen: () => ipcRenderer.invoke('oh:bueroOffen'),
+  onBueroVonFenster: (cb) => ipcRenderer.on('oh:bueroVonFenster', (e, m) => cb(m)),
+  onBueroZu: (cb) => ipcRenderer.on('oh:bueroZu', () => cb()),
   onOpenCal: (cb) => ipcRenderer.on('oh:openCal', (e, ref) => cb(ref)),
   onMcpCall: (cb) => ipcRenderer.on('oh:mcpCall', async (e, m) => {
     let r; try { r = await cb(m.tool, m.args); } catch (err) { r = { ok: false, error: String(err && err.message || err) }; }
