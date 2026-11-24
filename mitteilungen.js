@@ -5,6 +5,15 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.16.3', datum: '2026-11-24', de: [
+        'Punkte „Neu aus dem Eingang“ sitzen jetzt überall an derselben Stelle: am Anfang der Zeile (bei Notizen oben in der Ecke). Im Kalender bekommen auch Termine und Fristen ihren Punkt.',
+        'Büro: Die Leuchtringe der Mitarbeiter verschwinden nicht mehr unter Teppichen und Bodenflächen.',
+        'Büro: Das Namensschild steht über dem Status-Kristall statt davor.'
+      ], ar: [
+        'نقاط «جديد من الوارد» صارت بنفس المكان بكل الصفحات: ببداية السطر (وبالملاحظات بالزاوية فوق). وبالتقويم صار للمواعيد والمهل نقطتها كمان.',
+        'المكتب: حلقات الضو تحت الموظفين ما عادت تختفي تحت السجاد والأرضيات.',
+        'المكتب: يافطة الاسم صارت فوق كريستالة الحالة مش قدامها.'
+      ] },
     { v: '2.16.2', datum: '2026-11-24', de: [
         'E-Mail: Bilder und Dateien in E-Mails öffnen – Anhänge als Kacheln mit Vorschaubild, Klick auf ein Foto öffnet den Bildbetrachter (mit Vor/Zurück), andere Dateien öffnen im Standardprogramm.',
         'Jeden Anhang mit einem Klick „Als Dokument“ ablegen.',

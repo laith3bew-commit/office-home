@@ -264,16 +264,23 @@
 
   /* ---------- Punkte an neuen Einträgen (bis zum Öffnen) ---------- */
   const QUELLEN = () => [S.events || [], S.tasks, S.contacts, S.notes, S.documents, S.bookings || []];
-  const finde = id => { for (const A of QUELLEN()) { const o = A.find(x => x.id === id); if (o) return o; } return null; };
+  // Kalender-Einträge haben Kennungen wie „e:<id>“ (Termin) oder „t:<id>“ (Aufgabe)
+  const finde = id => { id = String(id || '').replace(/^[etc]:/, ''); for (const A of QUELLEN()) { const o = A.find(x => x.id === id); if (o) return o; } return null; };
+  const ZEILE = 'tr, .row, .note, .kcard, .kev, li, .card';
+  // Punkt immer an derselben Stelle: am Anfang der Zeile/Karte, senkrecht mittig (CSS .eghost > .egnew)
   function punkteSetzen() {
     const main = document.getElementById('main'); if (!main) return;
     main.querySelectorAll('[data-id]').forEach(el => {
       const o = finde(el.dataset.id); if (!o || !o.neu || o.neu.gesehen) return;
-      const ziel = el.closest('tr, .row, .note, .calitem, .evrow, li, .card') || el;
-      if (ziel.querySelector(':scope > .egnew, :scope > td:last-child > .egnew')) return;
+      const zeile = el.closest(ZEILE);
+      if (!zeile) return;                                                            // lose Knöpfe/Links ohne eigene Zeile: kein Punkt
+      if (zeile !== el && zeile.hasAttribute('data-id') && zeile.dataset.id !== el.dataset.id) return; // Link in einer fremden Zeile (z. B. Dokument im Termin)
+      const host = zeile.tagName === 'TR' ? zeile.firstElementChild : zeile; if (!host) return;
+      if (host.querySelector(':scope > .egnew')) return;
       const i = document.createElement('i'); i.className = 'egdot egnew ' + (o.neu.farbe !== 'gruen' ? 'puls' : ''); i.style.setProperty('--c', FARBE[o.neu.farbe] || FARBE.gruen); i.title = 'Neu aus dem Eingang';
-      if (ziel.tagName === 'TR') { const td = ziel.lastElementChild; if (td) td.appendChild(i); } else ziel.appendChild(i);
+      host.classList.add('eghost'); host.appendChild(i);
     });
+    main.querySelectorAll('.eghost').forEach(h => { if (!h.querySelector(':scope > .egnew')) h.classList.remove('eghost'); });
   }
   document.addEventListener('click', e => { const el = e.target.closest('#main [data-id]'); if (!el) return; const o = finde(el.dataset.id); if (o && o.neu && !o.neu.gesehen) { o.neu.gesehen = true; save(); } }, true);
 

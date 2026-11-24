@@ -410,10 +410,12 @@ function baueFigur(t) {
   const orbMat = new THREE.MeshBasicMaterial({ color: C(STATUS.frei.farbe), transparent: true });
   const orb = new THREE.Mesh(new THREE.OctahedronGeometry(.07, 0), orbMat); orb.position.y = 2.05; root.add(orb);
   /* Leuchtring am Boden (Status) */
-  const ringMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true, opacity: .8, depthWrite: false, side: THREE.DoubleSide, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending });
-  const ring = new THREE.Mesh(new THREE.RingGeometry(.42, .5, 40), ringMat); ring.rotation.x = -PI / 2; ring.position.y = .012; root.add(ring);
-  const scheinMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true, opacity: .18, depthWrite: false, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending });
-  const schein = new THREE.Mesh(new THREE.CircleGeometry(.62, 40), scheinMat); schein.rotation.x = -PI / 2; schein.position.y = .01; root.add(schein);
+  // Bodenflächen ziehen sich per polygonOffset nach vorn (gegen Flackern) → Ring/Schein noch stärker nach vorn, sonst verschwinden sie „unter dem Boden“
+  const VOR = { polygonOffset: true, polygonOffsetFactor: -30, polygonOffsetUnits: -30 };
+  const ringMat = new THREE.MeshBasicMaterial(Object.assign({ color: C(LAMPE.aus), transparent: true, opacity: .8, depthWrite: false, side: THREE.DoubleSide, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending }, VOR));
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.42, .5, 40), ringMat); ring.rotation.x = -PI / 2; ring.position.y = .07; ring.renderOrder = 5; root.add(ring); // über allen Bodenflächen (Teppiche liegen bis ~.05)
+  const scheinMat = new THREE.MeshBasicMaterial(Object.assign({ color: C(LAMPE.aus), transparent: true, opacity: .18, depthWrite: false, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending }, VOR));
+  const schein = new THREE.Mesh(new THREE.CircleGeometry(.62, 40), scheinMat); schein.rotation.x = -PI / 2; schein.position.y = .065; schein.renderOrder = 4; root.add(schein);
   const treffer = new THREE.Mesh(new THREE.BoxGeometry(.65, 1.9, .65), new THREE.MeshBasicMaterial({ visible: false })); treffer.position.y = .95; root.add(treffer);
   const P = { hy: .95, lean: 0, kx: 0, ky: 0, kz: 0, lob: 0, rob: 0, lkn: 0, rkn: 0, lsh: 0, rsh: 0, lshz: 0, rshz: 0, lel: 0, rel: 0 };
   return { root, kopf, treffer, orb, orbMat, ringMat, scheinMat, P, L,
@@ -867,7 +869,7 @@ function schleife(jetzt) {
   /* Namensschilder und Sprechblasen */
   const W = el.clientWidth, H = el.clientHeight, fern = rad > 20 && !fokus;
   leute.forEach(m => {
-    m.fig.kopf.getWorldPosition(v); v.y += .55; v.project(cam);
+    m.fig.orb.getWorldPosition(v); v.y += .2; v.project(cam); // Schild über dem Status-Kristall, nicht davor
     const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H;
     m.div.className = "schild" + (fern ? " fern" : ""); m.div.style.opacity = v.z > 1 ? 0 : fokus && fokus !== m ? .35 : 1;
     const lb = m.div.querySelector("b"); lb.style.background = LAMPE[m.lampe || "aus"]; lb.style.boxShadow = "0 0 8px " + LAMPE[m.lampe || "aus"]; const txt = m.lampe === "aus" && m.status !== "wartet" && !m.route.length ? LAMPE_TEXT.aus : statusText(m), stel = m.div.querySelector(".st"); if (stel.textContent !== txt) stel.textContent = txt;
