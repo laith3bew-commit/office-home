@@ -201,14 +201,47 @@ function memInfo(root) {
   const ws = (Array.isArray(cfg.workstations) ? cfg.workstations : []).filter(w => w && w.path).map(w => ({ slug: String(w.slug || w.path), path: String(w.path) }));
   return { root, workstations: ws };
 }
-// Nur Arbeitsbereiche aus der Konfiguration zulassen; '' = Hauptordner.
+// Erlaubt: '' = Hauptordner, ein Arbeitsbereich aus der Konfiguration oder ein vorhandener Unterordner
+// im Memory-Ordner (z. B. „Fa. Akili/Maha“ als Ordner einer Person). Nie außerhalb, nie in .memory selbst.
 function memWsDir(info, wsPath) {
   if (!wsPath) return info.root;
-  const w = info.workstations.find(x => x.path === wsPath);
-  if (!w) throw new Error('Unbekannter Arbeitsbereich: ' + wsPath);
-  const dir = path.resolve(info.root, w.path);
-  if (!dir.startsWith(path.resolve(info.root) + path.sep)) throw new Error('Ungültiger Arbeitsbereich.');
+  const root = path.resolve(info.root);
+  const dir = path.resolve(root, String(wsPath));
+  if (!dir.startsWith(root + path.sep)) throw new Error('Ordner liegt nicht im Memory-Ordner.');
+  const rel = path.relative(root, dir).split(path.sep);
+  if (rel.some(s => s === '.memory' || s === '.git' || s === '..')) throw new Error('Ungültiger Ordner.');
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) throw new Error('Ordner nicht gefunden: ' + wsPath);
+  let real = dir; try { real = fs.realpathSync(dir); } catch (e) {}
+  let realRoot = root; try { realRoot = fs.realpathSync(root); } catch (e) {}
+  if (real !== realRoot && !real.startsWith(realRoot + path.sep)) throw new Error('Ordner liegt nicht im Memory-Ordner.');
   return dir;
+}
+const relSlash = (root, abs) => path.relative(path.resolve(root), abs).split(path.sep).join('/');
+// Einfache Textsuche in .md/.txt-Dateien eines Personenordners (inkl. festgehaltener Notizen unter .memory/office-home).
+function memLocalSearch(root, dir, query, max) {
+  const terms = String(query).toLowerCase().split(/\s+/).filter(w => w.length > 1); if (!terms.length) return [];
+  const hits = []; let seen = 0;
+  const walk = (d, depth, inMem) => {
+    if (depth > 6 || seen > 4000) return;
+    let ents = []; try { ents = fs.readdirSync(d, { withFileTypes: true }); } catch (e) { return; }
+    for (const en of ents) {
+      const f = path.join(d, en.name);
+      if (en.isSymbolicLink()) continue;
+      if (en.isDirectory()) {
+        if (en.name === '.memory') { const oh = path.join(f, 'office-home'); if (fs.existsSync(oh)) walk(oh, depth + 1, true); continue; }
+        if (en.name.startsWith('.') || en.name === 'node_modules') continue;
+        walk(f, depth + 1, inMem); continue;
+      }
+      if (!/\.(md|txt)$/i.test(en.name)) continue; seen++;
+      let txt = ''; try { if (fs.statSync(f).size > 1024 * 1024) continue; txt = fs.readFileSync(f, 'utf8'); } catch (e) { continue; }
+      const low = txt.toLowerCase(); if (!terms.every(w => low.includes(w))) continue;
+      const i = low.indexOf(terms[0]); const snip = txt.slice(Math.max(0, i - 120), i + 280).replace(/\s+/g, ' ').trim();
+      const tm = txt.match(/^#\s+(.+)$/m);
+      hits.push({ scope: 'ordner', title: tm ? tm[1].trim() : en.name.replace(/\.(md|txt)$/i, ''), path: relSlash(root, f), snippet: snip, mtime: fs.statSync(f).mtimeMs });
+    }
+  };
+  walk(dir, 0, false);
+  return hits.sort((a, b) => b.mtime - a.mtime).slice(0, max || 8).map(h => { delete h.mtime; return h; });
 }
 const oneLine = (s, n) => String(s || '').replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, n || 200);
 const slugify = s => oneLine(s, 200).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
@@ -238,12 +271,50 @@ ipcMain.handle('oh:memPickRoot', async e => {
 ipcMain.handle('oh:memStatus', async (e, root) => {
   try { return Object.assign({ ok: true }, memInfo(root)); } catch (err) { return { ok: false, message: err.message }; }
 });
-ipcMain.handle('oh:memSearch', async (e, root, wsPath, query) => {
+// strict = Ordner einer Person: nur Treffer, deren Datei in diesem Ordner liegt (Engine + eigene Textsuche).
+ipcMain.handle('oh:memSearch', async (e, root, wsPath, query, strict) => {
   try {
     const info = memInfo(root); const q = oneLine(query, 300);
     if (!q) return { ok: true, hits: [] };
-    const out = await memRun(root, ['search', q, '--cwd', memWsDir(info, wsPath), '-n', '8']);
-    return { ok: true, hits: parseSearch(out) };
+    const dir = memWsDir(info, wsPath);
+    let hits = [];
+    try { hits = parseSearch(await memRun(root, ['search', q, '--cwd', dir, '-n', strict ? '40' : '8'])); } catch (err) { if (!strict) throw err; }
+    if (strict && wsPath) {
+      const pre = relSlash(root, dir) + '/';
+      hits = hits.filter(h => (h.path || '').replace(/\\/g, '/').startsWith(pre));
+      const known = new Set(hits.map(h => h.path));
+      for (const h of memLocalSearch(root, dir, q, 8)) if (!known.has(h.path)) hits.push(h);
+      hits = hits.slice(0, 10);
+    }
+    return { ok: true, hits };
+  } catch (err) { return { ok: false, message: err.message }; }
+});
+// Kopie einer hochgeladenen Datei in den Ordner der Person im Gedächtnis: <Ordner>/Home Office Eingang/<Datum>-<Name>
+ipcMain.handle('oh:memCopyFile', async (e, root, wsPath, name, buf) => {
+  try {
+    const info = memInfo(root); if (!wsPath) throw new Error('Kein Ordner für diese Person gewählt.');
+    const dir = path.join(memWsDir(info, wsPath), 'Home Office Eingang'); fs.mkdirSync(dir, { recursive: true });
+    const clean = String(name || 'Dokument').replace(/[\\/:*?"<>|\x00-\x1f]/g, '').replace(/^\.+/, '').trim().slice(0, 120) || 'Dokument';
+    const date = new Date().toISOString().slice(0, 10);
+    const ext = path.extname(clean), base = clean.slice(0, clean.length - ext.length);
+    let file = path.join(dir, `${date}-${base}${ext}`); let k = 2;
+    while (fs.existsSync(file)) file = path.join(dir, `${date}-${base}-${k++}${ext}`);
+    fs.writeFileSync(file, Buffer.from(buf));
+    return { ok: true, file: relSlash(info.root, file) };
+  } catch (err) { return { ok: false, message: err.message }; }
+});
+// Ordner einer Person wählen: nur Unterordner des Memory-Ordners; Rückgabe relativ (z. B. „Fa. Akili/Maha“).
+ipcMain.handle('oh:memPickDir', async (e, root, current) => {
+  try {
+    const info = memInfo(root); const w = BrowserWindow.fromWebContents(e.sender);
+    let start = info.root; try { if (current) start = memWsDir(info, current); } catch (err) {}
+    const r = dialog.showOpenDialogSync(w, { title: 'Ordner der Person im Gedächtnis wählen', defaultPath: start, properties: ['openDirectory'] });
+    if (!r || !r[0]) return { ok: false, cancel: true };
+    const dir = path.resolve(r[0]);
+    if (dir === path.resolve(info.root)) return { ok: false, message: 'Bitte nicht den ganzen Memory-Ordner wählen, sondern den Ordner der Person darin.' };
+    const rel = relSlash(info.root, dir);
+    memWsDir(info, rel);
+    return { ok: true, rel };
   } catch (err) { return { ok: false, message: err.message }; }
 });
 // Notiz festhalten: <Arbeitsbereich>/.memory/office-home/JJJJ-MM/<datum>-<titel>.md, danach Index aktualisieren.

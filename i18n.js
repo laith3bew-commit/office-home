@@ -204,7 +204,29 @@ Object.assign(W, {
   'Lädt die Vollmacht in deinen Google Drive (Ordner „Home Office – Vollmachten“). Jeder mit dem Link kann sie ansehen und drucken.': 'يرفع الوكالة إلى Google Drive (مجلد «Home Office – Vollmachten»). كل من لديه الرابط يستطيع عرضها وطباعتها.',
   'Logo oben rechts': 'الشعار أعلى اليمين', 'Link zur Vollmacht unter dem Text': 'رابط الوكالة تحت النص', 'Verträge': 'العقود',
   '4 · Unterschrift, Logo, Vollmacht & Internetmarke': '4 · التوقيع والشعار والوكالة وطابع البريد',
-  'Nur im Desktop-Programm verfügbar.': 'متاح فقط في برنامج سطح المكتب.', 'Drive': 'Drive', 'ohne Drive': 'بدون Drive'
+  'Nur im Desktop-Programm verfügbar.': 'متاح فقط في برنامج سطح المكتب.', 'Drive': 'Drive', 'ohne Drive': 'بدون Drive',
+  'Menü einklappen': 'طي القائمة', 'Menü ausklappen': 'فتح القائمة',
+  'Nächste freie Marke': 'الطابع الفاضي الجاي', 'Marke wählen': 'اختيار طابع', 'Marken-PDF laden': 'رفع PDF الطوابع', 'Internetmarken – Vorrat': 'مخزون طوابع البريد', 'benutzt': 'مستخدم',
+  'Als benutzt markieren': 'تعليم كمستخدم', 'Wieder frei': 'إرجاعه فاضي', 'Benutzte entfernen': 'حذف المستخدمة', 'Ausgewählte übernehmen': 'اعتماد المختار', 'Porto je Marke (€)': 'سعر الطابع (€)',
+  'oder einzelne Marke als Bild laden': 'أو رفع طابع واحد كصورة', 'keine Marke': 'بدون طابع', 'eigenes Bild': 'صورة خاصة', 'für einen Brief reserviert': 'محجوز لرسالة', 'Schließen': 'إغلاق',
+  'Mitteilungen': 'الإشعارات', 'Alle gelesen': 'تعليم الكل كمقروء', 'Heute': 'اليوم', 'Früher': 'سابقاً', 'Keine Mitteilungen.': 'لا توجد إشعارات.', 'Was ist neu?': 'شو الجديد؟',
+  'Erinnerungen einstellen': 'ضبط التذكيرات', 'gerade eben': 'هلق', 'Erinnerung': 'تذكير', 'Update': 'تحديث', 'Büro': 'المكتب', 'Hinweis': 'تنبيه', 'Neu': 'جديد',
+  'Fragen ans Gedächtnis und an deine Dokumente': 'أسئلة للذاكرة ولمستنداتك', 'Schnellaktionen': 'إجراءات سريعة', 'Datei hochladen': 'رفع ملف', 'Offene Rückfragen': 'الأسئلة المفتوحة',
+  'Fristen heute & diese Woche': 'مهل اليوم وهذا الأسبوع', 'Dokumente durchsuchen': 'البحث في المستندات', 'Antwort': 'الجواب', 'Neue Anfrage': 'سؤال جديد', 'Du': 'أنت', 'Gedächtnis': 'الذاكرة',
+  'Anlegen': 'إنشاء', 'Abbrechen': 'إلغاء', 'Brief öffnen': 'فتح الرسالة', 'Andere Vorlage': 'قالب آخر', 'Öffnen': 'فتح', 'Im Büro zeigen': 'عرض في المكتب', 'Im Kalender ansehen': 'عرض في التقويم',
+  'Neue Frist anlegen?': 'إنشاء مهلة جديدة؟', 'Brief mit Vorlage öffnen?': 'فتح رسالة بقالب؟', 'Neuen Brief öffnen?': 'فتح رسالة جديدة؟', 'Für wen ist die Datei?': 'لمن هذا الملف؟',
+  'Es gibt keine offenen Rückfragen.': 'لا توجد أسئلة مفتوحة.', 'Diese Woche ist nichts fällig.': 'لا شيء مستحق هذا الأسبوع.', 'Andere Schreibweisen': 'كتابات أخرى للاسم',
+  'Mit Vorlage beginnen': 'ابدأ من قالب', 'Alle Vorlagen': 'كل القوالب', 'Vorlage wählen': 'اختيار قالب', 'keine Vorlage': 'بدون قالب', 'Keine Vorlage gefunden.': 'لم يتم العثور على قالب.',
+  'Häufig genutzt': 'الأكثر استخداماً', 'Arbeit & Beruf': 'العمل والمهنة', 'Bank & Konto': 'البنك والحساب', 'Briefvorlagen & DIN 5008': 'قوالب الرسائل وDIN 5008', 'Datenschutz': 'حماية البيانات',
+  'Familie & Kinder': 'العائلة والأطفال', 'Finanzamt & Steuern': 'الضرائب', 'Gewerbe & Selbstständigkeit': 'التجارة والعمل الحر', 'Handy, Internet & TV': 'الجوال والإنترنت والتلفاز', 'Hausrecht': 'حق المنزل',
+  'Inkasso & Forderungen': 'التحصيل والمطالبات', 'Jobcenter & Sozialleistungen': 'الجوب سنتر والمساعدات', 'Kauf & Reklamation': 'الشراء والشكاوى', 'Kfz & Fahrzeug': 'السيارة', 'Krankenkasse': 'التأمين الصحي',
+  'Kündigungen': 'الإلغاءات', 'Mahnen & Rechnungen': 'التذكير والفواتير', 'Personal & Arbeitgeber': 'الموظفون وصاحب العمل', 'Reise & Verkehr': 'السفر والمواصلات', 'Rente & Altersvorsorge': 'التقاعد',
+  'Rundfunkbeitrag': 'رسوم البث', 'Schule & Studium': 'المدرسة والدراسة', 'Urkunden & Bescheinigungen': 'الوثائق والشهادات', 'Versicherung': 'التأمين', 'Verträge & Abos': 'العقود والاشتراكات',
+  'Vollmacht & Bürgschaft': 'الوكالة والكفالة', 'Widerruf': 'التراجع (Widerruf)', 'Widerspruch & Einspruch': 'الاعتراض', 'Wohnen & Miete': 'السكن والإيجار', 'Eigene Vorlagen': 'قوالبي',
+  'Ändern': 'تغيير', 'Ordner wählen': 'اختيار المجلد', 'noch kein Ordner gewählt – Gedächtnis für diese Person aus': 'لم يتم اختيار مجلد بعد – الذاكرة متوقفة لهذا الشخص',
+  'Ganzer Arbeitsbereich gewählt – liegen darin auch andere Personen, besser deren Unterordner wählen.': 'تم اختيار مساحة عمل كاملة – إذا كان فيها أشخاص آخرون، الأفضل اختيار المجلد الفرعي.',
+  'Jede Person bekommt ihren eigenen Ordner im Memory-Ordner (z. B. „Fa. Akili › Maha“). Für eine Person liest Home Office nur Treffer aus diesem Ordner und schreibt nur dorthin (Notizen unter „<Ordner>/.memory/office-home/“). Neue Personen fragen beim Anlegen nach ihrem Ordner. Erinnerungen landen in der Aufgabenliste des Gedächtnisses (Dashboard → Tasks). Keine Passwörter oder PINs in festgehaltene Texte schreiben.':
+    'لكل شخص مجلده الخاص داخل مجلد الذاكرة (مثلاً «Fa. Akili › Maha»). لهذا الشخص يقرأ Home Office فقط من هذا المجلد ويكتب فيه فقط. عند إضافة شخص جديد يسألك البرنامج عن مجلده. التذكيرات تذهب لقائمة مهام الذاكرة. لا تكتب كلمات سر أو PIN في النصوص المحفوظة.'
 });
 const MON_RE = new RegExp('\\b(' + Object.keys(MON).join('|') + ')\\b', 'g');
 const Z = '([\\d.,]+)';
@@ -234,7 +256,8 @@ const R = [
   [/^Letzter Tag zum Kündigen – das Vertragsende wäre am (.+)$/, (m, a) => 'آخر يوم للإلغاء – نهاية العقد ستكون في ' + a], [/^Feste Zahlung · (.+)$/, (m, a) => 'دفعة ثابتة · ' + T(a)],
   [/^Kündigungsfrist (.+)$/, (m, a) => 'مهلة الإلغاء: ' + a], [/^Kündigungsfrist: (.+)$/, (m, a) => 'مهلة الإلغاء: ' + a], [/^· Laufzeit bis (.+)$/, (m, a) => '· المدة حتى ' + a],
   [/^(Mo|Di|Mi|Do|Fr|Sa|So) (\d+\.(\d+\.)?)$/, (m, a, b) => TAG[a] + ' ' + b], [/^(.+) \((\d+)\)$/, (m, a, b) => (W[a] ? W[a] + ' (' + b + ')' : null)],
-  [/^Rückfrage geklärt: (.+)$/, (m, a) => 'تم توضيح السؤال: ' + T(a)], [/^Version (\S+) verfügbar\.?$/, (m, a) => 'النسخة ' + a + ' متوفرة.'], [/^Neue Version (\S+) verfügbar$/, (m, a) => 'نسخة جديدة ' + a + ' متوفرة']
+  [/^Rückfrage geklärt: (.+)$/, (m, a) => 'تم توضيح السؤال: ' + T(a)], [/^Version (\S+) verfügbar\.?$/, (m, a) => 'النسخة ' + a + ' متوفرة.'], [/^Neue Version (\S+) verfügbar$/, (m, a) => 'نسخة جديدة ' + a + ' متوفرة'],
+  [/^Ordner von (.+)$/, (m, a) => 'مجلد ' + T(a)], [/^Überschneidet sich mit (.+) – bitte für jede Person einen eigenen Ordner wählen\.$/, (m, a) => 'يتداخل مع ' + a + ' – اختر مجلداً خاصاً لكل شخص.']
 ];
 /* ---------- Büro (3D): Rollen, Status, Sprechblasen – Namen bleiben deutsch ---------- */
 Object.assign(W, {

@@ -237,7 +237,7 @@ html[dir=rtl] .langsw button{font-family:'Manrope','IBM Plex Sans Arabic',sans-s
 .letter .l-ret{font-size:7pt;padding-top:1.5mm;color:#222;max-width:80mm}
 .letter .l-field.hasm .l-ret{max-width:38mm}
 .letter .l-verm{font-size:9pt;font-weight:700;margin-top:1.5mm}
-.letter .l-marke{position:absolute;right:0;top:0;max-width:42mm;max-height:17.5mm}
+.letter .l-marke{position:absolute;right:0;top:0;max-width:42mm;max-height:17.5mm;z-index:1}
 .letter .l-addr{height:27.3mm;padding-left:5mm;overflow:hidden}
 .letter .l-info{position:absolute;left:125mm;top:50mm;width:75mm;font-size:8.5pt;border-collapse:collapse}
 .letter .l-info td{padding:0 2mm .7mm 0;vertical-align:top}
@@ -325,6 +325,166 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 .dstile.on{border-color:var(--accent2);background:var(--accent-soft)}
 .dstile .pv{width:168px;height:238px;overflow:hidden;text-align:left;margin-bottom:6px;border:1px solid var(--line);background:#fff}
 .dstile .pv .letter{transform:scale(.21);transform-origin:top left;box-shadow:none;pointer-events:none}
+/* Internetmarken-Vorrat */
+.modal.mkwin{width:min(900px,96vw);max-height:90vh;display:flex;flex-direction:column}
+.mkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;overflow:auto;padding:2px;margin-bottom:10px}
+.mkt{position:relative;display:flex;flex-direction:column;gap:4px;align-items:stretch;border:2px solid var(--line);border-radius:14px;background:#fff;color:#1B2A44;padding:6px;font:inherit;font-size:12px;cursor:pointer;text-align:start;overflow:hidden}
+.mkt img{width:100%;height:96px;object-fit:contain;background:#fff;border-radius:8px}
+.mkt span{font-weight:600}
+.mkt small{color:#4F6785}
+.mkt.on{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(79,103,133,.2)}
+#mkNeu .mkt:not(.on){opacity:.35}
+#mkNeu .mkt:not(.on)::after{content:'abgewählt';position:absolute;top:36px;left:0;right:0;text-align:center;font-weight:700;color:#A33A3A}
+.mkt.used img{opacity:.35;filter:grayscale(1)}
+.mkt.res{border-style:dashed}
+.mkstamp{position:absolute;top:28px;left:50%;transform:translateX(-50%) rotate(-14deg);font-style:normal;font-weight:800;font-size:20px;letter-spacing:.12em;text-transform:uppercase;color:#A33A3A;border:3px solid #A33A3A;border-radius:8px;padding:2px 10px;background:rgba(255,255,255,.75)}
+.mkacts{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.mkinfo{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0}
+/* Glocke + Mitteilungszentrale */
+.bell{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none;transition:background .15s}
+.bell:hover{background:var(--accent-soft)}
+.bell .i{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bell.has .i{animation:bellwag 2.4s ease 1}
+@keyframes bellwag{0%,100%{transform:rotate(0)}10%{transform:rotate(14deg)}20%{transform:rotate(-12deg)}30%{transform:rotate(8deg)}40%{transform:rotate(-4deg)}50%{transform:rotate(0)}}
+.bellcnt{position:absolute;top:-4px;inset-inline-end:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#A33A3A;color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;box-sizing:border-box;border:2px solid var(--bg)}
+#mzPanel{position:fixed;z-index:950;max-height:min(560px,calc(100vh - 90px));display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 50px rgba(27,42,68,.25);
+  opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .18s,transform .18s}
+#mzPanel.on{opacity:1;transform:none;pointer-events:auto}
+#mzPanel .grow{flex:1;min-width:0}
+.mzhead{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line2,var(--line))}
+.mzhead b{display:flex;gap:8px;align-items:center;font-size:14px}
+.mzlist{overflow:auto;padding:6px 8px;flex:1;min-height:60px}
+.mzlist .empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 0;color:var(--muted)}
+.mzgrp{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 6px 4px}
+.mzitem{display:flex;gap:10px;align-items:flex-start;padding:9px 8px;border-radius:12px;position:relative}
+.mzitem:hover{background:var(--hover)}
+.mzitem.link{cursor:pointer}
+.mzitem.neu::before{content:'';position:absolute;inset-inline-start:-2px;top:16px;width:6px;height:6px;border-radius:3px;background:var(--accent2)}
+.mzitem.neu .mzt{font-weight:700}
+.mzt{font-size:13.5px;line-height:1.35}
+.mzitem ul{margin:3px 0 3px;padding-inline-start:16px;font-size:12.5px;color:var(--ink);opacity:.85}
+.mzic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent2);flex:none}
+.mzic svg{width:15px;height:15px}
+.mzic.t-erinnerung,.mzic.t-frist{background:color-mix(in srgb,#C08A2E 18%,transparent);color:#9A6B1E}
+.mzic.t-update,.mzic.t-neu{background:color-mix(in srgb,#3f7d5a 16%,transparent);color:var(--ok,#3f7d5a)}
+.mzx{border:0;background:none;color:var(--muted);cursor:pointer;opacity:0;padding:2px}
+.mzx svg{width:13px;height:13px}
+.mzitem:hover .mzx{opacity:1}
+.mzfoot{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line2,var(--line))}
+/* Fenster „Neu in dieser Version“ */
+.modal.neuwin{width:min(560px,94vw);max-height:86vh;display:flex;flex-direction:column}
+.neuhero{display:flex;gap:14px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line2,var(--line));margin-bottom:10px}
+.neuhero h3{margin:2px 0 0}
+.neulogo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#4F6785,#1B2A44);color:#F4F0E8;display:grid;place-items:center;box-shadow:0 0 18px rgba(79,103,133,.45);flex:none}
+.neulogo svg{width:22px;height:22px}
+.neulist{overflow:auto;display:flex;flex-direction:column;gap:12px;padding-inline-end:4px}
+.neuvh{display:flex;gap:10px;align-items:baseline}
+.neuv ul{margin:6px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
+.neuv ul li::marker{color:var(--accent2)}
+/* Command (Strg+K): schwebender Knopf + Glasfenster */
+#cmdOrb{position:fixed;z-index:900;width:56px;height:56px;border-radius:50%;border:1px solid rgba(169,184,202,.55);cursor:grab;padding:0;touch-action:none;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55),rgba(169,184,202,.28) 45%,rgba(27,42,68,.18) 75%);backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
+  box-shadow:0 8px 24px rgba(27,42,68,.25),inset 0 0 0 1px rgba(255,255,255,.35);display:grid;place-items:center;transition:transform .2s,box-shadow .2s;opacity:.86}
+#cmdOrb:hover,#cmdOrb.on{opacity:1;transform:scale(1.06);box-shadow:0 10px 30px rgba(27,42,68,.35),0 0 0 4px rgba(79,103,133,.18)}
+#cmdOrb:active{cursor:grabbing}
+#cmdOrb .core{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,#4F6785,#1B2A44);color:#F4F0E8;display:grid;place-items:center;box-shadow:0 0 14px rgba(79,103,133,.7)}
+#cmdOrb .core svg{width:16px;height:16px}
+#cmdPanel{position:fixed;z-index:901;display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:22px;box-sizing:border-box;color:var(--ink);
+  background:color-mix(in srgb,var(--panel) 86%,transparent);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  border:1px solid var(--line);box-shadow:0 24px 60px rgba(27,42,68,.28);transform:scale(.4);opacity:0;filter:blur(8px);pointer-events:none;
+  transition:transform .38s cubic-bezier(.2,.9,.25,1.05),opacity .25s ease,filter .3s ease}
+#cmdPanel.on{transform:scale(1);opacity:1;filter:blur(0);pointer-events:auto}
+#cmdPanel .grow{flex:1;min-width:0}
+.cmdhead{display:flex;align-items:center;gap:10px}
+.cmdhead b{font-size:14px}
+.cmdlogo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#4F6785,#1B2A44);color:#F4F0E8;display:grid;place-items:center;box-shadow:0 0 14px rgba(79,103,133,.5)}
+.cmdhead kbd{font:600 10px var(--font,inherit);color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+.cmdx{width:28px;height:28px;border-radius:9px;border:0;background:var(--hover);color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.cmdfield{display:flex;gap:8px;align-items:center;padding:5px 5px 5px 14px;border-radius:16px;background:var(--bg,var(--hover));border:1px solid var(--line)}
+.cmdfield input{flex:1;min-width:0;height:34px;border:0;outline:0;background:none;color:var(--ink);font:inherit;font-size:14px;padding:0}
+.cmdfield button{width:36px;height:36px;border-radius:12px;border:0;background:linear-gradient(135deg,#4F6785,#1B2A44);color:#F4F0E8;cursor:pointer;display:grid;place-items:center}
+.cmdfield button:disabled{opacity:.45;cursor:default}
+.cmdbody{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
+.cmdq{align-self:flex-end;max-width:85%;padding:7px 12px;border-radius:14px 14px 4px 14px;background:var(--accent-soft);font-size:13px;font-weight:600}
+html[dir=rtl] .cmdq{align-self:flex-start;border-radius:14px 14px 14px 4px}
+.cmdroute{display:flex;align-items:flex-start;padding:4px 2px}
+.cmdroute .node{display:flex;flex-direction:column;align-items:center;gap:5px;width:64px;flex-shrink:0;color:var(--muted)}
+.cmdroute .node span{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;background:var(--hover);border:1px solid var(--line);transition:all .25s}
+.cmdroute .node span svg{width:15px;height:15px}
+.cmdroute .node em{font-style:normal;font-size:10px;font-weight:700;text-align:center;line-height:1.15;max-width:72px;overflow:hidden;text-overflow:ellipsis}
+.cmdroute .node.on{color:var(--ink)}
+.cmdroute .node.on span{background:var(--accent-soft)}
+.cmdroute .node.cur span{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(79,103,133,.18),0 0 12px rgba(79,103,133,.45)}
+.cmdroute .node.ok span{background:color-mix(in srgb,var(--ok,#3f7d5a) 18%,transparent)}
+.cmdroute .seg{flex:1;min-width:10px;height:2px;margin-top:15px;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+.cmdroute .seg.done{background:var(--accent2);opacity:.7}
+.cmdroute .seg.ok{background:var(--ok,#3f7d5a)}
+.cmdroute .seg.active,.cmdroute .seg.back{background:repeating-linear-gradient(90deg,var(--accent2) 0 5px,transparent 5px 10px);background-size:20px 2px;animation:cmdflow .6s linear infinite}
+.cmdroute .seg.back{animation-direction:reverse;background:repeating-linear-gradient(90deg,var(--ok,#3f7d5a) 0 5px,transparent 5px 10px)}
+@keyframes cmdflow{to{background-position:20px 0}}
+.cmdsteps{display:flex;align-items:center;gap:6px;border:0;background:none;padding:0;color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.cmdsteps svg,.cmdsteplist svg{width:14px;height:14px;color:var(--ok,#3f7d5a)}
+.cmdsteplist{display:flex;flex-direction:column;gap:5px}
+.cmdsteplist div{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.cmdsteplist div.cur{color:var(--ink);font-weight:700}
+.cmdsteplist .spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent2);border-top-color:transparent;animation:cmdspin 1s linear infinite;flex:none}
+@keyframes cmdspin{to{transform:rotate(360deg)}}
+.cmdans{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:var(--hover);border:1px solid var(--line);animation:cmdup .35s}
+@keyframes cmdup{from{opacity:0;transform:translateY(6px)}}
+.cmdans .lbl{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ok,#3f7d5a)}
+.cmdans .lbl i{width:6px;height:6px;border-radius:3px;background:currentColor;box-shadow:0 0 8px currentColor}
+.cmdans .txt{font-size:14px;font-weight:700;line-height:1.4}
+.cmdans .acts{display:flex;flex-wrap:wrap;gap:6px}
+.cmdval{padding:10px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.cmdval > div:nth-child(2){font-size:17px;font-weight:700;display:flex;align-items:center;gap:6px;margin:2px 0}
+.cmdhits{display:flex;flex-direction:column;gap:6px}
+.cmdhit{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.cmdhit b{display:flex;gap:6px;align-items:center;font-size:13px}
+.cmdhit b svg{width:14px;height:14px;flex:none}
+.cmdhit .btn{align-self:flex-start;margin-top:2px}
+.cmdrow{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:6px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line)}
+.cmdrow .muted{grid-column:2}
+.cmdrow.over{border-color:var(--danger)}
+.cmdsens{font-family:'Courier Prime',ui-monospace,monospace;background:var(--accent-soft);border-radius:6px;padding:0 5px;cursor:pointer;letter-spacing:.04em}
+.cmdsens.shown{background:color-mix(in srgb,#fde68a 60%,transparent)}
+.cmdcopy{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 2px;vertical-align:middle}
+.cmdcopy svg{width:13px;height:13px}
+.cmdfoot{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.cmdico{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:var(--hover);color:var(--accent2);cursor:pointer;display:grid;place-items:center}
+.cmdico svg{width:15px;height:15px}
+.cmdico:disabled{opacity:.5;cursor:default}
+.cmdlbl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.cmdgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmdtile{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--hover);color:var(--ink);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-align:start;line-height:1.25}
+.cmdtile:hover{background:var(--accent-soft)}
+.cmdtile svg{width:15px;height:15px;color:var(--accent2);flex:none}
+.cmdtile.sm{padding:6px 10px;font-size:11.5px;white-space:nowrap}
+.cmdtip{margin-top:10px;line-height:1.5}
+@media print{#cmdOrb,#cmdPanel{display:none!important}}
+/* Vorlagen: Kategorie-Kacheln und Auswahlfenster */
+.tplcats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.tplcat{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit;text-align:start;cursor:pointer}
+.tplcat:hover{background:var(--accent-soft);border-color:var(--accent2)}
+.tplcat span,.tplp nav button span{font-size:12px;color:var(--muted);background:var(--hover);border-radius:999px;padding:1px 8px}
+.modal.tplpick{width:min(980px,96vw);max-height:88vh;display:flex;flex-direction:column}
+.modal.tplpick h3{display:flex;gap:8px;align-items:center}
+.modal.tplpick #tplpQ{margin:4px 0 10px}
+.tplp{display:grid;grid-template-columns:240px minmax(0,1fr);gap:12px;min-height:0;flex:1;overflow:hidden}
+.tplp nav{overflow:auto;display:flex;flex-direction:column;gap:2px;padding-inline-end:4px}
+.tplp nav button{display:flex;justify-content:space-between;gap:6px;border:0;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;text-align:start;padding:7px 10px;border-radius:10px;cursor:pointer}
+.tplp nav button:hover{background:var(--hover)}
+.tplp nav button.on{background:var(--accent-soft);font-weight:600}
+#tplpList{overflow:auto;display:flex;flex-direction:column;gap:6px;padding-inline-end:4px}
+.tplphead{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent2);font-weight:600;margin:4px 2px}
+.tplpi{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:9px 12px;font:inherit;text-align:start;cursor:pointer}
+.tplpi:hover{border-color:var(--accent2);background:var(--accent-soft)}
+.tplpi .badge{margin-top:3px}
+.tplcur{flex:1;min-width:0;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--hover);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.letter mark[data-f]{cursor:pointer}
+.letter mark[data-f]:hover{background:#fbbf24;outline:1px solid #d97706}
+.gapflash{animation:gapflash 1.4s ease}
+@keyframes gapflash{0%,60%{box-shadow:0 0 0 3px #fbbf24}100%{box-shadow:0 0 0 0 transparent}}
+@media (max-width:700px){.tplp{grid-template-columns:1fr}.tplp nav{flex-direction:row;flex-wrap:wrap;max-height:120px}}
 /* Einstellungen: Abschnitte mit Seitenleiste */
 .setwrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
 .setnav{position:sticky;top:0;display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:8px}
@@ -377,7 +537,33 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 }
 @media (max-width:1100px){.brief{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
 .vbox,.card.vbox{max-width:620px}
-@media (max-width:800px){.app{grid-template-columns:1fr}.side{display:none}.g2,.g3{grid-template-columns:1fr}}
+/* Seitenleiste einklappbar: nur Symbole; beim Darüberfahren klappt sie als Overlay auf (.peek) */
+.logo .lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;font-size:22px}
+.logo{padding-inline-end:12px;gap:10px}
+.side{text-align:start;scrollbar-width:thin;scrollbar-color:rgba(169,184,202,.3) transparent}
+.sidetog{flex:none;width:30px;height:30px;border-radius:10px;border:1px solid rgba(169,184,202,.3);background:rgba(169,184,202,.08);color:#DDE4EC;display:grid;place-items:center;cursor:pointer;opacity:.75;transition:opacity .15s,background .15s}
+.sidetog:hover{opacity:1;background:var(--brand-hover)}
+.sidetog svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+html[dir=rtl] .sidetog svg{transform:scaleX(-1)}
+.nav a .lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav a.on .lbl + .cnt{margin-left:0}
+.app{transition:grid-template-columns .22s ease}
+.app.sidemini{grid-template-columns:72px 1fr}
+.app.sidemini .mainwrap{grid-column:2}
+.app.sidemini .side{scrollbar-width:none}
+.app.sidemini .side{position:fixed;inset-block:0;inset-inline-start:0;width:72px;z-index:880;overflow-x:hidden;transition:width .22s ease,box-shadow .22s ease}
+.app.sidemini .side.peek{width:240px;box-shadow:12px 0 40px rgba(27,42,68,.35)}
+html[dir=rtl] .app.sidemini .side.peek{box-shadow:-12px 0 40px rgba(27,42,68,.35)}
+.app.sidemini .sidetog svg{transform:rotate(180deg)}
+html[dir=rtl] .app.sidemini .sidetog svg{transform:scaleX(-1) rotate(180deg)}
+.app.sidemini .side:not(.peek) .logo{flex-direction:column;gap:10px;padding:18px 0 10px}
+.app.sidemini .side:not(.peek) .lbl,.app.sidemini .side:not(.peek) .foot,.app.sidemini .side:not(.peek) #updChip{display:none}
+.app.sidemini .side:not(.peek) .nav{padding:6px 10px}
+.app.sidemini .side:not(.peek) .nav .grp{font-size:0;padding:8px 0;margin:6px 8px;border-top:1px solid rgba(169,184,202,.18)}
+.app.sidemini .side:not(.peek) .nav a{justify-content:center;padding:9px 0;position:relative}
+.app.sidemini .side:not(.peek) .nav a.on::after{position:absolute;inset-inline-end:4px;top:50%;margin:-3px 0 0}
+.app.sidemini .side:not(.peek) .nav a .cnt{position:absolute;top:2px;inset-inline-end:6px;font-size:9.5px;padding:0 5px;margin:0}
+@media (max-width:800px){.app,.app.sidemini{grid-template-columns:1fr}.side,.app.sidemini .side{display:none}.g2,.g3{grid-template-columns:1fr}}
 
 /* Kalender (2.12) */
 .calhead{display:flex;align-items:center;gap:8px;margin:-6px 0 16px;flex-wrap:wrap} .calhead b.t{font-size:18px;font-weight:700;margin:0 6px}
@@ -423,9 +609,11 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 </head>
 <body>
 <script src="i18n.js"></script>
+<script src="vorlagen.js"></script>
 <div class="app">
   <aside class="side">
-    <div class="logo"><svg width="36" height="36" viewBox="0 0 200 200" aria-hidden="true"><rect x="6" y="6" width="188" height="188" rx="48" fill="#F4F0E8"/><path d="M84 64 V132 H124" fill="none" stroke="#1B2A44" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124" cy="70" r="9" fill="#4F6785"/></svg>Home Office</div>
+    <div class="logo"><svg width="36" height="36" viewBox="0 0 200 200" aria-hidden="true"><rect x="6" y="6" width="188" height="188" rx="48" fill="#F4F0E8"/><path d="M84 64 V132 H124" fill="none" stroke="#1B2A44" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124" cy="70" r="9" fill="#4F6785"/></svg><span class="lbl">Home Office</span>
+      <button class="sidetog" id="sideTog" type="button" aria-label="Menü einklappen" title="Menü einklappen"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/><path d="M20 5v14"/></svg></button></div>
     <nav class="nav" id="nav"></nav>
     <div id="updChip"></div>
     <div class="foot">Daten nur auf diesem Computer.<br><a href="#/settings">Datensicherung</a></div>
@@ -592,7 +780,7 @@ function defaultState(){
       cal: {ki:true, gLastSync:''}
     },
     persons: [p('p_vater', 'Vater', 'Herr', '#4F6785'), p('p_mutter', 'Mutter', 'Frau', '#A9B8CA')],
-    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[], events:[], gDeleted:[]
+    contacts:[], cases:[], tasks:[], contracts:[], documents:[], assets:[], notes:[], letters:[], templates:[], bookings:[], scans:[], events:[], gDeleted:[], mitteilungen:[], marken:[]
   };
 }
 let S = defaultState();
@@ -737,7 +925,7 @@ const isPrivate = c => !!c && c.kind === 'Privatperson';
 const F = {
   person: [
     {k:'role', l:'Bezeichnung (z. B. Vater)', req:1}, {k:'salutation', l:'Anrede', t:'select', o:['Herr','Frau','—']},
-    {k:'firstName', l:'Vorname'}, {k:'lastName', l:'Nachname'}, {k:'birth', l:'Geburtsdatum', t:'date'}, {k:'phone', l:'Telefon'},
+    {k:'firstName', l:'Vorname'}, {k:'lastName', l:'Nachname'}, {k:'alias', l:'Andere Schreibweisen', hint:'z. B. arabisch: مها، ماما – für die Frage-Leiste (Strg+K)'}, {k:'birth', l:'Geburtsdatum', t:'date'}, {k:'phone', l:'Telefon'},
     {k:'street', l:'Straße und Hausnummer'}, {k:'email', l:'E-Mail'}, {k:'zip', l:'PLZ'}, {k:'city', l:'Ort'},
     {k:'taxId', l:'Steuer-ID'}, {k:'pensionNo', l:'Rentenversicherungsnummer'},
     {k:'healthInsurance', l:'Krankenkasse & Versichertennummer', full:1},
@@ -796,7 +984,8 @@ function prefillPerson(){ return UI.person === 'all' ? '' : UI.person; }
 
 function editPerson(p){
   openForm({title: p ? 'Person bearbeiten' : 'Person hinzufügen', fields:F.person, data: p || {salutation:'Herr', color:'#4F6785'},
-    onSave: v => { upsert('persons', Object.assign(p || {id:uid()}, v)); render(); },
+    onSave: v => { const o = Object.assign(p || {id:uid()}, v); upsert('persons', o); render();
+      if (!p && memOn() && confirm(`Für ${o.role} jetzt den eigenen Ordner im Gedächtnis wählen? Home Office liest und schreibt für diese Person dann nur dort.`)) setTimeout(() => ACT.memPickDir({id:o.id}), 50); },
     onDelete: p && S.persons.length > 1 ? () => { remove('persons', p.id); if (UI.person === p.id) UI.person = 'all'; render(); } : null});
 }
 function editContact(c, after, preset = {}){
@@ -881,7 +1070,7 @@ const CASE_TEMPLATES = {
 };
 
 // ---------- Brief-Vorlagen (DIN 5008) ----------
-const BUILTIN_TEMPLATES = [
+const BASE_TEMPLATES = [
   {id:'vollmacht', name:'Anzeige der Bevollmächtigung', subject:'Anzeige der Bevollmächtigung – {Name}, geb. {Geburtsdatum}',
    body:'hiermit zeige ich an, dass ich {NameMitAnrede}, geboren am {Geburtsdatum}, wohnhaft {Anschrift}, vertrete.\n\n{VollmachtAbsatz}\n\nIch bitte Sie, Ihre Korrespondenz in dieser Angelegenheit künftig an mich zu richten und mich über alle laufenden Vorgänge zu informieren.\n\nBitte bestätigen Sie mir den Eingang dieses Schreibens.'},
   {id:'kuendigung', name:'Kündigung eines Vertrags', subject:'Kündigung des Vertrags – Kundennummer {Kundennummer}',
@@ -942,9 +1131,14 @@ const BUILTIN_TEMPLATES = [
   {id:'rv_formlos', cat:'Rente', name:'Formloser Rentenantrag (fristwahrend)', subject:'Formloser Antrag auf [Altersrente / Erwerbsminderungsrente / Hinterbliebenenrente] – Versicherungsnummer {Rentenversicherungsnummer}',
    body:'hiermit beantrage ich{Vertretung} fristwahrend [Leistung] ab dem [Datum].\n\nBitte senden Sie mir die erforderlichen Antragsformulare zu. Die vollständigen Unterlagen reiche ich umgehend nach.\n\nBitte bestätigen Sie mir den Eingang dieses Antrags.{VollmachtAbsatz}'}
 ];
-const TPL_CATS = ['Allgemein', 'Jobcenter / Sozialamt', 'Krankenkasse', 'Pflegekasse', 'Rente', 'Eigene Vorlagen'];
-const tplCat = t => t.custom ? 'Eigene Vorlagen' : (t.cat || 'Allgemein');
+// Katalog (vorlagen.js): Kategorien und Reihenfolge wie brief-wechsel.de, Texte eigene Formulierungen
+const BUILTIN_TEMPLATES = [...BASE_TEMPLATES, ...(window.TPL_EXTRA || [])];
+const TPL_KAT = (window.TPL_KAT || []).map(c => ({k:c.k, ids:c.ids.filter(id => BUILTIN_TEMPLATES.some(t => t.id === id))}));
+const TPL_CATS = [...TPL_KAT.map(c => c.k), 'Eigene Vorlagen'];
+const tplCatIds = k => k === 'Eigene Vorlagen' ? S.templates.map(t => t.id) : ((TPL_KAT.find(c => c.k === k) || {}).ids || []);
+const tplCat = t => t.custom ? 'Eigene Vorlagen' : ((TPL_KAT.find(c => c.ids.includes(t.id)) || {}).k || 'Häufig genutzt');
 const allTemplates = () => [...BUILTIN_TEMPLATES, ...S.templates];
+const tplById = id => allTemplates().find(t => t.id === id);
 const PLACEHOLDERS = ['Name','NameMitAnrede','Geburtsdatum','Anschrift','Aktenzeichen','Kundennummer','Krankenkasse','Rentenversicherungsnummer','SteuerID','Vertretung','VollmachtAbsatz','Datum'];
 
 // ---------- Navigation ----------
@@ -964,7 +1158,7 @@ function parseHash(){
 function renderNav(route){
   const act = ROUTE_NAV[route] ?? route;
   $('#nav').innerHTML = NAV.map(n => n.grp ? `<div class="grp">${n.grp}</div>` : (() => { const c = n.cnt ? n.cnt() : 0;
-    return `<a href="#/${n.r}" class="${act === n.r ? 'on' : ''}">${icon(n.i)}${n.l}${c ? `<span class="cnt">${c}</span>` : ''}</a>`; })()).join('');
+    return `<a href="#/${n.r}" class="${act === n.r ? 'on' : ''}" title="${esc(n.l)}">${icon(n.i)}<span class="lbl">${n.l}</span>${c ? `<span class="cnt">${c}</span>` : ''}</a>`; })()).join('');
   $('#modesw').innerHTML = modeSwitchHTML();
   $('#pills').innerHTML = `<button class="pill ${UI.person === 'all' ? 'on' : ''}" data-act="pfilter" data-id="all">Alle</button>` +
     S.persons.map(p => `<button class="pill ${UI.person === p.id ? 'on' : ''}" data-act="pfilter" data-id="${p.id}"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}</button>`).join('');
@@ -1656,8 +1850,9 @@ AFTER.contacts = () => {
 VIEWS.letters = () => {
   const list = byPerson(S.letters).sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
   return `<div class="head"><div class="grow"><h1>Brief schreiben</h1><p class="sub" style="margin:0">Briefe nach DIN 5008 mit fertigen Vorlagen – Daten, Unterschrift und Vollmachtshinweis werden automatisch eingesetzt.</p></div><a class="btn pri" href="#/brief/new">${icon('plus')}Neuer Brief</a></div>
-  <div class="card"><h3>Schnellstart mit Vorlage</h3>${TPL_CATS.filter(c => c !== 'Eigene Vorlagen').map(cat => { const L = BUILTIN_TEMPLATES.filter(t => tplCat(t) === cat);
-    return L.length ? `<div class="small muted" style="font-weight:600;margin:10px 0 6px">${esc(cat)}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${L.map(t => `<a class="btn sm" href="#/brief/new?tpl=${t.id}">${esc(t.name)}</a>`).join('')}</div>` : ''; }).join('')}</div>
+  <div class="card"><h3>Mit Vorlage beginnen</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input id="tplQ" placeholder="Vorlage suchen … z. B. Kündigung, Widerspruch, Pflegegrad" style="flex:1;min-width:240px"><button class="btn pri" data-act="tplPick">${icon('vorlage')}Alle Vorlagen</button></div>
+    <div class="tplcats">${TPL_CATS.map(k => { const n = tplCatIds(k).length; return n ? `<button class="tplcat" data-act="tplPick" data-id="${esc(k)}"><b>${esc(k)}</b><span>${n}</span></button>` : ''; }).join('')}</div></div>
   <div class="card" style="padding:6px 8px"><h3 style="padding:8px 10px 0">Gespeicherte Briefe</h3>${list.length ? `<table class="t"><tr><th>Datum</th><th>Betreff</th><th>Empfänger</th><th>Person</th><th>Versand</th><th></th></tr>
   ${list.map(l => `<tr class="click" data-go="#/brief/${l.id}"><td class="small">${fmtDate(l.date)}</td><td><b>${esc(letterSubject(l))}</b></td><td class="small">${esc((l.recipient || '').split('\n')[0])}</td><td>${personChip(l.personId)}</td><td class="small">${esc(l.shipping || '')}</td>
   <td class="act"><button class="btn sm" data-act="dupLetter" data-id="${l.id}" data-stop="1">${icon('kopieren')}Kopie</button> <button class="btn sm dan" data-act="delLetter" data-id="${l.id}" data-stop="1">${icon('loeschen')}Löschen</button></td></tr>`).join('')}</table>` : '<div class="empty">Noch keine Briefe gespeichert.</div>'}</div>
@@ -1712,8 +1907,9 @@ function poaLinkOf(L){
   return (L.usePoaLink ?? S.settings.letter.poaLink) !== false ? p.poaShare.link : '';
 }
 function logoOn(L){ return !!(senderIsMe(L) && S.settings.stamp && (L.useLogo ?? S.settings.letter.logoAlways)); }
-function markHTML(s){ return esc(s).replace(/(\{[^{}\n]+\}|\[[^\[\]\n]+\])/g, '<mark>$1</mark>'); }
-function paras(s){ return s.split(/\n\s*\n/).map(p => `<p>${markHTML(p).replace(/\n/g, '<br>')}</p>`).join(''); }
+// f = Feld im Formular (recipient, subject, salutation, body, closing); Klick auf die gelbe Stelle springt dorthin
+function markHTML(s, f){ return esc(s).replace(/(\{[^{}\n]+\}|\[[^\[\]\n]+\])/g, f ? `<mark data-f="${f}" title="Klicken: zum Feld springen">$1</mark>` : '<mark>$1</mark>'); }
+function paras(s, f){ return s.split(/\n\s*\n/).map(p => `<p>${markHTML(p, f).replace(/\n/g, '<br>')}</p>`).join(''); }
 const LETTER_DESIGNS = [
   {v:'klassisch', l:'Klassisch', d:'Schlicht, Name fett oben links'},
   {v:'modern', l:'Modern', d:'Name und Linie in Akzentfarbe'},
@@ -1745,19 +1941,21 @@ function letterHTML(L, design, opt = {}){
   if (bev && !poaLink && !anl.some(a => /vollmacht/i.test(a)) && /Vollmacht/.test(applyVars(L.body, L))) anl.unshift('Kopie der Vollmacht');
   const sig = (senderIsMe(L) && L.useSig && S.settings.signature) ? `<img src="${S.settings.signature}" alt="">` : '';
   const logo = logoOn(L) ? `<img class="l-logo" src="${S.settings.stamp}" alt="">` : '';
-  const marke = L.useMarke && L.markeImg ? `<img class="l-marke" src="${L.markeImg}" alt="">` : '';
+  // Internetmarke aus dem Vorrat in Originalgröße (Post: nicht verkleinern); ragt sie in die Anschriftzone, fließt die Anschrift links daran vorbei
+  const mm = L.useMarke && L.markeImg && L.markeMM && L.markeMM.w ? L.markeMM : null, mOver = mm ? Math.max(0, mm.h - 17.7) : 0;
+  const marke = L.useMarke && L.markeImg ? `<img class="l-marke" src="${L.markeImg}" alt=""${mm ? ` style="width:${mm.w}mm;height:${mm.h}mm;max-width:none;max-height:none"` : ''}>` : '';
   const num = (v, d, lo, hi) => Math.min(hi, Math.max(lo, Number(v) || d));
   return `<div class="letter d-${esc(dsg)} ${logo ? 'haslogo' : ''}" style="--lf:'${esc(ls.font)}';--ls:${Number(ls.size) || 11}pt;--acc:${esc(ls.accent || '#1f4e79')};--logo:${num(ls.logoSize, 28, 12, 50)}mm;--sig:${num(ls.sigSize, 22, 8, 45)}mm">
     ${ls.foldMarks ? '<div class="fold" style="top:105mm"></div><div class="hole" style="top:148.5mm"></div><div class="fold" style="top:210mm"></div>' : ''}
     ${logo}
     <div class="l-head"><div class="n">${esc(snd.name || 'Dein Name (Einstellungen)')}</div><div class="a">${esc([snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim(), snd.phone, snd.email].filter(Boolean).join('  ·  '))}</div></div>
-    <div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone">${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
-      <div class="l-addr"${ed('recipient')}>${markHTML(L.recipient || '[Empfänger]').replace(/\n/g, '<br>')}</div></div>
+    <div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone"${mOver ? ` style="height:${(17.7 + mOver).toFixed(1)}mm"` : ''}>${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
+      <div class="l-addr"${ed('recipient')}${mOver ? ` style="height:${(45 - 17.7 - mOver).toFixed(1)}mm;line-height:1.15"` : ''}>${markHTML(L.recipient || '[Empfänger]', opt.edit && 'recipient').replace(/\n/g, '<br>')}</div></div>
     <table class="l-info">${info.map(([k, v]) => `<tr><td>${esc(k)}:</td><td>${esc(v)}</td></tr>`).join('')}</table>
     <div class="l-body">
-      <div class="l-subj"${ed('subject')}>${markHTML(applyVars(L.subject, L) || '[Betreff]')}</div>
-      <p${ed('salutation')}>${markHTML(L.salutation)}</p>
-      <div${ed('body')}>${paras(applyVars(L.body, L) || '[Text]')}</div>
+      <div class="l-subj"${ed('subject')}>${markHTML(applyVars(L.subject, L) || '[Betreff]', opt.edit && 'subject')}</div>
+      <p${ed('salutation')}>${markHTML(L.salutation, opt.edit && 'salutation')}</p>
+      <div${ed('body')}>${paras(applyVars(L.body, L) || '[Text]', opt.edit && 'body')}</div>
       ${poaLink ? `<p class="l-poa">Die Vollmacht können Sie hier einsehen, herunterladen und ausdrucken:<br><a href="${esc(poaLink)}">${esc(poaLink)}</a></p>` : ''}
       <p style="margin-top:5mm"${ed('closing')}>${esc(L.closing)}</p>
       <div class="l-sigwrap"><div class="l-sig">${sig}</div></div>
@@ -1793,8 +1991,7 @@ VIEWS.brief = (id, q) => {
         <div class="fld"><label>Datum</label><input type="date" data-lf="date" value="${esc(L.date)}"></div></div>
         <div class="two"><div class="fld"><label>Ihr Zeichen / Aktenzeichen</label><input data-lf="ref" value="${esc(L.ref)}"></div><div class="fld"><label>Kunden- / Vertragsnummer</label><input data-lf="customerNo" value="${esc(L.customerNo)}"></div></div></div>
       <div class="card"><h3>3 · Inhalt</h3>
-        <div class="fld"><label>Vorlage</label><select data-act-chg="tpl"><option value="">– Vorlage wählen –</option>${TPL_CATS.map(cat => { const T = allTemplates().filter(t => tplCat(t) === cat);
-          return T.length ? `<optgroup label="${esc(cat)}">${optHTML(T.map(t => ({v:t.id, l:t.name})), L.templateId)}</optgroup>` : ''; }).join('')}</select></div>
+        <div class="fld"><label>Vorlage</label><div style="display:flex;gap:6px;align-items:center"><span class="tplcur">${L.templateId && tplById(L.templateId) ? `<b>${esc(tplById(L.templateId).name)}</b> <span class="small muted">· ${esc(tplCat(tplById(L.templateId)))}</span>` : '<span class="muted">keine Vorlage</span>'}</span><button class="btn sm" data-act="tplPick" data-id="${esc(L.templateId ? tplCat(tplById(L.templateId) || {}) : '')}" data-mode="brief">${icon('vorlage')}Vorlage wählen</button></div></div>
         <div class="fld"><label>Betreff</label><input data-lf="subject" value="${esc(L.subject)}"></div>
         <div class="fld"><label>Anrede</label><input data-lf="salutation" value="${esc(L.salutation)}" list="anreden"><datalist id="anreden"><option>Sehr geehrte Damen und Herren,</option><option>Sehr geehrte Frau …,</option><option>Sehr geehrter Herr …,</option></datalist></div>
         <div class="fld"><label>Text</label><div class="ph">${PLACEHOLDERS.map(p => `<button type="button" data-act="insPh" data-id="${p}">{${p}}</button>`).join('')}</div>
@@ -1810,7 +2007,7 @@ VIEWS.brief = (id, q) => {
           : `<div class="hint small muted" style="margin:-4px 0 8px">Noch kein Vollmacht-Link für ${esc(p.role)} – unter <a href="#/persons">Personen & Vollmachten</a> erstellen.</div>`) : ''; })()}
         <div class="hint small muted" style="margin:-2px 0 8px">Größe von Logo und Unterschrift sowie die Fußzeile: <a href="#/settings?tab=brief">Einstellungen → Briefe</a></div>
         <div class="fld cb"><input type="checkbox" data-lf="useMarke" id="cbMarke" ${L.useMarke ? 'checked' : ''}><label for="cbMarke">Internetmarke (Porto) im Adressfeld drucken</label></div>
-        <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox"><button class="btn sm" data-act="markeUpload">${icon('hochladen')}Internetmarke als Bild laden (PNG/JPG)</button> ${L.markeImg ? '<button class="btn sm dan" data-act="markeDel">' + icon('loeschen') + 'entfernen</button>' : ''}
+        <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox">${window.MK ? MK.infoHTML(L) : ''}<a href="#" class="small" data-act="markeUpload">oder einzelne Marke als Bild laden</a>
           ${L.markeImg ? `<img class="imgprev" src="${L.markeImg}">` : ''}<div class="hint small muted" style="margin-top:4px">Internetmarke bei der Deutschen Post online kaufen, als Bild speichern und hier laden. Vor dem ersten Versand einmal Probe drucken und mit Fensterumschlag (DL) prüfen.</div></div>
       </div>
       ${memPanelHTML([getContact(L.contactId)?.name || '', getPerson(L.personId) ? personName(getPerson(L.personId)) : ''].filter(Boolean).join(' '), L.personId)}
@@ -1836,7 +2033,9 @@ AFTER.brief = () => {
     const w = box.clientWidth - 36, letter = sc.firstElementChild, s = Math.min(1, w / letter.offsetWidth);
     sc.style.transform = `scale(${s})`; sc.style.height = (letter.offsetHeight * s) + 'px'; sc.style.width = letter.offsetWidth + 'px';
     const body = letter.querySelector('.l-body'); const limit = letter.offsetWidth * 279 / 210;
-    $('#pvwarn').textContent = (body.offsetTop + body.offsetHeight - 10 * letter.offsetWidth / 210) > limit ? 'Hinweis: Text geht über 1 Seite (wird beim Drucken umgebrochen).' : '';
+    const ad = letter.querySelector('.l-addr');
+    $('#pvwarn').textContent = ad && ad.scrollHeight > ad.clientHeight + 2 ? 'Achtung: Die Anschrift passt nicht ganz ins Fenster – bitte kürzen (z. B. Abteilung weglassen).'
+      : (body.offsetTop + body.offsetHeight - 10 * letter.offsetWidth / 210) > limit ? 'Hinweis: Text geht über 1 Seite (wird beim Drucken umgebrochen).' : '';
   };
   AFTER.brief.upd = upd;
   $$('[data-lf]').forEach(el => {
@@ -1845,19 +2044,71 @@ AFTER.brief = () => {
       const k = el.dataset.lf; LD[k] = el.type === 'checkbox' ? el.checked : el.value;
       if (k === 'contactId') { LD.recipient = contactAddress(getContact(el.value)); const r = $('[data-lf="recipient"]'); if (r) r.value = LD.recipient; }
       if (k === 'caseId' && el.value) { const c = getCase(el.value); if (c) { if (!LD.ref && c.ref) LD.ref = c.ref; if (c.personId) LD.personId = c.personId; if (c.contactId && !LD.recipient) { LD.contactId = c.contactId; LD.recipient = contactAddress(getContact(c.contactId)); } } return render(); }
+      if (k === 'useMarke' && LD.useMarke && !LD.markeImg && window.MK && MK.freie().length) return MK.naechste(LD).then(render);
       if (k === 'mode' || k === 'useMarke' || k === 'senderId') return render();
       clearTimeout(upd._t); upd._t = setTimeout(upd, 30);
     });
   });
-  const tplSel = $('[data-act-chg="tpl"]');
-  tplSel.addEventListener('change', () => {
-    const t = allTemplates().find(x => x.id === tplSel.value); if (!t) return;
-    if (LD.body.trim() && LD.body !== (allTemplates().find(x => x.id === LD.templateId) || {}).body && !confirm('Den bisherigen Text durch die Vorlage ersetzen?')) { tplSel.value = LD.templateId; return; }
-    LD.templateId = t.id; LD.subject = t.subject; LD.body = t.body; render();
-  });
+  // Gelbe Stellen in der Vorschau: Klick springt zum passenden Feld im Formular
+  $('#pvscale').addEventListener('mousedown', e => { const m = e.target.closest('mark[data-f]'); if (m) { e.preventDefault(); gapJump(m); } });
   window.onresize = () => { if (parseHash().route === 'brief') upd(); };
   upd();
 };
+// ---------- Vorlagen-Auswahl (Fenster mit Kategorien links, Vorlagen rechts, Suche) ----------
+const TPLP = {cat:'', q:'', mode:''};
+function tplPickOpen(cat, mode, q){
+  closeModal(); TPLP.cat = cat || ''; TPLP.mode = mode || ''; TPLP.q = q || '';
+  const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
+  bg.innerHTML = `<div class="modal tplpick"><h3>${icon('vorlage')}Vorlage wählen <span class="small muted" style="font-weight:400">${BUILTIN_TEMPLATES.length + S.templates.length} Vorlagen</span><button class="btn sm r" data-m="cancel">${icon('schliessen')}</button></h3>
+    <input id="tplpQ" placeholder="Suchen … (Titel oder Betreff)" value="${esc(TPLP.q)}">
+    <div class="tplp"><nav id="tplpNav"></nav><div id="tplpList"></div></div></div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click', e => { if (e.target === bg || e.target.closest('[data-m="cancel"]')) closeModal(); });
+  const draw = () => {
+    const q = TPLP.q.trim().toLowerCase();
+    $('#tplpNav').innerHTML = TPL_CATS.map(k => { const n = tplCatIds(k).length; return n ? `<button class="${!q && TPLP.cat === k ? 'on' : ''}" data-k="${esc(k)}">${esc(k)}<span>${n}</span></button>` : ''; }).join('');
+    let ids, head;
+    if (q) { ids = allTemplates().filter(t => (t.name + ' ' + (t.subject || '')).toLowerCase().includes(q)).map(t => t.id); head = `${ids.length} Treffer für „${esc(TPLP.q)}“`; }
+    else { if (!TPLP.cat) TPLP.cat = TPL_CATS[0]; ids = tplCatIds(TPLP.cat); head = esc(TPLP.cat); }
+    $('#tplpList').innerHTML = `<div class="tplphead">${head}</div>` + (ids.length ? ids.map(id => { const t = tplById(id); return t ? `<button class="tplpi" data-id="${esc(t.id)}"><b>${esc(t.name)}</b><span class="small muted">${esc(t.subject || 'leerer Brief')}</span>${q ? `<span class="badge">${esc(tplCat(t))}</span>` : ''}</button>` : ''; }).join('') : '<div class="empty">Keine Vorlage gefunden.</div>');
+  };
+  draw();
+  const qi = $('#tplpQ'); qi.focus(); qi.addEventListener('input', () => { TPLP.q = qi.value; draw(); });
+  $('#tplpNav').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; TPLP.cat = b.dataset.k; TPLP.q = ''; qi.value = ''; draw(); });
+  $('#tplpList').addEventListener('click', e => { const b = e.target.closest('.tplpi'); if (b) tplApply(b.dataset.id); });
+}
+function tplApply(id){
+  const t = tplById(id); if (!t) return;
+  if (TPLP.mode === 'brief' && LD) {
+    const cur = tplById(LD.templateId);
+    if (LD.body.trim() && LD.body !== (cur || {}).body && !confirm('Den bisherigen Text durch die Vorlage „' + t.name + '“ ersetzen?')) return;
+    closeModal(); LD.templateId = t.id; LD.subject = t.subject; LD.body = t.body; render(); toast('Vorlage: ' + t.name);
+  } else { closeModal(); location.hash = '#/brief/new?tpl=' + encodeURIComponent(t.id); }
+}
+// Klick auf eine gelbe Stelle: zum Formularfeld springen und die Stelle markieren
+const GAP_PERSON = ['Name', 'NameMitAnrede', 'Geburtsdatum', 'Anschrift', 'Krankenkasse', 'Rentenversicherungsnummer', 'SteuerID'];
+function gapFlash(el){ if (!el) return; el.scrollIntoView({block:'center', behavior:'smooth'}); el.classList.remove('gapflash'); void el.offsetWidth; el.classList.add('gapflash'); }
+function gapJump(m){
+  if (UI.briefWide) { UI.briefWide = false; render(); }
+  const f = m.dataset.f, txt = m.textContent, inner = txt.slice(1, -1);
+  if (txt[0] === '{') {
+    if (inner === 'Aktenzeichen' || inner === 'Kundennummer') { const el = $(`[data-lf="${inner === 'Aktenzeichen' ? 'ref' : 'customerNo'}"]`); gapFlash(el); if (el) el.focus(); return; }
+    if (inner === 'Datum') { const el = $('[data-lf="date"]'); gapFlash(el); if (el) el.focus(); return; }
+    if (GAP_PERSON.includes(inner)) { const p = getPerson(LD.personId); if (p) { editPerson(p); toast('Bitte „' + inner + '“ bei ' + p.role + ' ergänzen'); } else { const el = $('[data-lf="personId"]'); gapFlash(el); if (el) el.focus(); } return; }
+  }
+  if (f === 'recipient' && txt === '[Empfänger]') { const el = $('[data-lf="contactId"]'); gapFlash(el.closest('.fld')); el.focus(); return; }
+  const el = $(`[data-lf="${f}"]`); if (!el) return;
+  gapFlash(el);
+  // n-te gleiche Stelle im Feld finden und auswählen
+  const same = [...$$(`#pvscale mark[data-f="${f}"]`)].filter(x => x.textContent === txt); const n = Math.max(0, same.indexOf(m));
+  let pos = -1; for (let i = 0; i <= n; i++) { pos = el.value.indexOf(txt, pos + 1); if (pos < 0) break; }
+  el.focus();
+  if (pos >= 0 && el.setSelectionRange) { el.setSelectionRange(pos, pos + txt.length); if (el.tagName === 'TEXTAREA') { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; el.scrollTop = Math.max(0, el.value.slice(0, pos).split('\n').length - 3) * lh; } }
+}
+const TPL_ACT = {
+  tplPick: d => { const q = $('#tplQ'); tplPickOpen(d.id || '', d.mode || '', !d.id && q ? q.value : ''); }
+};
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'tplQ') { e.preventDefault(); tplPickOpen('', '', e.target.value); } });
 const letterSubject = l => applyVars(l.subject, l) || '(ohne Betreff)';
 function letterHasGaps(L){ const all = [applyVars(L.subject, L), applyVars(L.body, L), L.recipient].join('\n'); return /\{[^{}\n]+\}|\[[^\[\]\n]+\]/.test(all) || !L.recipient.trim(); }
 function saveLetter(silent){
@@ -1870,13 +2121,13 @@ function saveLetter(silent){
 }
 // Ausgabe: im Desktop-Programm über window.officeHome (Drucken bzw. PDF speichern), im Browser über window.print()
 const DESKTOP = !!(window.officeHome && window.officeHome.desktop);
-function outputPrint(html, title, asPDF){
+function outputPrint(html, title, asPDF, onDone){
   $('#print-root').innerHTML = html;
   const t = document.title; document.title = title.replace(/[\\/:*?"<>|]/g, '').slice(0, 90);
   setTimeout(async () => {
     try {
-      if (DESKTOP) { const r = asPDF ? await window.officeHome.savePDF(document.title) : await window.officeHome.print(); if (asPDF && r && r.ok) toast('PDF gespeichert'); }
-      else window.print();
+      if (DESKTOP) { const r = asPDF ? await window.officeHome.savePDF(document.title) : await window.officeHome.print(); if (asPDF && r && r.ok) toast('PDF gespeichert'); if (onDone) onDone(!!(r && r.ok)); }
+      else { window.print(); if (onDone) onDone(null); }
     } catch (e) { alert('Ausgabe fehlgeschlagen: ' + e.message); }
     finally { document.title = t; }
   }, 150);
@@ -1884,7 +2135,12 @@ function outputPrint(html, title, asPDF){
 function printLetter(asPDF){
   if (letterHasGaps(LD) && !confirm('Es gibt noch gelb markierte Stellen bzw. keinen Empfänger. Trotzdem ' + (asPDF ? 'als PDF speichern' : 'drucken') + '?')) return;
   saveLetter(true);
-  outputPrint(letterHTML(LD), 'Brief ' + LD.date + ' ' + applyVars(LD.subject, LD), asPDF);
+  const L = LD;
+  outputPrint(letterHTML(L), 'Brief ' + L.date + ' ' + applyVars(L.subject, L), asPDF, ok => {
+    // Internetmarke aus dem Vorrat: nach erfolgreichem Druck / PDF als benutzt markieren
+    if (!window.MK || !L.useMarke || !L.markeId) return;
+    if (ok === true || (ok === null && confirm('Wurde der Brief gedruckt? Dann die Internetmarke als benutzt markieren.'))) { MK.benutzt(L); if (parseHash().route === 'brief') render(); }
+  });
 }
 
 // ---------- Monatsbericht ----------
@@ -2109,7 +2365,7 @@ AFTER.settings = async () => {
 async function backup(){
   if (MODE === 'demo') return alert('Im Demo-Modus gibt es keine Sicherung – das sind nur Beispieldaten. Für deine echten Daten oben auf „Live“ umschalten.');
   const files = {};
-  for (const d of S.documents) if (d.fileId) { const f = await fileGet(d.fileId); if (f) files[d.fileId] = {name:f.name, type:f.type, data: await blobToDataURL(f.blob)}; }
+  for (const d of [...S.documents, ...(S.marken || [])]) if (d.fileId) { /* Dokumente + Internetmarken-Bilder */ const f = await fileGet(d.fileId); if (f) files[d.fileId] = {name:f.name, type:f.type, data: await blobToDataURL(f.blob)}; }
   S.settings.lastBackup = today(); save();
   const vault = DB.db ? await DB.get('kv', 'vault') : null; // Tresor nur verschlüsselt
   const data = {app:'OfficeHome', version:1, exported:new Date().toISOString(), state:S, files, vault: vault || null};
@@ -2184,10 +2440,14 @@ const ACT = {
   saveLetter: () => saveLetter(false), printLetter: () => printLetter(false), pdfLetter: () => printLetter(true),
   saveTpl: () => { const n = prompt('Name der Vorlage:', LD.subject ? LD.subject.slice(0, 50) : ''); if (!n) return; const t = {id:'c_' + uid(), name:n, subject:LD.subject, body:LD.body, custom:true}; S.templates.push(t); LD.templateId = t.id; save(); toast('Vorlage gespeichert'); render(); },
   delTpl: d => { if (confirm('Vorlage löschen?')) { remove('templates', d.id); render(); } },
-  dupLetter: d => { const l = clone(S.letters.find(x => x.id === d.id)); l.id = uid(); l.date = today(); l.updated = new Date().toISOString(); S.letters.push(l); save(); location.hash = '#/brief/' + l.id; },
-  delLetter: d => { if (confirm('Brief löschen?')) { remove('letters', d.id); render(); } },
-  markeUpload: async () => { const f = await pickFile('image/*'); if (!f) return; LD.markeImg = await imageToDataURL(f, 700); render(); },
-  markeDel: () => { LD.markeImg = ''; render(); },
+  dupLetter: d => { const l = clone(S.letters.find(x => x.id === d.id)); l.id = uid(); l.date = today(); if (l.markeId) { l.markeId = ''; l.markeImg = ''; } /* Kopie nie mit derselben Internetmarke */ l.updated = new Date().toISOString(); S.letters.push(l); save(); location.hash = '#/brief/' + l.id; },
+  delLetter: d => { if (confirm('Brief löschen?')) { (S.marken || []).forEach(m => { if (m.reserved === d.id && !m.used) m.reserved = ''; }); remove('letters', d.id); render(); } },
+  markeUpload: async () => { const f = await pickFile('image/*'); if (!f) return; if (window.MK && LD.markeId) await MK.setzen(LD, null); LD.markeImg = await imageToDataURL(f, 700); LD.markeId = ''; render(); },
+  markeDel: async () => { if (window.MK && LD.markeId) await MK.setzen(LD, null); LD.markeImg = ''; LD.markeId = ''; render(); },
+  mkNaechste: async () => { if (await MK.naechste(LD)) render(); },
+  mkWaehlen: () => MK.waehlen(LD),
+  mkVorrat: () => MK.verwalten(),
+  mkImport: () => MK.importieren(),
   upImg: async d => { const f = await pickFile('image/*'); if (!f) return; S.settings[d.id] = await imageToDataURL(f, 900); save(); render(); },
   delImg: d => { S.settings[d.id] = ''; save(); render(); },
   setTab: d => { UI.setTab = d.id; if (location.hash !== '#/settings') location.hash = '#/settings'; else { render(); const m = $('#main'); if (m) m.scrollTop = 0; } },
@@ -2254,7 +2514,7 @@ function initUpdates(){
   });
 }
 async function flushSave(){ clearTimeout(saveTimer); if (DB.db) await DB.put('kv', stateKey(), S); }
-Object.assign(ACT, POA_ACT);
+Object.assign(ACT, POA_ACT, TPL_ACT);
 AFTER.persons = async () => { if (DESKTOP && !GS.status && window.officeHome.gStatus) { await gRefreshStatus(); if (parseHash().route === 'persons') render(); } };
 Object.assign(ACT, {
   updCheck: async () => { UPD.state = 'checking'; updUI(); const r = await window.officeHome.updateCheck();
@@ -2271,7 +2531,18 @@ const MEM_KINDS = ['Brief per Post', 'E-Mail', 'Fax', 'Antrag / Formular', 'Pers
 const memCfg = () => S.settings.memory;
 // Im Demo-Modus nie ins echte Gedächtnis schreiben oder daraus lesen.
 const memOn = () => DESKTOP && MODE !== 'demo' && !!window.officeHome.memStatus && !!memCfg().root && !!(MEM.status && MEM.status.ok);
-const memWsFor = personId => (personId && memCfg().map[personId]) || memCfg().defaultWs || '';
+// Mit Person: nur deren eigener Ordner (kein Rückfall auf andere Bereiche). Ohne Person: allgemeiner Bereich.
+const memWsFor = personId => personId ? (memCfg().map[personId] || null) : (memCfg().defaultWs || '');
+const memDirLabel = rel => rel ? rel.replace(/\//g, ' › ') : 'Hauptordner (Memory)';
+// Warnungen: Ordner überschneiden sich zwischen Personen oder ein ganzer Arbeitsbereich ist gewählt.
+function memDirWarn(p){
+  const m = memCfg(), rel = m.map[p.id]; if (!rel) return '';
+  const inside = (a, b) => a === b || a.startsWith(b + '/');
+  const clash = S.persons.filter(o => o.id !== p.id && m.map[o.id] && (inside(rel, m.map[o.id]) || inside(m.map[o.id], rel)));
+  if (clash.length) return `<div class="small" style="color:var(--danger)">Überschneidet sich mit ${clash.map(o => esc(o.role)).join(', ')} – bitte für jede Person einen eigenen Ordner wählen.</div>`;
+  const ws = ((MEM.status && MEM.status.workstations) || []).some(w => w.path === rel);
+  return ws ? '<div class="small muted">Ganzer Arbeitsbereich gewählt – liegen darin auch andere Personen, besser deren Unterordner wählen.</div>' : '';
+}
 const memWsOpts = () => [{v:'', l:'Hauptordner (Memory)'}, ...((MEM.status && MEM.status.workstations) || []).map(w => ({v:w.path, l:w.path}))];
 const addDaysISO = (iso, n) => { const d = new Date((iso || today()) + 'T00:00'); d.setDate(d.getDate() + (Number(n) || 0)); return isoDate(d); };
 
@@ -2288,11 +2559,13 @@ function memCardHTML(){
   if (m.root && st && st.ok) {
     body += `<p class="small" style="color:var(--ok)">✓ Verbunden · ${st.workstations.length} Arbeitsbereiche gefunden</p>
       <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
-      ${S.persons.map(p => `<div class="fld"><label>${esc(p.role)}${personName(p) !== p.role ? ' – ' + esc(personName(p)) : ''} gehört zu</label><select data-chg="memMap" data-id="${p.id}">${optHTML(memWsOpts(), m.map[p.id] || '')}</select></div>`).join('')}
+      ${S.persons.map(p => `<div class="fld full"><label>Ordner von ${esc(p.role)}${personName(p) !== p.role ? ' – ' + esc(personName(p)) : ''}</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--hover)">${m.map[p.id] ? icon('dokumente') + ' ' + esc(memDirLabel(m.map[p.id])) : '<span class="muted">noch kein Ordner gewählt – Gedächtnis für diese Person aus</span>'}</span>
+        <button class="btn sm" data-act="memPickDir" data-id="${p.id}">${icon('vorgaenge')}${m.map[p.id] ? 'Ändern' : 'Ordner wählen'}</button>${m.map[p.id] ? `<button class="btn sm dan" data-act="memClearDir" data-id="${p.id}">${icon('schliessen')}Entfernen</button>` : ''}</div>${memDirWarn(p)}</div>`).join('')}
       <div class="fld"><label>Ohne Person (Allgemein)</label><select data-chg="memDefault">${optHTML(memWsOpts(), m.defaultWs)}</select></div>
       <div class="fld"><label>Erinnerung standardmäßig nach (Tagen)</label><input type="number" min="1" data-chg="memDays" value="${esc(m.remindDays)}"></div>
       </form></div>
-      <p class="small muted">Wichtig: Jede Person in ihren eigenen Arbeitsbereich legen – die Wände des Gedächtnisses trennen die Bereiche. Notizen landen unter „&lt;Arbeitsbereich&gt;/.memory/office-home/“, Erinnerungen in der Aufgabenliste des Gedächtnisses (Dashboard → Tasks). Keine Passwörter oder PINs in festgehaltene Texte schreiben.</p>`;
+      <p class="small muted">Jede Person bekommt ihren eigenen Ordner im Memory-Ordner (z. B. „Fa. Akili › Maha“). Für eine Person liest Home Office nur Treffer aus diesem Ordner und schreibt nur dorthin (Notizen unter „&lt;Ordner&gt;/.memory/office-home/“). Neue Personen fragen beim Anlegen nach ihrem Ordner. Erinnerungen landen in der Aufgabenliste des Gedächtnisses (Dashboard → Tasks). Keine Passwörter oder PINs in festgehaltene Texte schreiben.</p>`;
   }
   return `<h3>${icon('gedaechtnis')}Gedächtnis (Memory)</h3>${body}`;
 }
@@ -2300,8 +2573,10 @@ function memCardUpdate(){ const c = $('#memCard'); if (c) c.innerHTML = memCardH
 
 function memPanelHTML(q, personId){
   if (!memOn()) return '';
+  const p = getPerson(personId), dir = p ? memWsFor(p.id) : (memCfg().defaultWs || '');
+  if (p && !dir) return `<div class="card"><h3>${icon('gedaechtnis')}Aus dem Gedächtnis</h3><p class="small muted" style="margin-top:0">Für ${esc(p.role)} ist noch kein Ordner im Gedächtnis gewählt.</p><button class="btn sm" data-act="memPickDir" data-id="${p.id}">${icon('vorgaenge')}Ordner wählen</button></div>`;
   return `<div class="card"><h3>${icon('gedaechtnis')}Aus dem Gedächtnis</h3>
-    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap"><select id="memWs" style="padding:6px;border:1px solid var(--line);border-radius:8px;max-width:180px">${optHTML(memWsOpts(), memWsFor(personId))}</select>
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">${p ? `<input type="hidden" id="memWs" value="${esc(dir)}" data-strict="1"><span class="badge" title="Nur dieser Ordner wird gelesen">${icon('dokumente')}${esc(memDirLabel(dir))}</span>` : `<select id="memWs" style="padding:6px;border:1px solid var(--line);border-radius:8px;max-width:180px">${optHTML(memWsOpts(), dir)}</select>`}
       <input id="memQ" value="${esc(q)}" placeholder="z. B. Jobcenter Aktenzeichen" style="flex:1;min-width:140px;padding:7px 10px;border:1px solid var(--line);border-radius:8px"><button class="btn" data-act="memSearch">${icon('suche')}Suchen</button></div>
     <div id="memHits" class="list"><div class="muted small">Suche im Gedächtnis – z. B. nach Behörde, Aktenzeichen oder letztem Schreiben.</div></div></div>`;
 }
@@ -2309,7 +2584,7 @@ async function memSearch(){
   const q = $('#memQ'), box = $('#memHits'); if (!q || !box) return;
   if (!q.value.trim()) return q.focus();
   box.innerHTML = '<div class="muted small">Suche läuft …</div>';
-  const r = await window.officeHome.memSearch(memCfg().root, $('#memWs').value, q.value);
+  const ws = $('#memWs'); const r = await window.officeHome.memSearch(memCfg().root, ws.value, q.value, ws.dataset.strict === '1');
   if (!r.ok) { box.innerHTML = `<div class="small" style="color:var(--danger)">${esc(r.message)}</div>`; return; }
   box.innerHTML = r.hits.length ? r.hits.map(h => `<div class="row" style="align-items:flex-start"><div class="grow"><div class="ttl">${esc(h.title)}</div>
       <div class="small muted trunc">${esc(h.path)}</div>${h.snippet ? `<div class="small" style="white-space:pre-wrap;margin-top:3px">${esc(h.snippet.slice(0, 400))}</div>` : ''}</div></div>`).join('')
@@ -2319,8 +2594,10 @@ async function memSearch(){
 // Gemeinsames Formular: Notiz ins Gedächtnis + optional Erinnerung (Gedächtnis und Home Office).
 function memRecord({title, kind, to, ref, body, personId, caseId, caseTitle, date, remindText}){
   const m = memCfg(); const p = getPerson(personId);
+  const own = p ? memWsFor(personId) : '';
+  if (p && !own) { if (confirm(`Für ${p.role} ist noch kein Ordner im Gedächtnis gewählt. Jetzt wählen?`)) ACT.memPickDir({id:p.id}); return; }
   const fields = [
-    {k:'ws', l:'Arbeitsbereich im Gedächtnis', t:'select', o:memWsOpts()},
+    p ? {k:'ws', l:'Ordner im Gedächtnis (nur ' + p.role + ')', t:'select', o:[{v:own, l:memDirLabel(own)}]} : {k:'ws', l:'Arbeitsbereich im Gedächtnis', t:'select', o:memWsOpts()},
     {k:'kind', l:'Art', t:'select', o:MEM_KINDS},
     {k:'title', l:'Titel', req:1, full:1}, {k:'date', l:'Datum', t:'date'}, {k:'to', l:'An / Stelle'},
     {k:'body', l:'Inhalt (wird mit gespeichert)', t:'textarea', rows:9, full:1},
@@ -2329,8 +2606,9 @@ function memRecord({title, kind, to, ref, body, personId, caseId, caseTitle, dat
     {k:'localTask', l:'Erinnerung auch als Frist in Home Office', t:'checkbox', full:1}
   ];
   openForm({title:'Im Gedächtnis festhalten', fields, saveLabel:'Festhalten',
-    data:{ws:memWsFor(personId), kind:kind || MEM_KINDS[0], title, date:date || today(), to, body, remind:true, days:m.remindDays || 14, remindText, localTask:true},
+    data:{ws:p ? own : (m.defaultWs || ''), kind:kind || MEM_KINDS[0], title, date:date || today(), to, body, remind:true, days:m.remindDays || 14, remindText, localTask:true},
     onSave: async v => {
+      if (p) v.ws = own; // Person: immer nur in ihren eigenen Ordner schreiben
       const due = addDaysISO(v.date, v.days);
       const r = await window.officeHome.memNote(m.root, v.ws, {title:v.title, date:v.date, kind:v.kind, to:v.to, ref, caseTitle,
         person: p ? personName(p) : '', body:v.body, reminder: v.remind ? fmtDate(due) + ' – ' + v.remindText : ''});
@@ -2353,6 +2631,16 @@ Object.assign(ACT, {
   memPick: async () => { const r = await window.officeHome.memPickRoot(); if (!r) return; memCfg().root = r; save(); await memLoadStatus(); memCardUpdate(); if (MEM.status && MEM.status.ok) toast('Gedächtnis verbunden'); },
   memOff: () => { if (!confirm('Verbindung zum Gedächtnis trennen? Es wird nichts gelöscht.')) return; memCfg().root = ''; MEM.status = null; save(); render(); },
   memSearch: () => memSearch(),
+  memPickDir: async d => {
+    const p = getPerson(d.id); if (!p || !memCfg().root) return;
+    const r = await window.officeHome.memPickDir(memCfg().root, memCfg().map[p.id] || '');
+    if (!r || r.cancel) return; if (!r.ok) return alert(r.message || 'Ordner konnte nicht gewählt werden.');
+    const inside = (a, b) => a === b || a.startsWith(b + '/');
+    const other = S.persons.find(o => o.id !== p.id && memCfg().map[o.id] && (inside(r.rel, memCfg().map[o.id]) || inside(memCfg().map[o.id], r.rel)));
+    if (other && !confirm(`Dieser Ordner überschneidet sich mit dem Ordner von ${other.role}. Dann könnten Daten gemischt werden. Trotzdem übernehmen?`)) return;
+    memCfg().map[p.id] = r.rel; save(); toast(p.role + ': ' + memDirLabel(r.rel)); memCardUpdate(); if (parseHash().route !== 'settings') render();
+  },
+  memClearDir: d => { const p = getPerson(d.id); if (!p) return; delete memCfg().map[p.id]; save(); memCardUpdate(); toast('Ordner entfernt – Gedächtnis für ' + p.role + ' aus'); },
   memLetter: () => {
     const L = LD; const ct = getContact(L.contactId); const to = ct ? ct.name : (L.recipient || '').split('\n')[0];
     const kind = L.shipping === 'Per E-Mail vorab' ? 'E-Mail' : L.shipping === 'Per Fax vorab' ? 'Fax' : L.shipping === 'Persönlich abgegeben' ? 'Persönlich abgegeben' : 'Brief per Post';
@@ -2537,7 +2825,7 @@ function buildDemoState(){
     st.documents.push({id:id('d'), title:title + ' ' + fmtDate(date).slice(3), personId:p, category:cat, sender:c.name, date, added:dshift(date, ri(1, 4)) > T ? T : dshift(date, ri(1, 4)), caseId:rnd() < .35 ? (st.cases.find(x => x.contactId === c.id)?.id || '') : '', deadline: rnd() < .15 ? dshift(date, 30) : '', tags:pick(['', 'wichtig', 'Original im Ordner', 'Kopie']), notes:''}); }
   // Briefe aus den Vorlagen
   st.letters = [];
-  for (let i = 0; i < 36; i++) { const tpl = pick(BUILTIN_TEMPLATES), c = pick(st.contacts.filter(x => x.kind !== 'Privatperson')), p = pick([V, M]), date = D(-ri(0, 350));
+  for (let i = 0; i < 36; i++) { const tpl = pick(BASE_TEMPLATES), c = pick(st.contacts.filter(x => x.kind !== 'Privatperson')), p = pick([V, M]), date = D(-ri(0, 350));
     st.letters.push({id:id('br'), personId:p, mode:'bev', senderId:'', contactId:c.id, recipient:contactAddress(c), templateId:tpl.id, subject:tpl.subject, ref:ri(100, 999) + '-' + ri(10000, 99999), customerNo:'', date,
       shipping:pick(['', '', 'Einschreiben', 'Einschreiben mit Rückschein', 'Per Fax vorab']), salutation:'Sehr geehrte Damen und Herren,', body:tpl.body, closing:'Mit freundlichen Grüßen', useSig:true, useStamp:false, useMarke:false, markeImg:'', attachments:'', caseId:'', updated:date + 'T10:00:00.000Z'}); }
   // Notizen
@@ -3385,6 +3673,9 @@ function kiApply(d, res){
   const diffs = [];
   for (const k of Array.isArray(res.kontakte) ? res.kontakte : []) { const r = kiContact(k, diffs); if (r) lines.push(r); }
   d.ki = {at:new Date().toISOString(), ok:true};
+  // Nummern aus dem Dokument (für die Frage-Leiste „Command“): [{art, wert}]
+  const nums = (Array.isArray(res.nummern) ? res.nummern : []).filter(n => n && n.art && n.wert).slice(0, 30).map(n => ({art:String(n.art).slice(0, 60), wert:String(n.wert).slice(0, 80)}));
+  if (nums.length) d.kiNummern = nums;
   save(); render(); calAfterChange();
   const acts = [];
   if (lines.some(l => !/^(Neu im|Ergänzt)/.test(l))) acts.push({l:'Im Kalender ansehen', f:() => { location.hash = '#/calendar'; }});
@@ -3633,15 +3924,35 @@ function initBuero(){
   if (parseHash().route === 'office') setTimeout(() => buZeigen(true), 2600);
 }
 
+// ---------- Seitenleiste einklappen ----------
+// Zustand in localStorage 'oh-side' ('mini' = nur Symbole). Eingeklappt: Maus drüber → klappt kurz auf, Maus weg → wieder zu; Knopf = dauerhaft auf/zu.
+(function(){
+  const app = document.querySelector('.app'), side = document.querySelector('.side'), tog = document.getElementById('sideTog'); if (!app || !side || !tog) return;
+  let tIn = null, tOut = null;
+  const mini = () => app.classList.contains('sidemini');
+  const setMini = on => { app.classList.toggle('sidemini', on); side.classList.remove('peek'); try { localStorage.setItem('oh-side', on ? 'mini' : 'full'); } catch (e) {}
+    const l = on ? 'Menü ausklappen' : 'Menü einklappen'; tog.title = l; tog.setAttribute('aria-label', l); setTimeout(() => window.dispatchEvent(new Event('resize')), 250); };
+  let st = 'full'; try { st = localStorage.getItem('oh-side') || 'full'; } catch (e) {}
+  if (st === 'mini') setMini(true);
+  tog.addEventListener('click', e => { e.stopPropagation(); setMini(!mini()); });
+  side.addEventListener('mouseenter', () => { if (!mini()) return; clearTimeout(tOut); tIn = setTimeout(() => side.classList.add('peek'), 140); });
+  side.addEventListener('mouseleave', () => { clearTimeout(tIn); tOut = setTimeout(() => side.classList.remove('peek'), 220); });
+  side.addEventListener('click', e => { if (mini() && e.target.closest('.nav a')) side.classList.remove('peek'); }); // nach dem Wechsel wieder zu
+})();
+
 // ---------- Start ----------
 (async () => {
   try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   document.body.classList.toggle('is-demo', MODE === 'demo');
+  window.OH_READY = true; // Zustand geladen – ab jetzt dürfen Zusatzmodule (Mitteilungen) speichern
   themeSet(themeGet()); render(); initUpdates(); initMcp(); initScan(); initKalender(); initBuero();
   if (memCfg().root) { await memLoadStatus(); render(); }
 })();
 </script>
+<script src="mitteilungen.js"></script>
+<script src="marken.js"></script>
+<script src="command.js"></script>
 </body>
 </html>

@@ -20,7 +20,10 @@ contextBridge.exposeInMainWorld('officeHome', {
   // Gedächtnis (Memory-Engine)
   memPickRoot: () => ipcRenderer.invoke('oh:memPickRoot'),
   memStatus: (root) => ipcRenderer.invoke('oh:memStatus', root),
-  memSearch: (root, ws, query) => ipcRenderer.invoke('oh:memSearch', root, ws, query),
+  memSearch: (root, ws, query, strict) => ipcRenderer.invoke('oh:memSearch', root, ws, query, !!strict),
+  memPickDir: (root, current) => ipcRenderer.invoke('oh:memPickDir', root, current),
+  memCopyFile: (root, ws, name, buf) => ipcRenderer.invoke('oh:memCopyFile', root, ws, name, buf),
+  onReminder: (cb) => ipcRenderer.on('oh:reminder', (e, r) => cb(r)),
   memNote: (root, ws, note) => ipcRenderer.invoke('oh:memNote', root, ws, note),
   memTask: (root, task) => ipcRenderer.invoke('oh:memTask', root, task),
   // Claude-Anbindung (MCP): Server an/aus, Einrichtung, Werkzeugaufrufe aus Claude beantworten

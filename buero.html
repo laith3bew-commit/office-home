@@ -118,6 +118,16 @@ const STATUS = {
   wartet: { farbe: "#7A5C1E", text: "hat eine Frage" }, bereit: { farbe: "#A9B8CA", text: "bereit" }, frei: { farbe: "#C5CCD6", text: "Pause" }
 };
 
+/* Leuchtende Zustände (Farben wie im Swipii-Büro von Heike Kühn): grün = arbeitet, orange = Pause, rot = außer Dienst (keine Aufgaben) */
+const LAMPE = { arbeit: "#3DDC97", pause: "#F2B544", aus: "#FF5D5D" };
+const AUS_NACH = 90; // Sekunden ohne Aufgabe → außer Dienst
+function statusLampe(m, sek) {
+  if (m.status === "arbeitet" || m.auftrag) return "arbeit";
+  if (m.status === "wartet") return "pause";
+  return sek - (m.letzteArbeit == null ? -1e9 : m.letzteArbeit) > AUS_NACH ? "aus" : "pause";
+}
+const LAMPE_TEXT = { arbeit: "arbeitet", pause: "Pause", aus: "außer Dienst – keine Aufgaben" };
+
 /* ---------- Die 8 Mitarbeiter ---------- */
 const ICON = {
   sekretariat: '<path d="M14 3.5H7.5A2.5 2.5 0 0 0 5 6v12a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18V8.5Z"/><path d="M14 3.5V7a1.5 1.5 0 0 0 1.5 1.5H19"/><path d="M8.6 13h6.8"/><path d="M8.6 16.5h3.8"/><circle cx="15" cy="16.5" r="1.1" fill="var(--icon-dot,#4F6785)" stroke="none"/>',
@@ -288,7 +298,9 @@ B(2.4, .7, .45, F.sofa, 5.4, .35, -6.65, raum); B(1.8, .7, .45, F.sofa, 8.3, .35
 /* Empfang: Briefkasten am Eingang, Sideboard, Whiteboard */
 B(1.4, .03, .05, F.rahmen, 2.4, .02, RZ, raum); // Eingangsschwelle
 const briefkasten = G(1.9, 0, 6.5, raum);
-B(.5, .62, .4, F.stahl, 0, .95, 0, briefkasten); B(.06, .62, .06, F.rahmen, 0, .32, 0, briefkasten); B(.34, .03, .05, F.rahmen, 0, 1.12, .21, briefkasten);
+const kastenMat = new THREE.MeshStandardMaterial({ color: C(F.stahl), roughness: .5, metalness: .2, emissive: C("#FFFFFF"), emissiveIntensity: 0 }); B(.5, .62, .4, kastenMat, 0, .95, 0, briefkasten);
+const kastenLicht = new THREE.PointLight(0xffffff, 0, 3.2); kastenLicht.position.set(0, 1.2, .5); briefkasten.add(kastenLicht);
+let kastenSchein = null; // Sprite mit weichem Lichtfleck, wird beim ersten Bild angelegt (GLOW_TEX) B(.06, .62, .06, F.rahmen, 0, .32, 0, briefkasten); B(.34, .03, .05, F.rahmen, 0, 1.12, .21, briefkasten);
 const kastenUmschlag = B(.3, .02, .2, F.papier, 0, 1.28, 0, briefkasten); kastenUmschlag.visible = false;
 B(1.6, .6, .4, F.weiss, 3.8, .3, 6.6, raum); pflanze(3.3, 6.6, .4, F.weiss).position.y = .62;
 
@@ -397,9 +409,14 @@ function baueFigur(t) {
   /* Status-Kristall über dem Kopf (wie Swipii) */
   const orbMat = new THREE.MeshBasicMaterial({ color: C(STATUS.frei.farbe), transparent: true });
   const orb = new THREE.Mesh(new THREE.OctahedronGeometry(.07, 0), orbMat); orb.position.y = 2.05; root.add(orb);
+  /* Leuchtring am Boden (Status) */
+  const ringMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true, opacity: .8, depthWrite: false, side: THREE.DoubleSide, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending });
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.42, .5, 40), ringMat); ring.rotation.x = -PI / 2; ring.position.y = .012; root.add(ring);
+  const scheinMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true, opacity: .18, depthWrite: false, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending });
+  const schein = new THREE.Mesh(new THREE.CircleGeometry(.62, 40), scheinMat); schein.rotation.x = -PI / 2; schein.position.y = .01; root.add(schein);
   const treffer = new THREE.Mesh(new THREE.BoxGeometry(.65, 1.9, .65), new THREE.MeshBasicMaterial({ visible: false })); treffer.position.y = .95; root.add(treffer);
   const P = { hy: .95, lean: 0, kx: 0, ky: 0, kz: 0, lob: 0, rob: 0, lkn: 0, rkn: 0, lsh: 0, rsh: 0, lshz: 0, rshz: 0, lel: 0, rel: 0 };
-  return { root, kopf, treffer, orb, orbMat, P, L,
+  return { root, kopf, treffer, orb, orbMat, ringMat, scheinMat, P, L,
     zeige(req) { tasse.visible = req === "tasse"; handy.visible = req === "handy"; akte.visible = req === "akte"; },
     setze(z, k) { for (const n in P) if (z[n] !== undefined) P[n] += (z[n] - P[n]) * k;
       huefte.position.y = P.hy; rumpf.rotation.x = P.lean; kopf.rotation.set(P.kx, P.ky, P.kz);
@@ -806,15 +823,28 @@ function schleife(jetzt) {
     if (m.ort === m.sitzOrt) m.akteDabei = false;
     m.fig.setze(haltung(pose, T + m.id.length * 1.7, m.fig.L), Math.min(1, dt * (pose === "gehen" || pose === "rennen" || pose === "tragen" ? 12 : 5)));
     const sitzt = m.ort === m.sitzOrt; m.platz.stuhl.position.z += ((sitzt ? 0 : -.3) - m.platz.stuhl.position.z) * Math.min(1, dt * 3);
-    const st = m.status === "arbeitet" && m.route.length && !m.auftrag ? "rennt" : m.status, farbe = C(STATUS[st].farbe);
-    m.platz.bildschirme.forEach(b => { b.color.copy(sitzt || m.status !== "frei" ? farbe : C(DUNKEL ? "#16223A" : "#D8D3C9")); if (m.status === "arbeitet" && sitzt) b.color.multiplyScalar(.85 + Math.sin(T * 8) * .15); });
+    if (m.status === "arbeitet" || m.status === "wartet" || m.auftrag) m.letzteArbeit = sek;
+    const lz = statusLampe(m, sek); m.lampe = lz; const farbe = C(LAMPE[lz]);
+    const puls = lz === "arbeit" ? .85 + Math.sin(T * 8 + m.id.length) * .15 : m.status === "wartet" ? .55 + .45 * Math.abs(Math.sin(T * 3)) : .8 + Math.sin(T * 1.5 + m.id.length) * .2;
+    /* Bildschirme: grün beim Arbeiten (flackert), orange in der Pause, rot außer Dienst */
+    m.platz.bildschirme.forEach(b => { b.color.copy(farbe).multiplyScalar(lz === "arbeit" ? puls : .9); });
+    /* Leuchtring und Schein am Boden */
+    m.fig.ringMat.color.copy(farbe); m.fig.ringMat.opacity = (DUNKEL ? .95 : .85) * puls;
+    m.fig.scheinMat.color.copy(farbe); m.fig.scheinMat.opacity = (DUNKEL ? .32 : .22) * puls;
+    if (!m.fig.halo) { m.fig.halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW_TEX, color: farbe.clone(), transparent: true, depthWrite: false, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending })); m.fig.halo.scale.setScalar(.55); m.fig.root.add(m.fig.halo); }
+    m.fig.halo.material.color.copy(farbe); m.fig.halo.material.opacity = (DUNKEL ? .9 : .55) * puls; m.fig.halo.position.copy(m.fig.orb.position);
     m.fig.orbMat.color.copy(farbe); m.fig.orb.rotation.y += dt * (m.status === "arbeitet" ? 3 : .8); m.fig.orb.position.y = 2.05 + Math.sin(T * 2 + m.id.length) * .03 + (pose.startsWith("arbeit") || ["platz", "melden", "bereit", "handy", "reden-sitz", "zuhoeren"].includes(pose) ? -.43 : 0);
-    m.fig.orbMat.opacity = m.status === "wartet" ? .4 + .6 * Math.abs(Math.sin(T * 3)) : m.status === "frei" ? .45 : 1;
+    m.fig.orbMat.opacity = m.status === "wartet" ? .4 + .6 * Math.abs(Math.sin(T * 3)) : 1;
   });
   /* Tresortür */
   tresorTuerAchse.rotation.y += ((tresorOffen ? -1.6 : 0) - tresorTuerAchse.rotation.y) * Math.min(1, dt * 2);
   /* Briefumschlag schwebt */
   if (kastenUmschlag.visible) { kastenUmschlag.position.y = 1.28 + Math.sin(T * 3) * .04; kastenUmschlag.rotation.y += dt; }
+  { const voll = kastenUmschlag.visible, k = voll ? .75 + .25 * Math.sin(T * 3.2) : 0;
+    if (!kastenSchein) { kastenSchein = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW_TEX, color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending })); kastenSchein.scale.setScalar(1.9); kastenSchein.position.set(0, 1.0, 0); briefkasten.add(kastenSchein); }
+    kastenMat.emissiveIntensity += ((voll ? (DUNKEL ? .55 : 1.1) * k : 0) - kastenMat.emissiveIntensity) * Math.min(1, dt * 4); // hell: Kasten selbst wird weiß
+    kastenLicht.intensity += ((voll ? (DUNKEL ? 2.2 : 1.4) * k : 0) - kastenLicht.intensity) * Math.min(1, dt * 4);
+    kastenSchein.material.opacity += ((voll ? (DUNKEL ? .85 : .6) * k : 0) - kastenSchein.material.opacity) * Math.min(1, dt * 4); }
   /* Informationsflüsse */
   for (let i = fluesse.length - 1; i >= 0; i--) {
     const f = fluesse[i], t = sek - f.t0, k = t / f.dauer;
@@ -840,7 +870,7 @@ function schleife(jetzt) {
     m.fig.kopf.getWorldPosition(v); v.y += .55; v.project(cam);
     const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H;
     m.div.className = "schild" + (fern ? " fern" : ""); m.div.style.opacity = v.z > 1 ? 0 : fokus && fokus !== m ? .35 : 1;
-    m.div.querySelector("b").style.background = STATUS[m.status].farbe; const txt = statusText(m), stel = m.div.querySelector(".st"); if (stel.textContent !== txt) stel.textContent = txt;
+    const lb = m.div.querySelector("b"); lb.style.background = LAMPE[m.lampe || "aus"]; lb.style.boxShadow = "0 0 8px " + LAMPE[m.lampe || "aus"]; const txt = m.lampe === "aus" && m.status !== "wartet" && !m.route.length ? LAMPE_TEXT.aus : statusText(m), stel = m.div.querySelector(".st"); if (stel.textContent !== txt) stel.textContent = txt;
     m.div.style.transform = `translate(${Math.round(sx - m.div.offsetWidth / 2)}px,${Math.round(sy - m.div.offsetHeight)}px)`;
     if (m.blase) { if (sek > m.blase.bis) { m.blase.el.remove(); m.blase = null; } else { m.fig.kopf.getWorldPosition(v); v.y += .25; v.x += .25; v.project(cam);
       m.blase.el.style.transform = `translate(${Math.max(8, Math.min(W - m.blase.el.offsetWidth - 8, Math.round((v.x + 1) / 2 * W + 10)))}px,${Math.max(8, Math.round((1 - v.y) / 2 * H - m.div.offsetHeight - m.blase.el.offsetHeight - 4))}px)`; m.blase.el.style.opacity = v.z > 1 ? 0 : 1; } }

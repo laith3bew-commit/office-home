@@ -43,7 +43,8 @@ Antworte NUR mit JSON nach diesem Schema, ohne Erklärungen:
    "funktion": "Zuständigkeit / Funktion der Person", "strasse": "", "plz": "", "ort": "", "telefon": "", "fax": "", "email": "" } ],
  "termine": [ { "titel": "kurzer Titel", "datum": "JJJJ-MM-TT", "uhrzeit": "HH:MM oder leer", "art": "termin (Termin mit Uhrzeit/Anwesenheit) oder frist (Abgabe, Rückmeldung, Widerspruch)",
    "ort": "Ort/Raum oder leer", "was_tun": "konkret: was mitbringen, einreichen oder erledigen" } ],
- "gueltigkeit": [ { "was": "z. B. Bewilligung Bürgergeld", "gueltig_bis": "JJJJ-MM-TT", "erneuern": "was rechtzeitig zu beantragen oder einzureichen ist" } ]
+ "gueltigkeit": [ { "was": "z. B. Bewilligung Bürgergeld", "gueltig_bis": "JJJJ-MM-TT", "erneuern": "was rechtzeitig zu beantragen oder einzureichen ist" } ],
+ "nummern": [ { "art": "z. B. Versichertennummer, Krankenkasse, Aktenzeichen, Kundennummer, Vertragsnummer, BG-Nummer, Steuer-ID, Steuernummer, Rentenversicherungsnummer, IBAN, Betrag, Pflegegrad", "wert": "genau wie im Dokument" } ]
 }
 Regeln: Nur Daten, die im Dokument stehen. Kontakte nur mit mindestens Organisation oder Name. Keine Kontakte für den Empfänger selbst oder die betroffene Person.
 Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechnen (Briefdatum + Frist, Zugang 3 Tage nach Briefdatum). Bei befristeten Bewilligungen oder Bescheiden das Ende in "gueltigkeit" eintragen.`;
@@ -234,6 +235,8 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
         n.on('click', () => { showWin(); const w = getWin(); if (w && !w.isDestroyed()) w.webContents.send('oh:openCal', r.ref || ''); });
         n.show();
       }
+      // auch in die Mitteilungszentrale (Glocke) der Oberfläche
+      try { const w = getWin(); if (w && !w.isDestroyed()) w.webContents.send('oh:reminder', { id: r.id, title: r.title, body: r.body || '' }); } catch (e) {}
     }
     if (changed) saveRem();
   }
