@@ -75,11 +75,13 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
   });
 
   // ---------- Google Kalender (OAuth für Desktop-Apps, Loopback + PKCE) ----------
-  const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+  // drive.file: nur Dateien, die Home Office selbst anlegt (Vollmacht-Freigabe)
+  const SCOPE = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file';
   let gToken = null; // {access, exp}
   const gClient = () => { const s = secrets(); return { id: s.gClientId || '', secret: s.gClientSecret || '', refresh: s.gRefresh || '' }; };
 
-  ipcMain.handle('oh:gStatus', () => { const c = gClient(); return { hasClient: !!(c.id && c.secret), connected: !!c.refresh, email: readJson('oh-prefs.json', {}).gEmail || '' }; });
+  ipcMain.handle('oh:gStatus', () => { const c = gClient(); const p = readJson('oh-prefs.json', {});
+    return { hasClient: !!(c.id && c.secret), connected: !!c.refresh, email: p.gEmail || '', drive: !!c.refresh && /drive\.file/.test(p.gScope || '') }; });
   ipcMain.handle('oh:gSetClient', (e, id, secret) => {
     try { setSecret('gClientId', String(id || '').trim()); setSecret('gClientSecret', String(secret || '').trim()); return { ok: true }; }
     catch (err) { return { ok: false, message: errText(err) }; }
@@ -87,7 +89,7 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
   ipcMain.handle('oh:gDisconnect', async () => {
     const c = gClient();
     if (c.refresh) { try { await fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(c.refresh), { method: 'POST' }); } catch (e) {} }
-    setSecret('gRefresh', ''); gToken = null; const p = readJson('oh-prefs.json', {}); delete p.gEmail; writeJson('oh-prefs.json', p);
+    setSecret('gRefresh', ''); gToken = null; const p = readJson('oh-prefs.json', {}); delete p.gEmail; delete p.gScope; writeJson('oh-prefs.json', p);
     return { ok: true };
   });
   ipcMain.handle('oh:gConnect', async () => {
@@ -113,7 +115,7 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
           setSecret('gRefresh', j.refresh_token); gToken = { access: j.access_token, exp: Date.now() + (j.expires_in - 60) * 1000 };
           let email = '';
           try { const ci = await gApi('GET', '/calendars/primary'); email = ci.id || ''; } catch (err) {}
-          const p = readJson('oh-prefs.json', {}); p.gEmail = email; writeJson('oh-prefs.json', p);
+          const p = readJson('oh-prefs.json', {}); p.gEmail = email; p.gScope = j.scope || ''; writeJson('oh-prefs.json', p);
           page('Google Kalender ist jetzt mit Home Office verbunden.'); finish({ ok: true, email });
         } catch (err) { page('Fehler: ' + errText(err)); finish({ ok: false, message: errText(err) }); }
       });
@@ -130,7 +132,7 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
 
   async function gAccess() {
     if (gToken && gToken.exp > Date.now()) return gToken.access;
-    const c = gClient(); if (!c.refresh) throw new Error('Google Kalender ist nicht verbunden.');
+    const c = gClient(); if (!c.refresh) throw new Error('Google ist nicht verbunden (Einstellungen → Kalender, Google & KI).');
     const r = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ client_id: c.id, client_secret: c.secret, refresh_token: c.refresh, grant_type: 'refresh_token' }) });
     const j = await r.json();
@@ -164,6 +166,53 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
   ipcMain.handle('oh:gDelete', async (e, googleId) => {
     try { await gApi('DELETE', '/calendars/primary/events/' + encodeURIComponent(googleId)); return { ok: true }; }
     catch (err) { return { ok: false, message: errText(err) }; }
+  });
+
+  // ---------- Google Drive: Vollmacht als Freigabelink ----------
+  // Lädt die Datei in den Ordner „Home Office – Vollmachten“ (wird bei Bedarf angelegt) und gibt sie
+  // für „jeder mit dem Link“ zum Ansehen frei. Bei vorhandener fileId wird nur der Inhalt ersetzt (Link bleibt gleich).
+  async function driveFetch(url, opt = {}) {
+    const r = await fetch(url, Object.assign({}, opt, { headers: Object.assign({ authorization: 'Bearer ' + await gAccess() }, opt.headers || {}) }));
+    if (r.status === 204) return {};
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const reason = j.error && j.error.errors && j.error.errors[0] && j.error.errors[0].reason;
+      if (r.status === 403 && /insufficient/i.test(reason || (j.error && j.error.message) || '')) throw new Error('Google Drive ist noch nicht freigegeben – bitte unter Einstellungen → Google einmal „Trennen“ und neu verbinden.');
+      if (r.status === 403 && /accessNotConfigured|SERVICE_DISABLED/i.test(JSON.stringify(j))) throw new Error('Bitte in der Google Cloud Console die „Google Drive API“ aktivieren.');
+      throw new Error((j.error && j.error.message) || ('Google-Drive-Fehler ' + r.status));
+    }
+    return j;
+  }
+  async function driveFolder() {
+    const p = readJson('oh-prefs.json', {});
+    if (p.gDriveFolder) { try { const f = await driveFetch('https://www.googleapis.com/drive/v3/files/' + p.gDriveFolder + '?fields=id,trashed'); if (f.id && !f.trashed) return f.id; } catch (e) {} }
+    const f = await driveFetch('https://www.googleapis.com/drive/v3/files?fields=id', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Home Office – Vollmachten', mimeType: 'application/vnd.google-apps.folder' }) });
+    const q = readJson('oh-prefs.json', {}); q.gDriveFolder = f.id; writeJson('oh-prefs.json', q);
+    return f.id;
+  }
+  ipcMain.handle('oh:gDriveShare', async (e, name, type, buf, fileId) => {
+    try {
+      const data = Buffer.from(buf); const mime = type || 'application/pdf';
+      let f = null;
+      if (fileId) {
+        try { f = await driveFetch('https://www.googleapis.com/upload/drive/v3/files/' + encodeURIComponent(fileId) + '?uploadType=media&fields=id,webViewLink,trashed', { method: 'PATCH', headers: { 'content-type': mime }, body: data }); }
+        catch (err) { f = null; }
+        if (f && f.trashed) f = null;
+      }
+      if (!f) {
+        const folder = await driveFolder(); const b = 'oh' + crypto.randomBytes(12).toString('hex');
+        const meta = JSON.stringify({ name, parents: [folder] });
+        const body = Buffer.concat([Buffer.from(`--${b}\r\ncontent-type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${b}\r\ncontent-type: ${mime}\r\n\r\n`), data, Buffer.from(`\r\n--${b}--`)]);
+        f = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { method: 'POST', headers: { 'content-type': 'multipart/related; boundary=' + b }, body });
+      }
+      await driveFetch('https://www.googleapis.com/drive/v3/files/' + f.id + '/permissions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ role: 'reader', type: 'anyone' }) });
+      return { ok: true, id: f.id, link: f.webViewLink || ('https://drive.google.com/file/d/' + f.id + '/view') };
+    } catch (err) { return { ok: false, message: errText(err) }; }
+  });
+  ipcMain.handle('oh:gDriveUnshare', async (e, fileId) => {
+    try { await driveFetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId), { method: 'DELETE' }); return { ok: true }; }
+    catch (err) { if (/not found|404/i.test(errText(err))) return { ok: true }; return { ok: false, message: errText(err) }; }
   });
 
   // ---------- Erinnerungen (Windows-Benachrichtigungen) ----------

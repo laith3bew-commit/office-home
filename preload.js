@@ -45,6 +45,9 @@ contextBridge.exposeInMainWorld('officeHome', {
   gSetClient: (id, secret) => ipcRenderer.invoke('oh:gSetClient', id, secret),
   gConnect: () => ipcRenderer.invoke('oh:gConnect'),
   gDisconnect: () => ipcRenderer.invoke('oh:gDisconnect'),
+  // Vollmacht als Google-Drive-Freigabelink
+  gDriveShare: (name, type, buf, fileId) => ipcRenderer.invoke('oh:gDriveShare', name, type, buf, fileId),
+  gDriveUnshare: (fileId) => ipcRenderer.invoke('oh:gDriveUnshare', fileId),
   gList: (from, to) => ipcRenderer.invoke('oh:gList', from, to),
   gUpsert: (ev, id) => ipcRenderer.invoke('oh:gUpsert', ev, id),
   gDelete: (id) => ipcRenderer.invoke('oh:gDelete', id),

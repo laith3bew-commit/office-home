@@ -246,9 +246,16 @@ html[dir=rtl] .langsw button{font-family:'Manrope','IBM Plex Sans Arabic',sans-s
 .letter .l-subj{font-weight:700;margin-bottom:7mm}
 .letter .l-body p{margin:0 0 3.6mm}
 .letter .l-sigwrap{position:relative;margin-top:1mm}
-.letter .l-sig{height:16mm;display:flex;align-items:flex-end}
-.letter .l-sig img{max-height:16mm;max-width:60mm}
-.letter .l-stamp{position:absolute;left:58mm;top:-6mm;max-height:28mm;max-width:42mm;opacity:.92}
+.letter .l-sig{min-height:8mm;display:flex;align-items:flex-end}
+.letter .l-sig img{height:var(--sig,22mm);max-width:90mm;object-fit:contain;object-position:left bottom}
+/* Logo / Stempel: immer oben rechts im Briefkopf, Größe aus den Einstellungen */
+.letter .l-logo{position:absolute;right:20mm;top:9mm;width:var(--logo,28mm);height:var(--logo,28mm);object-fit:contain;object-position:right top;z-index:2}
+.letter.haslogo .l-head{padding-right:calc(var(--logo,28mm) + 5mm);box-sizing:border-box}
+.letter.haslogo.d-band .l-head{padding-right:calc(var(--logo,28mm) + 25mm)}
+.letter.haslogo.d-elegant .l-head{padding-left:calc(var(--logo,28mm) + 5mm)}
+.letter .l-poa{margin:1mm 0 4mm;font-size:.92em}
+.letter .l-poa a{color:inherit;word-break:break-all}
+.letter .l-foot{position:absolute;left:25mm;right:20mm;top:282mm;font-size:7.5pt;line-height:1.3;white-space:pre-wrap}
 .letter .l-anl{margin-top:7mm}
 .letter .l-anl b{display:block}
 .letter .fold{position:absolute;left:4mm;width:5mm;border-top:.3pt solid #888}
@@ -318,6 +325,24 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 .dstile.on{border-color:var(--accent2);background:var(--accent-soft)}
 .dstile .pv{width:168px;height:238px;overflow:hidden;text-align:left;margin-bottom:6px;border:1px solid var(--line);background:#fff}
 .dstile .pv .letter{transform:scale(.21);transform-origin:top left;box-shadow:none;pointer-events:none}
+/* Einstellungen: Abschnitte mit Seitenleiste */
+.setwrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
+.setnav{position:sticky;top:0;display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:8px}
+.setnav button{display:flex;gap:10px;align-items:center;border:0;background:transparent;font:inherit;color:var(--ink);text-align:start;padding:9px 12px;border-radius:12px;cursor:pointer}
+.setnav button:hover{background:var(--hover)}
+.setnav button.on{background:var(--accent-soft);font-weight:600}
+.setnav button .ic{opacity:.8}
+.setsec{display:none}
+.setsec.on{display:block}
+.setsec > h2{margin:0 0 4px;font-size:20px}
+.setsec > .sub{margin:0 0 14px}
+.setrow{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.setrow input[type=range]{width:220px}
+.setpv{width:calc(210mm * .42);height:calc(140mm * .42);overflow:hidden;border:1px solid var(--line);border-radius:10px;background:#fff;flex:none}
+.setpv .letter{transform:scale(.42);transform-origin:top left;box-shadow:none;pointer-events:none}
+.setpv.bottom{height:calc(167mm * .42)}
+.setpv.bottom .letter{margin-top:calc(-130mm * .42)}
+@media (max-width:900px){.setwrap{grid-template-columns:1fr}.setnav{position:static;flex-direction:row;flex-wrap:wrap}}
 /* Monatsbericht */
 .rpwrap{background:var(--hover);border-radius:var(--radius);padding:18px;overflow-x:auto}
 .report{background:#fff;color:#000;width:210mm;margin:0 auto;padding:15mm 18mm;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.4;box-shadow:0 4px 18px rgba(0,0,0,.18)}
@@ -560,7 +585,8 @@ function defaultState(){
     version: 1,
     settings: {
       me: {name:'', street:'', zip:'', city:'', phone:'', email:''},
-      letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79'},
+      letter: {font:'Arial', size:11, longDate:true, foldMarks:true, greeting:'Mit freundlichen Grüßen', design:'klassisch', accent:'#1f4e79',
+    logoAlways:true, logoSize:28, sigSize:22, footer:'', footerColor:'#555555', poaLink:true},
       signature:'', stamp:'', reminderDays:14, contractDays:60, lastBackup:'', autoContracts:true, scan:{mode:'dok', watchDir:''},
       memory: {root:'', map:{}, defaultWs:'', remindDays:14},
       cal: {ki:true, gLastSync:''}
@@ -715,7 +741,10 @@ const F = {
     {k:'street', l:'Straße und Hausnummer'}, {k:'email', l:'E-Mail'}, {k:'zip', l:'PLZ'}, {k:'city', l:'Ort'},
     {k:'taxId', l:'Steuer-ID'}, {k:'pensionNo', l:'Rentenversicherungsnummer'},
     {k:'healthInsurance', l:'Krankenkasse & Versichertennummer', full:1},
-    {k:'poaDate', l:'Vollmacht vom', t:'date'}, {k:'poaScope', l:'Umfang der Vollmacht', hint:'z. B. Generalvollmacht, Behörden, Bank'},
+    {k:'poaKind', l:'Art der Vollmacht', t:'select', o:['', 'Vorsorgevollmacht', 'Generalvollmacht', 'Vorsorge- und Generalvollmacht', 'Bankvollmacht', 'Betreuungsverfügung', 'Sonstige']},
+    {k:'poaDate', l:'Vollmacht vom', t:'date'}, {k:'poaScope', l:'Umfang der Vollmacht', hint:'z. B. Vermögen, Behörden, Gesundheit, Bank'},
+    {k:'poaNotary', l:'Beglaubigung', t:'select', o:['', 'keine', 'notariell beurkundet', 'notariell beglaubigt', 'Betreuungsbehörde beglaubigt']},
+    {k:'poaRegister', l:'Im Zentralen Vorsorgeregister eingetragen', t:'checkbox'},
     {k:'color', l:'Farbe', t:'color'}, {k:'notes', l:'Notizen', t:'textarea', full:1, rows:3}
   ],
   contact: [
@@ -854,7 +883,7 @@ const CASE_TEMPLATES = {
 // ---------- Brief-Vorlagen (DIN 5008) ----------
 const BUILTIN_TEMPLATES = [
   {id:'vollmacht', name:'Anzeige der Bevollmächtigung', subject:'Anzeige der Bevollmächtigung – {Name}, geb. {Geburtsdatum}',
-   body:'hiermit zeige ich an, dass ich {NameMitAnrede}, geboren am {Geburtsdatum}, wohnhaft {Anschrift}, vertrete. Eine Kopie der Vollmacht füge ich bei.\n\nIch bitte Sie, Ihre Korrespondenz in dieser Angelegenheit künftig an mich zu richten und mich über alle laufenden Vorgänge zu informieren.\n\nBitte bestätigen Sie mir den Eingang dieses Schreibens.'},
+   body:'hiermit zeige ich an, dass ich {NameMitAnrede}, geboren am {Geburtsdatum}, wohnhaft {Anschrift}, vertrete.\n\n{VollmachtAbsatz}\n\nIch bitte Sie, Ihre Korrespondenz in dieser Angelegenheit künftig an mich zu richten und mich über alle laufenden Vorgänge zu informieren.\n\nBitte bestätigen Sie mir den Eingang dieses Schreibens.'},
   {id:'kuendigung', name:'Kündigung eines Vertrags', subject:'Kündigung des Vertrags – Kundennummer {Kundennummer}',
    body:'hiermit kündige ich{Vertretung} den oben genannten Vertrag fristgerecht zum nächstmöglichen Zeitpunkt.\n\nBitte bestätigen Sie mir die Kündigung sowie das genaue Vertragsende schriftlich.\n\nEiner Kontaktaufnahme zu Werbe- oder Rückgewinnungszwecken widerspreche ich. Das erteilte SEPA-Lastschriftmandat endet mit dem Vertragsende.{VollmachtAbsatz}'},
   {id:'widerspruch', name:'Widerspruch gegen einen Bescheid', subject:'Widerspruch gegen Ihren Bescheid vom [Datum des Bescheids] – Aktenzeichen {Aktenzeichen}',
@@ -1552,16 +1581,55 @@ VIEWS.notes = () => {
   ${list.length ? `<div class="notes">${list.map(n => `<div class="note" data-act="editNote" data-id="${n.id}"><h4>${n.pinned ? '📌 ' : ''}${esc(n.title)}</h4><div class="small" style="margin-bottom:6px">${personChip(n.personId)} <span class="muted">· ${fmtDate(n.updated)}</span></div><p>${esc(n.content)}</p></div>`).join('')}</div>` : '<div class="card"><div class="empty">Noch keine Notizen.</div></div>'}`;
 };
 
+// Vollmacht einer Person: neuestes Dokument der Kategorie „Vollmacht“ + Freigabelink über Google Drive (p.poaShare)
+function poaDocOf(p){ return S.documents.filter(d => d.personId === p.id && d.category === 'Vollmacht' && d.fileId).sort((a, b) => (a.created || a.date || '').localeCompare(b.created || b.date || '')).pop() || null; }
+function poaBoxHTML(p, poaDoc){
+  const sh = p.poaShare || null, g = GS.status || {};
+  const facts = [p.poaKind, p.poaDate ? 'vom ' + fmtDate(p.poaDate) : '', p.poaNotary && p.poaNotary !== 'keine' ? p.poaNotary : '', p.poaRegister ? 'im Vorsorgeregister' : ''].filter(Boolean).join(' · ');
+  const stale = sh && poaDoc && sh.docId !== poaDoc.id;
+  let link;
+  if (sh && sh.link) link = `<div class="small" style="margin:6px 0"><span class="badge green">Link aktiv</span> <span class="muted">seit ${fmtDate(sh.date)}</span>${stale ? ' <span class="badge amber">neueres Dokument – bitte aktualisieren</span>' : ''}<br><a href="${esc(sh.link)}" target="_blank" style="word-break:break-all">${esc(sh.link)}</a></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" data-act="poaCopy" data-id="${p.id}">${icon('kopieren')}Link kopieren</button>${poaDoc ? `<button class="btn sm" data-act="poaShare" data-id="${p.id}">${icon('update')}Aktualisieren</button>` : ''}<button class="btn sm dan" data-act="poaUnshare" data-id="${p.id}">${icon('schliessen')}Link aufheben</button></div>`;
+  else if (!DESKTOP) link = '<div class="small muted">Freigabelinks gibt es nur im Desktop-Programm.</div>';
+  else if (!poaDoc) link = '<div class="small muted">Erst die Vollmacht als PDF hochladen, dann kann ein Link erstellt werden.</div>';
+  else if (!g.connected || !g.drive) link = `<div class="small muted">Für den Link Google ${g.connected ? 'neu ' : ''}verbinden (inkl. Google Drive): <a href="#/settings?tab=google">Einstellungen → Kalender, Google & KI</a>.</div>`;
+  else link = `<button class="btn sm pri" data-act="poaShare" data-id="${p.id}" ${MODE === 'demo' ? 'disabled title="Nicht im Demo-Modus"' : ''}>${icon('vollmacht')}Freigabelink erstellen</button>
+      <div class="small muted" style="margin-top:4px">Lädt die Vollmacht in deinen Google Drive (Ordner „Home Office – Vollmachten“). Jeder mit dem Link kann sie ansehen und drucken.</div>`;
+  return `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line2)"><b style="display:flex;gap:6px;align-items:center">${icon('vollmacht')}Vollmacht</b>
+    <div class="small" style="margin:4px 0 8px">${facts ? esc(facts) : '<span class="badge amber">Angaben fehlen</span> <a href="#" data-act="editPerson" data-id="' + p.id + '">ausfüllen</a>'}${p.poaScope ? `<div class="muted">Umfang: ${esc(p.poaScope)}</div>` : ''}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${poaDoc ? `<button class="btn sm" data-act="openDoc" data-id="${poaDoc.id}">${icon('auge')}${esc(poaDoc.title)}</button>` : ''}<button class="btn sm" data-act="newDoc" data-person="${p.id}" data-cat="Vollmacht">${icon('hochladen')}${poaDoc ? 'Neue Fassung hochladen' : 'Vollmacht als PDF hochladen'}</button></div>
+    ${link}</div>`;
+}
+async function poaShare(p){
+  if (MODE === 'demo') return alert('Im Demo-Modus wird nichts zu Google hochgeladen.');
+  const d = poaDocOf(p); if (!d) return alert('Bitte zuerst die Vollmacht als PDF hochladen.');
+  const f = await fileGet(d.fileId); if (!f || !f.blob) return alert('Die Datei der Vollmacht wurde nicht gefunden.');
+  const name = 'Vollmacht ' + personName(p) + (p.poaDate ? ' vom ' + fmtDate(p.poaDate) : '') + '.' + ((f.name || '').split('.').pop() || 'pdf');
+  toast('Vollmacht wird hochgeladen …');
+  const r = await window.officeHome.gDriveShare(name, f.type || f.blob.type || 'application/pdf', await f.blob.arrayBuffer(), p.poaShare && p.poaShare.fileId);
+  if (!r || !r.ok) return alert('Freigabelink konnte nicht erstellt werden:\n' + ((r && r.message) || 'unbekannter Fehler'));
+  p.poaShare = {fileId:r.id, link:r.link, docId:d.id, date:today()}; save(); render();
+  try { await navigator.clipboard.writeText(r.link); toast('Link erstellt und kopiert'); } catch (e) { toast('Link erstellt'); }
+}
+const POA_ACT = {
+  poaShare: d => { const p = getPerson(d.id); if (p) poaShare(p); },
+  poaCopy: async d => { const p = getPerson(d.id); if (!p || !p.poaShare) return; try { await navigator.clipboard.writeText(p.poaShare.link); toast('Link kopiert'); } catch (e) { prompt('Link:', p.poaShare.link); } },
+  poaUnshare: async d => { const p = getPerson(d.id); if (!p || !p.poaShare) return;
+    if (!confirm('Link aufheben? Die Datei wird aus deinem Google Drive gelöscht und der Link funktioniert nicht mehr – auch nicht in bereits verschickten Briefen.')) return;
+    const r = await window.officeHome.gDriveUnshare(p.poaShare.fileId);
+    if (!r || !r.ok) return alert('Konnte nicht aufgehoben werden:\n' + ((r && r.message) || 'unbekannter Fehler'));
+    delete p.poaShare; save(); render(); toast('Link aufgehoben'); }
+};
+
 // Personen
 VIEWS.persons = () => `<div class="head"><div class="grow"><h1>Personen & Vollmachten</h1><p class="sub" style="margin:0">Die Daten werden automatisch in Briefe eingesetzt (Name, Geburtsdatum, Anschrift).</p></div><button class="btn pri" data-act="newPerson">${icon('plus')}Person hinzufügen</button></div>
-  <div class="grid g2">${S.persons.map(p => { const poaDoc = S.documents.find(d => d.personId === p.id && d.category === 'Vollmacht');
+  <div class="grid g2">${S.persons.map(p => { const poaDoc = poaDocOf(p);
     return `<div class="card pcard" style="border-top-color:${esc(p.color)}"><h3><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}<button class="btn sm r" data-act="editPerson" data-id="${p.id}">${icon('bearbeiten')}Bearbeiten</button></h3>
     <div class="kv"><div>Name</div><div><b>${esc([p.salutation !== '—' ? p.salutation : '', personName(p)].join(' '))}</b></div><div>Geburtsdatum</div><div>${fmtDate(p.birth) || '—'}</div>
     <div>Anschrift</div><div>${esc(addrOneLine(p)) || '—'}</div><div>Telefon / E-Mail</div><div>${esc([p.phone, p.email].filter(Boolean).join(' · ')) || '—'}</div>
     <div>Steuer-ID</div><div>${esc(p.taxId) || '—'}</div><div>Rentenvers.-Nr.</div><div>${esc(p.pensionNo) || '—'}</div><div>Krankenkasse</div><div>${esc(p.healthInsurance) || '—'}</div>
-    <div>Vollmacht</div><div>${p.poaDate ? 'vom ' + fmtDate(p.poaDate) : '<span class="badge amber">nicht eingetragen</span>'} ${p.poaScope ? '· ' + esc(p.poaScope) : ''}</div>
-    <div>Vollmacht-Dokument</div><div>${poaDoc ? `<a href="#" data-act="openDoc" data-id="${poaDoc.id}">${esc(poaDoc.title)} öffnen</a>` : `<a href="#" data-act="newDoc" data-person="${p.id}" data-cat="Vollmacht">Vollmacht hochladen</a>`}</div>
-    ${p.notes ? `<div>Notizen</div><div style="white-space:pre-wrap">${esc(p.notes)}</div>` : ''}</div></div>`; }).join('')}</div>
+    ${p.notes ? `<div>Notizen</div><div style="white-space:pre-wrap">${esc(p.notes)}</div>` : ''}</div>
+    ${poaBoxHTML(p, poaDoc)}</div>`; }).join('')}</div>
   <div class="banner blue">${icon('info')}<div>Tipp: Die Daten von Vater und Mutter bleiben getrennt. Über die Auswahl oben („Alle / Vater / Mutter“) siehst du jeweils nur die Unterlagen einer Person.</div></div>`;
 
 // Kontakte
@@ -1634,10 +1702,16 @@ function applyVars(text, L){
     Krankenkasse: p ? p.healthInsurance : '', Rentenversicherungsnummer: p ? p.pensionNo : '', SteuerID: p ? p.taxId : ''};
   let t = String(text || '');
   t = t.replace(/[ \t]?\{Vertretung\}/g, bev ? ' im Namen und in Vollmacht von ' + anredeName(p) : '');
-  t = t.replace(/\s*\{VollmachtAbsatz\}\s*/g, bev ? '\n\nEine Kopie der Vollmacht liegt bei.\n\n' : '\n\n');
+  t = t.replace(/\s*\{VollmachtAbsatz\}\s*/g, bev && !poaLinkOf(L) ? '\n\nEine Kopie der Vollmacht liegt bei.\n\n' : '\n\n');
   t = t.replace(/\{([^{}\n]+)\}/g, (m, k) => vars[k] ? vars[k] : m);
   return t.replace(/\n{3,}/g, '\n\n').trim();
 }
+// Freigabelink der Vollmacht (Google Drive), nur bei „als Bevollmächtigter“ und wenn im Brief nicht abgeschaltet
+function poaLinkOf(L){
+  const p = getPerson(L.personId); if (L.mode !== 'bev' || !p || !p.poaShare || !p.poaShare.link) return '';
+  return (L.usePoaLink ?? S.settings.letter.poaLink) !== false ? p.poaShare.link : '';
+}
+function logoOn(L){ return !!(senderIsMe(L) && S.settings.stamp && (L.useLogo ?? S.settings.letter.logoAlways)); }
 function markHTML(s){ return esc(s).replace(/(\{[^{}\n]+\}|\[[^\[\]\n]+\])/g, '<mark>$1</mark>'); }
 function paras(s){ return s.split(/\n\s*\n/).map(p => `<p>${markHTML(p).replace(/\n/g, '<br>')}</p>`).join(''); }
 const LETTER_DESIGNS = [
@@ -1667,12 +1741,15 @@ function letterHTML(L, design, opt = {}){
   if (snd.email) info.push(['E-Mail', snd.email]);
   info.push(['Datum', ls.longDate ? fmtDateLong(L.date) : fmtDate(L.date)]);
   let anl = (L.attachments || '').split('\n').map(s => s.trim()).filter(Boolean);
-  if (bev && !anl.some(a => /vollmacht/i.test(a)) && /Vollmacht/.test(applyVars(L.body, L))) anl.unshift('Kopie der Vollmacht');
+  const poaLink = poaLinkOf(L);
+  if (bev && !poaLink && !anl.some(a => /vollmacht/i.test(a)) && /Vollmacht/.test(applyVars(L.body, L))) anl.unshift('Kopie der Vollmacht');
   const sig = (senderIsMe(L) && L.useSig && S.settings.signature) ? `<img src="${S.settings.signature}" alt="">` : '';
-  const stamp = (senderIsMe(L) && L.useStamp && S.settings.stamp) ? `<img class="l-stamp" src="${S.settings.stamp}" alt="">` : '';
+  const logo = logoOn(L) ? `<img class="l-logo" src="${S.settings.stamp}" alt="">` : '';
   const marke = L.useMarke && L.markeImg ? `<img class="l-marke" src="${L.markeImg}" alt="">` : '';
-  return `<div class="letter d-${esc(dsg)}" style="--lf:'${esc(ls.font)}';--ls:${Number(ls.size) || 11}pt;--acc:${esc(ls.accent || '#1f4e79')}">
+  const num = (v, d, lo, hi) => Math.min(hi, Math.max(lo, Number(v) || d));
+  return `<div class="letter d-${esc(dsg)} ${logo ? 'haslogo' : ''}" style="--lf:'${esc(ls.font)}';--ls:${Number(ls.size) || 11}pt;--acc:${esc(ls.accent || '#1f4e79')};--logo:${num(ls.logoSize, 28, 12, 50)}mm;--sig:${num(ls.sigSize, 22, 8, 45)}mm">
     ${ls.foldMarks ? '<div class="fold" style="top:105mm"></div><div class="hole" style="top:148.5mm"></div><div class="fold" style="top:210mm"></div>' : ''}
+    ${logo}
     <div class="l-head"><div class="n">${esc(snd.name || 'Dein Name (Einstellungen)')}</div><div class="a">${esc([snd.street, ((snd.zip || '') + ' ' + (snd.city || '')).trim(), snd.phone, snd.email].filter(Boolean).join('  ·  '))}</div></div>
     <div class="l-field ${marke ? 'hasm' : ''}"><div class="l-zone">${marke}<div class="l-ret">${esc(ret)}</div>${L.shipping ? `<div class="l-verm">${esc(L.shipping)}</div>` : ''}</div>
       <div class="l-addr"${ed('recipient')}>${markHTML(L.recipient || '[Empfänger]').replace(/\n/g, '<br>')}</div></div>
@@ -1681,11 +1758,13 @@ function letterHTML(L, design, opt = {}){
       <div class="l-subj"${ed('subject')}>${markHTML(applyVars(L.subject, L) || '[Betreff]')}</div>
       <p${ed('salutation')}>${markHTML(L.salutation)}</p>
       <div${ed('body')}>${paras(applyVars(L.body, L) || '[Text]')}</div>
+      ${poaLink ? `<p class="l-poa">Die Vollmacht können Sie hier einsehen, herunterladen und ausdrucken:<br><a href="${esc(poaLink)}">${esc(poaLink)}</a></p>` : ''}
       <p style="margin-top:5mm"${ed('closing')}>${esc(L.closing)}</p>
-      <div class="l-sigwrap"><div class="l-sig">${sig}</div>${stamp}</div>
+      <div class="l-sigwrap"><div class="l-sig">${sig}</div></div>
       <div>${esc(snd.name)}${bev ? `<br><span style="font-size:.92em">in Vollmacht für ${esc(anredeName(p))}</span>` : ''}</div>
       ${anl.length ? `<div class="l-anl"><b>Anlage${anl.length > 1 ? 'n' : ''}</b>${anl.map(a => esc(a)).join('<br>')}</div>` : ''}
     </div>
+    ${(ls.footer || '').trim() ? `<div class="l-foot" style="color:${esc(ls.footerColor || '#555555')}">${esc(ls.footer.trim())}</div>` : ''}
     <div class="pgend"></div></div>`;
 }
 VIEWS.brief = (id, q) => {
@@ -1723,9 +1802,13 @@ VIEWS.brief = (id, q) => {
           <span class="hint">Platzhalter in {…} werden automatisch ausgefüllt. Stellen in […] gelb markiert = noch selbst ausfüllen.</span></div>
         <div class="fld"><label>Grußformel</label><input data-lf="closing" value="${esc(L.closing)}"></div>
         <div class="fld"><label>Anlagen (eine pro Zeile)</label><textarea data-lf="attachments" rows="3">${esc(L.attachments)}</textarea><span class="hint">„Kopie der Vollmacht“ wird bei Vollmacht automatisch ergänzt.</span></div></div>
-      <div class="card"><h3>4 · Unterschrift, Stempel & Internetmarke</h3>
+      <div class="card"><h3>4 · Unterschrift, Logo, Vollmacht & Internetmarke</h3>
         <div class="fld cb"><input type="checkbox" data-lf="useSig" id="cbSig" ${L.useSig ? 'checked' : ''}><label for="cbSig">Unterschrift einfügen ${ls.signature ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
-        <div class="fld cb"><input type="checkbox" data-lf="useStamp" id="cbStamp" ${L.useStamp ? 'checked' : ''}><label for="cbStamp">Stempel einfügen ${ls.stamp ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
+        <div class="fld cb"><input type="checkbox" data-lf="useLogo" id="cbStamp" ${(L.useLogo ?? ls.letter.logoAlways) ? 'checked' : ''}><label for="cbStamp">Logo oben rechts ${ls.stamp ? '' : '<span class="muted">(in Einstellungen hochladen)</span>'}</label></div>
+        ${(() => { const p = getPerson(L.personId); return L.mode === 'bev' && p ? (p.poaShare && p.poaShare.link
+          ? `<div class="fld cb"><input type="checkbox" data-lf="usePoaLink" id="cbPoa" ${(L.usePoaLink ?? ls.letter.poaLink) !== false ? 'checked' : ''}><label for="cbPoa">Link zur Vollmacht unter dem Text</label></div>`
+          : `<div class="hint small muted" style="margin:-4px 0 8px">Noch kein Vollmacht-Link für ${esc(p.role)} – unter <a href="#/persons">Personen & Vollmachten</a> erstellen.</div>`) : ''; })()}
+        <div class="hint small muted" style="margin:-2px 0 8px">Größe von Logo und Unterschrift sowie die Fußzeile: <a href="#/settings?tab=brief">Einstellungen → Briefe</a></div>
         <div class="fld cb"><input type="checkbox" data-lf="useMarke" id="cbMarke" ${L.useMarke ? 'checked' : ''}><label for="cbMarke">Internetmarke (Porto) im Adressfeld drucken</label></div>
         <div ${L.useMarke ? '' : 'style="display:none"'} id="markeBox"><button class="btn sm" data-act="markeUpload">${icon('hochladen')}Internetmarke als Bild laden (PNG/JPG)</button> ${L.markeImg ? '<button class="btn sm dan" data-act="markeDel">' + icon('loeschen') + 'entfernen</button>' : ''}
           ${L.markeImg ? `<img class="imgprev" src="${L.markeImg}">` : ''}<div class="hint small muted" style="margin-top:4px">Internetmarke bei der Deutschen Post online kaufen, als Bild speichern und hier laden. Vor dem ersten Versand einmal Probe drucken und mit Fensterumschlag (DL) prüfen.</div></div>
@@ -1923,56 +2006,102 @@ VIEWS.search =(id, q) => {
 };
 
 // Einstellungen
-VIEWS.settings = () => {
+const SET_SECS = [
+  {v:'allgemein', l:'Allgemein', i:'einstellungen', d:'Darstellung und Sprache der Bedienung.'},
+  {v:'daten', l:'Meine Daten', i:'personen', d:'Deine Angaben als Bevollmächtigter – erscheinen als Absender in Briefen.'},
+  {v:'brief', l:'Briefe', i:'brief', d:'Design, Schrift, Logo, Unterschrift und Fußzeile – gilt für alle Briefe und wird dauerhaft gespeichert.'},
+  {v:'vollmacht', l:'Vollmacht', i:'vollmacht', d:'Freigabelinks der Vollmachten, die automatisch unter jedem Brief stehen.'},
+  {v:'google', l:'Kalender, Google & KI', i:'kalender', d:'Google Kalender und Drive, Gemini, Erinnerungen und Hintergrundbetrieb.'},
+  {v:'claude', l:'Claude & Gedächtnis', i:'ki', d:'Anbindung an Claude (MCP) und an das Gedächtnis.'},
+  {v:'system', l:'Sicherung & Update', i:'update', d:'Datensicherung, Wiederherstellung und Programm-Updates.'}
+];
+VIEWS.settings = (id, q) => {
   const s = S.settings, me = s.me, ls = s.letter;
+  if (q && q.get('tab') && SET_SECS.some(x => x.v === q.get('tab'))) UI.setTab = q.get('tab');
+  const tab = SET_SECS.some(x => x.v === UI.setTab) ? UI.setTab : 'allgemein';
   const inp = (k, l, v, t = 'text') => `<div class="fld"><label>${l}</label><input type="${t}" data-set="${k}" value="${esc(v)}"></div>`;
+  const sec = (v, body) => { const x = SET_SECS.find(y => y.v === v); return `<section class="setsec ${tab === v ? 'on' : ''}" data-sec="${v}"><h2>${x.l}</h2><p class="sub small muted">${x.d}</p>${body}</section>`; };
+  const pvL = Object.assign(sampleLetter(), {mode:'me', senderId:'me', useSig:true});
+  const poaRows = S.persons.map(p => `<div class="row"><div class="grow"><b>${esc(p.role)}</b> <span class="small muted">${esc(personName(p))}</span><div class="small">${p.poaShare && p.poaShare.link ? `<span class="badge green">Link aktiv</span> <a href="${esc(p.poaShare.link)}" target="_blank">${esc(p.poaShare.link)}</a>` : '<span class="badge amber">kein Link</span>'}</div></div><a class="btn sm" href="#/persons">${icon('vollmacht')}Verwalten</a></div>`).join('');
   return `<div class="head"><div class="grow"><h1>Einstellungen</h1></div></div>
-  <div class="card"><h3>Darstellung</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="themesw">${[['hell', 'Hell'], ['dunkel', 'Dunkel'], ['system', 'System']].map(([v, l]) => `<button class="${themeGet() === v ? 'on' : ''}" data-act="setTheme" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.</span></div>
-    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px"><b class="small">Sprache der Bedienung</b><span class="themesw langsw no-i18n">${[['de', 'Deutsch'], ['ar', 'العربية']].map(([v, l]) => `<button class="${(window.OH_LANG || 'de') === v ? 'on' : ''}" data-act="setLang" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">Briefe, Vorlagen und Berichte bleiben immer Deutsch (DIN 5008).</span></div></div>
-  <div class="grid g2">
-    <div class="card"><h3>Meine Daten (Bevollmächtigter / Absender)</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+  <div class="setwrap"><nav class="setnav">${SET_SECS.map(x => `<button class="${tab === x.v ? 'on' : ''}" data-act="setTab" data-id="${x.v}">${icon(x.i)}${x.l}</button>`).join('')}</nav>
+  <div class="setbody">
+  ${sec('allgemein', `<div class="card"><h3>Darstellung</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="themesw">${[['hell', 'Hell'], ['dunkel', 'Dunkel'], ['system', 'System']].map(([v, l]) => `<button class="${themeGet() === v ? 'on' : ''}" data-act="setTheme" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.</span></div>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px"><b class="small">Sprache der Bedienung</b><span class="themesw langsw no-i18n">${[['de', 'Deutsch'], ['ar', 'العربية']].map(([v, l]) => `<button class="${(window.OH_LANG || 'de') === v ? 'on' : ''}" data-act="setLang" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">Briefe, Vorlagen und Berichte bleiben immer Deutsch (DIN 5008).</span></div></div>`)}
+  ${sec('daten', `<div class="card"><h3>Meine Daten (Bevollmächtigter / Absender)</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       ${inp('me.name', 'Vor- und Nachname', me.name)}${inp('me.phone', 'Telefon', me.phone)}${inp('me.street', 'Straße und Hausnummer', me.street)}${inp('me.email', 'E-Mail', me.email, 'email')}${inp('me.zip', 'PLZ', me.zip)}${inp('me.city', 'Ort', me.city)}
-    </form></div><p class="small muted" style="margin:10px 0 0">Wird automatisch als Absender in Briefe übernommen.</p></div>
-    <div class="card"><h3>Briefgestaltung</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+    </form></div><p class="small muted" style="margin:10px 0 0">Wird automatisch als Absender in Briefe übernommen.</p></div>`)}
+  ${sec('brief', `<div class="card"><h3>Briefvorlage (Design)</h3>
+      <p class="small muted" style="margin-top:0">Anschriftfeld und Infoblock bleiben bei jedem Design nach DIN 5008 Form B, passend für Fensterumschläge.</p>
+      <div class="dsgrid">${(() => { const smp = sampleLetter(); return LETTER_DESIGNS.map(x => `<button type="button" class="dstile ${(ls.design || 'klassisch') === x.v ? 'on' : ''}" data-act="setDesign" data-id="${x.v}"><div class="pv">${letterHTML(smp, x.v)}</div><b>${x.l}</b><div class="small muted" style="max-width:168px">${x.d}</div></button>`).join(''); })()}</div>
+      <div class="modal" style="box-shadow:none;width:100%;max-height:none;margin-top:12px"><form style="padding:0" onsubmit="return false">
+        <div class="fld"><label>Akzentfarbe (Modern, Farbband, Randlinie)</label><select data-set="letter.accent" data-rerender="1">${optHTML(LETTER_ACCENTS, ls.accent)}</select></div><div></div>
+      </form></div></div>
+    <div class="card"><h3>Schrift & Format</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       <div class="fld"><label>Schriftart</label><select data-set="letter.font">${optHTML(['Arial', 'Calibri', 'Helvetica', 'Verdana', 'Times New Roman', 'Georgia', 'Courier Prime'], ls.font)}</select></div>
       <div class="fld"><label>Schriftgröße</label><select data-set="letter.size">${optHTML(['10', '11', '12'], String(ls.size))}</select></div>
       <div class="fld"><label>Datumsformat</label><select data-set="letter.longDate">${optHTML([{v:'true', l:'23. November 2026'}, {v:'false', l:'23.11.2026'}], String(ls.longDate))}</select></div>
       <div class="fld"><label>Falz- und Lochmarken</label><select data-set="letter.foldMarks">${optHTML([{v:'true', l:'anzeigen'}, {v:'false', l:'ausblenden'}], String(ls.foldMarks))}</select></div>
       <div class="fld full"><label>Standard-Grußformel</label><input data-set="letter.greeting" value="${esc(ls.greeting)}"></div>
-      <div class="fld full"><label>Sprache</label><select disabled><option>Deutsch</option></select></div>
     </form></div></div>
-    <div class="card" style="grid-column:1/-1"><h3>Briefvorlage (Design)</h3>
-      <p class="small muted" style="margin-top:0">Gilt für alle Briefe. Anschriftfeld und Infoblock bleiben bei jedem Design nach DIN 5008 Form B, passend für Fensterumschläge.</p>
-      <div class="dsgrid">${(() => { const smp = sampleLetter(); return LETTER_DESIGNS.map(x => `<button type="button" class="dstile ${(ls.design || 'klassisch') === x.v ? 'on' : ''}" data-act="setDesign" data-id="${x.v}"><div class="pv">${letterHTML(smp, x.v)}</div><b>${x.l}</b><div class="small muted" style="max-width:168px">${x.d}</div></button>`).join(''); })()}</div>
-      <div class="modal" style="box-shadow:none;width:100%;max-height:none;margin-top:12px"><form style="padding:0" onsubmit="return false">
-        <div class="fld"><label>Akzentfarbe (Modern, Farbband, Randlinie)</label><select data-set="letter.accent" data-rerender="1">${optHTML(LETTER_ACCENTS, ls.accent)}</select></div><div></div>
-      </form></div></div>
-    <div class="card"><h3>Unterschrift & Stempel</h3>
-      <p class="small muted" style="margin-top:0">Unterschrift auf weißem Papier mit dunklem Stift, abfotografieren oder scannen, zuschneiden und hier laden (PNG mit transparentem Hintergrund ist ideal).</p>
-      <div style="display:flex;gap:28px;flex-wrap:wrap"><div><b class="small">Unterschrift</b>${s.signature ? `<img class="imgprev" src="${s.signature}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keine</div>'}
-        <button class="btn sm" data-act="upImg" data-id="signature">${icon('hochladen')}Laden</button> ${s.signature ? '<button class="btn sm dan" data-act="delImg" data-id="signature">' + icon('loeschen') + 'Entfernen</button>' : ''}</div>
-      <div><b class="small">Stempel / Siegel</b>${s.stamp ? `<img class="imgprev" src="${s.stamp}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keiner</div>'}
-        <button class="btn sm" data-act="upImg" data-id="stamp">${icon('hochladen')}Laden</button> ${s.stamp ? '<button class="btn sm dan" data-act="delImg" data-id="stamp">' + icon('loeschen') + 'Entfernen</button>' : ''}</div></div></div>
-    <div class="card"><h3>Erinnerungen</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
+    <div class="card"><h3>Logo & Unterschrift</h3>
+      <p class="small muted" style="margin-top:0">Das Logo steht immer oben rechts im Briefkopf. Unterschrift auf weißem Papier mit dunklem Stift, scannen oder abfotografieren, zuschneiden und laden (PNG mit transparentem Hintergrund ist ideal).</p>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:280px">
+          <div><b class="small">Logo</b>${s.stamp ? `<img class="imgprev" src="${s.stamp}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keins</div>'}
+            <button class="btn sm" data-act="upImg" data-id="stamp">${icon('hochladen')}Laden</button> ${s.stamp ? '<button class="btn sm dan" data-act="delImg" data-id="stamp">' + icon('loeschen') + 'Entfernen</button>' : ''}</div>
+          <div class="setrow"><label class="small" style="min-width:110px">Größe Logo</label><input type="range" min="12" max="50" step="1" data-set="letter.logoSize" data-live="logo" value="${Number(ls.logoSize) || 28}"><b class="small" id="lvLogo">${Number(ls.logoSize) || 28} mm</b></div>
+          <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-set="letter.logoAlways" ${ls.logoAlways !== false ? 'checked' : ''}>In jedem neuen Brief automatisch einsetzen</label>
+          <div style="margin-top:16px"><b class="small">Unterschrift</b>${s.signature ? `<img class="imgprev" src="${s.signature}">` : '<div class="imgprev muted small" style="width:200px;height:60px;display:grid;place-items:center">keine</div>'}
+            <button class="btn sm" data-act="upImg" data-id="signature">${icon('hochladen')}Laden</button> ${s.signature ? '<button class="btn sm dan" data-act="delImg" data-id="signature">' + icon('loeschen') + 'Entfernen</button>' : ''}</div>
+          <div class="setrow"><label class="small" style="min-width:110px">Größe Unterschrift</label><input type="range" min="8" max="45" step="1" data-set="letter.sigSize" data-live="sig" value="${Number(ls.sigSize) || 22}"><b class="small" id="lvSig">${Number(ls.sigSize) || 22} mm</b></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap"><div><div class="small muted" style="margin-bottom:4px">Vorschau Briefkopf</div><div class="setpv" id="setpvTop">${letterHTML(pvL)}</div></div><div><div class="small muted" style="margin-bottom:4px">Vorschau Unterschrift & Fußzeile</div><div class="setpv bottom" id="setpvSig">${letterHTML(pvL)}</div></div></div>
+      </div></div>
+    <div class="card"><h3>Fußzeile</h3>
+      <p class="small muted" style="margin-top:0">Steht unten auf jedem Brief, z. B. „Dieses Schreiben wurde maschinell erstellt und ist mit einer digitalen Unterschrift gültig.“ Leer lassen = keine Fußzeile.</p>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:280px"><div class="fld"><label>Text der Fußzeile (mehrere Zeilen möglich)</label><textarea rows="3" data-set="letter.footer" data-live="foot" style="width:100%">${esc(ls.footer || '')}</textarea></div>
+          <div class="setrow"><label class="small">Farbe</label>${[['#555555', 'Grau'], ['#000000', 'Schwarz'], ['#C00000', 'Rot'], ['#1B2A44', 'Navy'], ['#4F6785', 'Stahl']].map(([v, l]) => `<label class="small" style="display:flex;gap:5px;align-items:center"><input type="radio" name="footCol" data-set="letter.footerColor" value="${v}" ${(ls.footerColor || '#555555').toLowerCase() === v.toLowerCase() ? 'checked' : ''}><span style="width:14px;height:14px;border-radius:50%;background:${v};display:inline-block"></span>${l}</label>`).join('')}</div></div>
+        <div><div class="small muted" style="margin-bottom:4px">Vorschau Unterschrift & Fußzeile</div><div class="setpv bottom" id="setpvBot">${letterHTML(pvL)}</div></div>
+      </div></div>`)}
+  ${sec('vollmacht', `<div class="card"><h3>${icon('vollmacht')}Vollmacht-Link in Briefen</h3>
+      <p class="small muted" style="margin-top:0">Wenn du „als Bevollmächtigter“ schreibst und für die Person ein Freigabelink existiert, steht unter dem Text: „Die Vollmacht können Sie hier einsehen, herunterladen und ausdrucken: …“. Den Link erstellst du unter <a href="#/persons">Personen & Vollmachten</a> (Google Drive, unter „Kalender, Google & KI“ verbinden).</p>
+      <label class="small" style="display:flex;gap:6px;align-items:center;margin-bottom:10px"><input type="checkbox" data-set="letter.poaLink" ${ls.poaLink !== false ? 'checked' : ''}>Link automatisch in jeden Brief setzen (im Brief einzeln abschaltbar)</label>
+      <div class="list">${poaRows || '<div class="empty">Noch keine Personen.</div>'}</div></div>`)}
+  ${sec('google', `${DESKTOP ? `<div class="card" id="calCard">${calCardHTML()}</div>` : '<div class="card"><div class="empty">Nur im Desktop-Programm verfügbar.</div></div>'}
+    <div class="card"><h3>Verträge</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       <div class="fld"><label>Vertragskündigungen anzeigen (Tage vorher)</label><input type="number" data-set="contractDays" value="${s.contractDays}"></div><div></div>
-    </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.</p></div>
-    ${DESKTOP ? `<div class="card" id="calCard" style="grid-column:1/-1">${calCardHTML()}</div>` : ''}
-    ${DESKTOP ? `<div class="card" id="mcpCard" style="grid-column:1/-1">${mcpCardHTML()}</div>` : ''}
-    ${DESKTOP ? `<div class="card" id="updCard" style="grid-column:1/-1">${updCardHTML()}</div>` : ''}
-    ${DESKTOP && window.officeHome.memStatus ? `<div class="card" id="memCard" style="grid-column:1/-1">${memCardHTML()}</div>` : ''}
-    <div class="card" style="grid-column:1/-1"><h3>${icon('save')}Datensicherung</h3>
+    </form></div><p class="small muted">Fristen kannst du unter „Fristen & Aufgaben“ auch als .ics-Datei in einen anderen Kalender übernehmen – mit Erinnerung 2 Tage vorher.</p></div>`)}
+  ${sec('claude', `${DESKTOP ? `<div class="card" id="mcpCard">${mcpCardHTML()}</div>` : ''}
+    ${DESKTOP && window.officeHome.memStatus ? `<div class="card" id="memCard">${memCardHTML()}</div>` : ''}
+    ${!DESKTOP ? '<div class="card"><div class="empty">Nur im Desktop-Programm verfügbar.</div></div>' : ''}`)}
+  ${sec('system', `<div class="card"><h3>${icon('save')}Datensicherung</h3>
       <p style="margin-top:0">Alle Daten liegen <b>nur auf diesem Computer</b> (im Browser-Speicher dieses Programms). Erstelle regelmäßig eine Sicherung und speichere sie z. B. auf einem USB-Stick.</p>
       <p class="small muted">Letzte Sicherung: ${s.lastBackup ? fmtDate(s.lastBackup) : 'noch nie'} · <span id="usage"></span></p>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="backup">Sicherung herunterladen</button><button class="btn" data-act="restore">Sicherung wiederherstellen</button><span style="flex:1"></span><button class="btn dan" data-act="wipe">Alle Daten löschen</button></div></div>
-  </div>`;
+    ${DESKTOP ? `<div class="card" id="updCard">${updCardHTML()}</div>` : ''}`)}
+  </div></div>`;
 };
 AFTER.settings = async () => {
   mcpRefresh();
-  $$('[data-set]').forEach(el => el.addEventListener('change', () => {
+  const setVal = el => {
     const path = el.dataset.set.split('.'); let o = S.settings; for (let i = 0; i < path.length - 1; i++) o = o[path[i]];
-    let v = el.value; if (v === 'true') v = true; else if (v === 'false') v = false; else if (el.type === 'number' || path[1] === 'size') v = Number(v);
-    o[path[path.length - 1]] = v; save(); toast('Gespeichert'); if (el.dataset.rerender || path[0] === 'letter') render();
-  }));
+    let v = el.value; if (el.type === 'checkbox') v = el.checked; else if (v === 'true') v = true; else if (v === 'false') v = false; else if (el.type === 'number' || el.type === 'range' || path[1] === 'size') v = Number(v);
+    o[path[path.length - 1]] = v; return path;
+  };
+  // Live-Vorschau für Logo-/Unterschriftsgröße und Fußzeile, ohne die Seite neu aufzubauen
+  const livePv = () => { const pvL = Object.assign(sampleLetter(), {mode:'me', senderId:'me', useSig:true}); const h = letterHTML(pvL);
+    ['#setpvTop', '#setpvSig', '#setpvBot'].forEach(s => { const b = $(s); if (b) b.innerHTML = h; });
+    const a = $('#lvLogo'), b = $('#lvSig'); if (a) a.textContent = S.settings.letter.logoSize + ' mm'; if (b) b.textContent = S.settings.letter.sigSize + ' mm'; };
+  $$('[data-set]').forEach(el => {
+    el.addEventListener('change', () => {
+      if (el.type === 'radio' && !el.checked) return;
+      const path = setVal(el); save(); toast('Gespeichert');
+      if (el.dataset.live) livePv(); else if (el.dataset.rerender || path[0] === 'letter') render();
+    });
+    if (el.dataset.live) el.addEventListener('input', () => { setVal(el); livePv(); clearTimeout(el._t); el._t = setTimeout(save, 400); });
+  });
   if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); const u = $('#usage'); if (u) u.textContent = 'Belegter Speicher: ' + (e.usage / 1048576).toFixed(1) + ' MB'; }
 };
 
@@ -2061,6 +2190,7 @@ const ACT = {
   markeDel: () => { LD.markeImg = ''; render(); },
   upImg: async d => { const f = await pickFile('image/*'); if (!f) return; S.settings[d.id] = await imageToDataURL(f, 900); save(); render(); },
   delImg: d => { S.settings[d.id] = ''; save(); render(); },
+  setTab: d => { UI.setTab = d.id; if (location.hash !== '#/settings') location.hash = '#/settings'; else { render(); const m = $('#main'); if (m) m.scrollTop = 0; } },
   setDesign: d => { S.settings.letter.design = d.id; save(); render(); toast('Briefvorlage: ' + (LETTER_DESIGNS.find(x => x.v === d.id) || {}).l); },
   repMonth: d => { UI.reportMonth = monthShift(UI.reportMonth, Number(d.id)); render(); },
   printReport: () => printReport(false), pdfReport: () => printReport(true),
@@ -2124,6 +2254,8 @@ function initUpdates(){
   });
 }
 async function flushSave(){ clearTimeout(saveTimer); if (DB.db) await DB.put('kv', stateKey(), S); }
+Object.assign(ACT, POA_ACT);
+AFTER.persons = async () => { if (DESKTOP && !GS.status && window.officeHome.gStatus) { await gRefreshStatus(); if (parseHash().route === 'persons') render(); } };
 Object.assign(ACT, {
   updCheck: async () => { UPD.state = 'checking'; updUI(); const r = await window.officeHome.updateCheck();
     if (!r.ok) { UPD.state = 'error'; UPD.message = r.message; } else if (UPD.state === 'checking') UPD.state = r.latest && r.latest !== r.current ? UPD.state : 'none'; updUI(); },
@@ -3277,7 +3409,7 @@ let BG = null;
 function calCardHTML(){
   const k = KI.status || {}, g = GS.status || {}, demo = MODE === 'demo';
   const stepList = ['<a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> öffnen und ein neues Projekt „Home Office“ anlegen.',
-    '„APIs und Dienste“ → „Bibliothek“ → <b>Google Calendar API</b> aktivieren.',
+    '„APIs und Dienste“ → „Bibliothek“ → <b>Google Calendar API</b> und <b>Google Drive API</b> aktivieren (Drive für die Vollmacht-Links).',
     '„OAuth-Zustimmungsbildschirm“: Nutzertyp <b>Extern</b>, App-Name „Home Office“, deine E-Mail. Danach den Status auf <b>In Produktion</b> setzen (sonst läuft die Anmeldung nach 7 Tagen ab). Die Warnung „App nicht überprüft“ beim Verbinden mit „Erweitert → Weiter“ bestätigen – es ist deine eigene App.',
     '„Anmeldedaten“ → „Anmeldedaten erstellen“ → <b>OAuth-Client-ID</b>, Anwendungstyp <b>Desktop-App</b>.',
     'Client-ID und Clientschlüssel unten einfügen und „Mit Google verbinden“ klicken.'];
@@ -3296,7 +3428,7 @@ function calCardHTML(){
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" data-act="kiSave">${icon('speichern')}Speichern</button>${k.hasKey ? `<button class="btn dan" data-act="kiDel">${icon('loeschen')}Schlüssel löschen</button>` : ''}</div></div>
     <div><b>Google Kalender (beide Richtungen)</b>
       <p class="small muted" style="margin:4px 0 10px">Termine aus Home Office erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.</p>
-      ${g.connected ? `<p><span class="badge green">verbunden</span> ${esc(g.email || '')}<br><span class="small muted">Letzter Abgleich: ${calCfg().gLastSync ? new Date(calCfg().gLastSync).toLocaleString('de-DE') : 'noch nie'}${GS.msg ? ' · Fehler: ' + esc(GS.msg) : ''}</span></p>
+      ${g.connected ? `<p><span class="badge green">verbunden</span> ${esc(g.email || '')} ${g.drive ? '<span class="badge green">Drive</span>' : '<span class="badge amber">ohne Drive</span>'}<br>${g.drive ? '' : '<span class="small">Für Vollmacht-Links: in der Google Cloud Console die <b>Google Drive API</b> aktivieren, dann hier „Trennen“ und neu verbinden.</span><br>'}<span class="small muted">Letzter Abgleich: ${calCfg().gLastSync ? new Date(calCfg().gLastSync).toLocaleString('de-DE') : 'noch nie'}${GS.msg ? ' · Fehler: ' + esc(GS.msg) : ''}</span></p>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="gSyncNow">${icon('update')}Jetzt abgleichen</button><button class="btn dan" data-act="gDisconnect">${icon('schliessen')}Trennen</button></div>`
       : `${g.hasClient ? '<p><span class="badge">Zugang eingetragen</span></p>' : `<ol class="small" style="padding-left:18px;margin:0 0 10px">${stepList.map(s => `<li style="margin-bottom:4px">${s}</li>`).join('')}</ol>`}
         <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">

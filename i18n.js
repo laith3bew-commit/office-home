@@ -179,6 +179,33 @@ const MONK = { 'Jan': 'يناير', 'Feb': 'فبراير', 'Mär': 'مارس', '
 const TAG = { 'Mo': 'الإثنين', 'Di': 'الثلاثاء', 'Mi': 'الأربعاء', 'Do': 'الخميس', 'Fr': 'الجمعة', 'Sa': 'السبت', 'So': 'الأحد' };
 const TAGK = { 'Mo': 'إثن', 'Di': 'ثلا', 'Mi': 'أرب', 'Do': 'خمي', 'Fr': 'جمع', 'Sa': 'سبت', 'So': 'أحد' };
 Object.assign(W, MONK, TAGK);
+/* 2.14: Einstellungen in Abschnitten, Logo, Fußzeile, Vollmacht-Link */
+Object.assign(W, {
+  'Allgemein': 'عام', 'Meine Daten': 'بياناتي', 'Briefe': 'الرسائل', 'Vollmacht': 'الوكالة', 'Kalender, Google & KI': 'التقويم وGoogle والذكاء الاصطناعي',
+  'Claude & Gedächtnis': 'Claude والذاكرة', 'Sicherung & Update': 'النسخ الاحتياطي والتحديث',
+  'Darstellung und Sprache der Bedienung.': 'المظهر ولغة الواجهة.',
+  'Deine Angaben als Bevollmächtigter – erscheinen als Absender in Briefen.': 'بياناتك كوكيل – تظهر كمرسل في الرسائل.',
+  'Design, Schrift, Logo, Unterschrift und Fußzeile – gilt für alle Briefe und wird dauerhaft gespeichert.': 'التصميم والخط والشعار والتوقيع والتذييل – لكل الرسائل ويُحفظ بشكل دائم.',
+  'Freigabelinks der Vollmachten, die automatisch unter jedem Brief stehen.': 'روابط مشاركة الوكالات التي تظهر تلقائياً تحت كل رسالة.',
+  'Google Kalender und Drive, Gemini, Erinnerungen und Hintergrundbetrieb.': 'تقويم Google وDrive وGemini والتذكيرات والعمل في الخلفية.',
+  'Anbindung an Claude (MCP) und an das Gedächtnis.': 'الربط مع Claude (MCP) ومع الذاكرة.',
+  'Datensicherung, Wiederherstellung und Programm-Updates.': 'النسخ الاحتياطي والاستعادة وتحديثات البرنامج.',
+  'Schrift & Format': 'الخط والتنسيق', 'Logo & Unterschrift': 'الشعار والتوقيع', 'Logo': 'الشعار', 'keins': 'لا يوجد',
+  'Größe Logo': 'حجم الشعار', 'Größe Unterschrift': 'حجم التوقيع', 'In jedem neuen Brief automatisch einsetzen': 'إدراجه تلقائياً في كل رسالة جديدة',
+  'Vorschau Briefkopf': 'معاينة رأس الرسالة', 'Vorschau Unterschrift & Fußzeile': 'معاينة التوقيع والتذييل', 'Fußzeile': 'التذييل (Fußzeile)',
+  'Text der Fußzeile (mehrere Zeilen möglich)': 'نص التذييل (يمكن عدة أسطر)', 'Farbe': 'اللون', 'Grau': 'رمادي', 'Schwarz': 'أسود', 'Rot': 'أحمر', 'Navy': 'كحلي', 'Stahl': 'فولاذي',
+  'Das Logo steht immer oben rechts im Briefkopf. Unterschrift auf weißem Papier mit dunklem Stift, scannen oder abfotografieren, zuschneiden und laden (PNG mit transparentem Hintergrund ist ideal).': 'الشعار دائماً أعلى اليمين في رأس الرسالة. وقّع على ورق أبيض بقلم غامق، امسحه أو صوّره، قصّه وحمّله (PNG بخلفية شفافة هو الأفضل).',
+  'Steht unten auf jedem Brief, z. B. „Dieses Schreiben wurde maschinell erstellt und ist mit einer digitalen Unterschrift gültig.“ Leer lassen = keine Fußzeile.': 'يظهر أسفل كل رسالة، مثلاً «Dieses Schreiben wurde maschinell erstellt …». اتركه فارغاً = بدون تذييل.',
+  'Vollmacht-Link in Briefen': 'رابط الوكالة في الرسائل', 'Link automatisch in jeden Brief setzen (im Brief einzeln abschaltbar)': 'إضافة الرابط تلقائياً لكل رسالة (يمكن إيقافه لكل رسالة)',
+  'Verwalten': 'إدارة', 'Link aktiv': 'الرابط فعّال', 'kein Link': 'لا يوجد رابط', 'Link kopieren': 'نسخ الرابط', 'Aktualisieren': 'تحديث', 'Link aufheben': 'إلغاء الرابط',
+  'Freigabelink erstellen': 'إنشاء رابط مشاركة', 'Neue Fassung hochladen': 'رفع نسخة جديدة', 'Vollmacht als PDF hochladen': 'رفع الوكالة PDF', 'Angaben fehlen': 'بيانات ناقصة', 'ausfüllen': 'تعبئة',
+  'Art der Vollmacht': 'نوع الوكالة', 'Beglaubigung': 'التصديق', 'Im Zentralen Vorsorgeregister eingetragen': 'مسجلة في السجل المركزي للوكالات',
+  'Erst die Vollmacht als PDF hochladen, dann kann ein Link erstellt werden.': 'ارفع الوكالة PDF أولاً، بعدها يمكن إنشاء الرابط.',
+  'Lädt die Vollmacht in deinen Google Drive (Ordner „Home Office – Vollmachten“). Jeder mit dem Link kann sie ansehen und drucken.': 'يرفع الوكالة إلى Google Drive (مجلد «Home Office – Vollmachten»). كل من لديه الرابط يستطيع عرضها وطباعتها.',
+  'Logo oben rechts': 'الشعار أعلى اليمين', 'Link zur Vollmacht unter dem Text': 'رابط الوكالة تحت النص', 'Verträge': 'العقود',
+  '4 · Unterschrift, Logo, Vollmacht & Internetmarke': '4 · التوقيع والشعار والوكالة وطابع البريد',
+  'Nur im Desktop-Programm verfügbar.': 'متاح فقط في برنامج سطح المكتب.', 'Drive': 'Drive', 'ohne Drive': 'بدون Drive'
+});
 const MON_RE = new RegExp('\\b(' + Object.keys(MON).join('|') + ')\\b', 'g');
 const Z = '([\\d.,]+)';
 const DATUM_RE = new RegExp('^((Mo|Di|Mi|Do|Fr|Sa|So),? )?(\\d{1,2}\\.? )?(' + Object.keys(MON).join('|') + ')( \\d{4})?$');
