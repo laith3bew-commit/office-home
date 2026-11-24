@@ -1,4 +1,4 @@
-// Office Home – Scanner (Hauptprozess): Drucker-Scan über WIA, Handy-Upload im Heimnetz (QR-Code),
+// Home Office – Scanner (Hauptprozess): Drucker-Scan über WIA, Handy-Upload im Heimnetz (QR-Code),
 // überwachter Ordner und PDF-Erstellung. Alle Seiten gehen per IPC 'oh:scanIncoming' an die Oberfläche.
 'use strict';
 const path = require('path');
@@ -18,7 +18,7 @@ module.exports = function setupScan({ app, ipcMain, dialog, BrowserWindow, getWi
     try {
       const { PDFDocument } = require('pdf-lib');
       const doc = await PDFDocument.create();
-      doc.setTitle(String(title || 'Scan')); doc.setProducer('Office Home'); doc.setCreator('Office Home Scanner');
+      doc.setTitle(String(title || 'Scan')); doc.setProducer('Home Office'); doc.setCreator('Home Office Scanner');
       const A4 = [595.28, 841.89];
       for (const p of parts || []) {
         const bytes = new Uint8Array(p.data);
@@ -80,7 +80,7 @@ module.exports = function setupScan({ app, ipcMain, dialog, BrowserWindow, getWi
       const srv = http.createServer((req, res) => {
         const u = new URL(req.url, 'http://x'); const ok = u.searchParams.get('t') === token;
         const json = (code, o) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify(o)); };
-        if (!ok) { res.writeHead(403, { 'content-type': 'text/plain; charset=utf-8' }); return res.end('Zugang abgelaufen. Bitte den QR-Code in Office Home neu scannen.'); }
+        if (!ok) { res.writeHead(403, { 'content-type': 'text/plain; charset=utf-8' }); return res.end('Zugang abgelaufen. Bitte den QR-Code in Home Office neu scannen.'); }
         bumpIdle();
         if (req.method === 'GET' && u.pathname === '/') { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }); return res.end(page); }
         if (req.method === 'POST' && u.pathname === '/upload') {

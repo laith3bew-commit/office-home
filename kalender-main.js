@@ -1,4 +1,4 @@
-// Office Home – Kalender (Hauptprozess): Gemini (Dokumente lesen), Google Kalender (zweiseitig) und Erinnerungen.
+// Home Office – Kalender (Hauptprozess): Gemini (Dokumente lesen), Google Kalender (zweiseitig) und Erinnerungen.
 // Geheimnisse (Gemini-Schlüssel, Google-Client, Google-Anmeldung) liegen nur lokal, verschlüsselt mit safeStorage.
 'use strict';
 const path = require('path');
@@ -100,7 +100,7 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
       const srv = http.createServer(async (req, res) => {
         const u = new URL(req.url, 'http://127.0.0.1');
         if (u.pathname !== '/') { res.writeHead(404); return res.end(); }
-        const page = msg => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(`<!doctype html><meta charset="utf-8"><body style="font-family:Segoe UI,sans-serif;background:#F4F0E8;color:#1B2A44;display:grid;place-items:center;height:100vh"><div><h2>Office Home</h2><p>${msg}</p><p>Du kannst dieses Fenster schließen.</p></div>`); };
+        const page = msg => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(`<!doctype html><meta charset="utf-8"><body style="font-family:Segoe UI,sans-serif;background:#F4F0E8;color:#1B2A44;display:grid;place-items:center;height:100vh"><div><h2>Home Office</h2><p>${msg}</p><p>Du kannst dieses Fenster schließen.</p></div>`); };
         if (u.searchParams.get('state') !== state) { page('Ungültige Anfrage.'); return; }
         const code = u.searchParams.get('code');
         if (!code) { page('Anmeldung abgebrochen.'); finish({ ok: false, message: 'Anmeldung abgebrochen.' }); return; }
@@ -114,7 +114,7 @@ Fristen aus Formulierungen wie „innerhalb von 2 Wochen nach Erhalt“ ausrechn
           let email = '';
           try { const ci = await gApi('GET', '/calendars/primary'); email = ci.id || ''; } catch (err) {}
           const p = readJson('oh-prefs.json', {}); p.gEmail = email; writeJson('oh-prefs.json', p);
-          page('Google Kalender ist jetzt mit Office Home verbunden.'); finish({ ok: true, email });
+          page('Google Kalender ist jetzt mit Home Office verbunden.'); finish({ ok: true, email });
         } catch (err) { page('Fehler: ' + errText(err)); finish({ ok: false, message: errText(err) }); }
       });
       const finish = r => { if (done) return; done = true; setTimeout(() => srv.close(), 500); showWin(); resolve(r); };

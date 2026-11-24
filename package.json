@@ -1,8 +1,8 @@
 {
   "name": "office-home",
   "productName": "Office Home",
-  "version": "2.13.0",
-  "description": "Office Home – Familienbüro für Bevollmächtigte (offline)",
+  "version": "2.13.1",
+  "description": "Home Office – Familienbüro für Bevollmächtigte (offline)",
   "author": "Leon",
   "private": true,
   "main": "main.js",
@@ -61,7 +61,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Office Home",
+      "shortcutName": "Home Office",
       "deleteAppDataOnUninstall": false,
       "language": "1031",
       "installerLanguages": [

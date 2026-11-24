@@ -1,4 +1,4 @@
-// Office Home – Arabische Oberfläche (Version 2.13).
+// Home Office – Arabische Oberfläche (Version 2.13).
 // Übersetzt die sichtbare Bedienung (Texte, Platzhalter, Tooltips, Meldungen) von Deutsch nach Arabisch und schaltet auf
 // Rechts-nach-links. Nicht übersetzt werden: Briefe/Vorlagen/Vorschau (bleiben Deutsch nach DIN 5008), Monatsbericht,
 // eigene Eingaben (Titel, Notizen …) und Druck. Ziffern bleiben 0–9, Formate deutsch (24.11.2026, 12,50 €).
@@ -23,7 +23,7 @@ const W = {
   'Aktivität': 'النشاط', 'Finanzen →': 'المالية ←', 'Fristen-Ausblick': 'نظرة على المهل', 'Alle Statistiken →': 'كل الإحصائيات ←', 'überf.': 'متأخر', 'diese W.': 'هذا الأسبوع',
   'Anstehende Fristen': 'المهل القادمة', 'alle anzeigen': 'عرض الكل', 'Vertrag': 'عقد', 'Details': 'التفاصيل', 'Vollmacht': 'وكالة (Vollmacht)', 'Nächste Frist': 'المهلة التالية',
   'Vermögen (Saldo)': 'الأملاك (الرصيد)', 'Zuletzt hinzugefügt': 'أُضيف مؤخراً', 'nicht eingetragen': 'غير مُدخلة', 'Noch nichts vorhanden': 'لا يوجد شيء بعد', 'Keine offenen Vorgänge': 'لا توجد ملفات مفتوحة',
-  'Keine Fristen in den nächsten 30 Tagen 🎉': 'لا مهل خلال الـ 30 يوماً القادمة 🎉', 'Willkommen bei Office Home!': 'أهلاً بك في Office Home!', 'Jetzt sichern': 'احفظ نسخة الآن',
+  'Keine Fristen in den nächsten 30 Tagen 🎉': 'لا مهل خلال الـ 30 يوماً القادمة 🎉', 'Willkommen bei Home Office!': 'أهلاً بك في Home Office!', 'Jetzt sichern': 'احفظ نسخة الآن',
   'Noch keine Datensicherung erstellt.': 'لم تُنشأ نسخة احتياطية بعد.', 'Oder zuerst im Demo-Modus mit vielen Beispieldaten ausprobieren →': 'أو جرّب أولاً الوضع التجريبي مع بيانات كثيرة ←',
   'Trage zuerst': 'أدخل أولاً', 'deine eigenen Daten': 'بياناتك أنت', '(als Bevollmächtigter) und die': '(بصفتك الوكيل) و', 'Daten deiner Eltern': 'بيانات والديك', 'ein – dann werden Briefe automatisch richtig ausgefüllt.': '– عندها تُملأ الرسائل تلقائياً بشكل صحيح.',
   // Statistik
@@ -110,20 +110,20 @@ const W = {
   'Jedes neue Dokument (Upload, Scanner, Handy) wird an Gemini geschickt. Termine, Fristen und Gültigkeiten landen im Kalender, Ansprechpartner im Adressbuch. Bitte die': 'كل مستند جديد (رفع، ماسح، هاتف) يُرسل إلى Gemini. المواعيد والمهل ومدد الصلاحية تذهب إلى التقويم، والأشخاص المسؤولون إلى دفتر العناوين. يُرجى استخدام',
   'von Google AI Studio nutzen – in der kostenlosen darf Google die Inhalte verwenden.': 'من Google AI Studio – في المجانية يحق لـ Google استخدام المحتوى.', 'Gemini-API-Schlüssel (aus aistudio.google.com)': 'مفتاح Gemini API (من aistudio.google.com)', 'Modell': 'النموذج',
   'jedes neue Dokument automatisch lesen': 'قراءة كل مستند جديد تلقائياً', 'Schlüssel löschen': 'حذف المفتاح', 'Google Kalender (beide Richtungen)': 'تقويم Google (بالاتجاهين)',
-  'Termine aus Office Home erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.': 'مواعيد Office Home تظهر في تقويم Google (وبالتالي على الهاتف مع تذكير)؛ ومواعيد Google تظهر هنا.',
+  'Termine aus Home Office erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.': 'مواعيد Home Office تظهر في تقويم Google (وبالتالي على الهاتف مع تذكير)؛ ومواعيد Google تظهر هنا.',
   'Client-ID': 'معرّف العميل (Client-ID)', 'Clientschlüssel': 'سر العميل (Client secret)', 'Zugang speichern': 'حفظ بيانات الدخول', 'Mit Google verbinden': 'الربط مع Google', 'Jetzt abgleichen': 'مزامنة الآن', 'Trennen': 'فصل', 'verbunden': 'متصل', 'Zugang eingetragen': 'بيانات الدخول مُدخلة',
-  'Windows meldet sich 1 Woche und 1 Tag vorher (bei Terminen mit Uhrzeit auch 1 Stunde vorher). Damit das auch bei geschlossenem Fenster klappt, läuft Office Home mit einem Symbol neben der Uhr weiter.': 'يُذكّرك Windows قبل أسبوع وقبل يوم (وللمواعيد ذات الساعة قبل ساعة أيضاً). ولكي يعمل ذلك والنافذة مغلقة، يبقى Office Home يعمل برمز بجانب الساعة.',
+  'Windows meldet sich 1 Woche und 1 Tag vorher (bei Terminen mit Uhrzeit auch 1 Stunde vorher). Damit das auch bei geschlossenem Fenster klappt, läuft Home Office mit einem Symbol neben der Uhr weiter.': 'يُذكّرك Windows قبل أسبوع وقبل يوم (وللمواعيد ذات الساعة قبل ساعة أيضاً). ولكي يعمل ذلك والنافذة مغلقة، يبقى Home Office يعمل برمز بجانب الساعة.',
   'Beim Schließen im Hintergrund weiterlaufen': 'متابعة العمل في الخلفية عند الإغلاق', 'Mit Windows starten (unsichtbar)': 'التشغيل مع Windows (بشكل مخفي)', 'Claude-Anbindung (MCP)': 'ربط Claude (MCP)',
-  'Claude Desktop oder Claude Code können Office Home lesen – mit deinem normalen Claude-Abo, ohne API-Schlüssel. Die Daten bleiben hier; Claude bekommt nur, was du in einer Unterhaltung abfragst.': 'يستطيع Claude Desktop أو Claude Code قراءة Office Home – باشتراكك العادي في Claude، بدون مفتاح API. البيانات تبقى هنا؛ ولا يحصل Claude إلا على ما تطلبه في المحادثة.',
+  'Claude Desktop oder Claude Code können Home Office lesen – mit deinem normalen Claude-Abo, ohne API-Schlüssel. Die Daten bleiben hier; Claude bekommt nur, was du in einer Unterhaltung abfragst.': 'يستطيع Claude Desktop أو Claude Code قراءة Home Office – باشتراكك العادي في Claude، بدون مفتاح API. البيانات تبقى هنا؛ ولا يحصل Claude إلا على ما تطلبه في المحادثة.',
   'Verbindung einschalten': 'تشغيل الاتصال', 'Claude darf eintragen (Aufgaben, Notizen, Verlauf, Briefentwürfe, Buchungen)': 'يُسمح لـ Claude بالإدخال (مهام، ملاحظات، سجل، مسودات رسائل، قيود)', 'aus': 'متوقف', 'an': 'يعمل',
   'Programm-Update': 'تحديث البرنامج', 'Installierte Version:': 'النسخة المثبّتة:', 'Nach Updates suchen': 'البحث عن تحديثات', 'Das Programm sucht beim Start automatisch nach einer neuen Version (Internet nötig).': 'يبحث البرنامج تلقائياً عند التشغيل عن نسخة جديدة (يلزم إنترنت).',
   '✓ Du hast die neueste Version.': '✓ لديك أحدث نسخة.', 'Suche nach Updates …': 'جارٍ البحث عن تحديثات …', 'Herunterladen und installieren': 'تنزيل وتثبيت', 'Jetzt installieren und neu starten': 'التثبيت وإعادة التشغيل الآن',
   'Gedächtnis (Memory)': 'الذاكرة (Memory)', 'Memory-Ordner:': 'مجلد الذاكرة:', 'nicht gewählt': 'غير محدد', 'Ordner wählen': 'اختيار مجلد', 'Verbindung trennen': 'قطع الاتصال', 'Suchen': 'بحث',
-  'Verbindet Office Home mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.': 'يربط Office Home بذاكرتك: أثناء الكتابة ترى ما هو معروف (أرقام الملفات، آخر المراسلات)، وتُحفظ الرسائل والإيميلات والملفات المرسلة مع محتواها – مع تذكير عند الطلب.',
+  'Verbindet Home Office mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.': 'يربط Home Office بذاكرتك: أثناء الكتابة ترى ما هو معروف (أرقام الملفات، آخر المراسلات)، وتُحفظ الرسائل والإيميلات والملفات المرسلة مع محتواها – مع تذكير عند الطلب.',
   'Alle Daten liegen': 'كل البيانات موجودة', 'nur auf diesem Computer': 'على هذا الحاسوب فقط', '(im Browser-Speicher dieses Programms). Erstelle regelmäßig eine Sicherung und speichere sie z. B. auf einem USB-Stick.': '(في ذاكرة هذا البرنامج). أنشئ نسخة احتياطية بانتظام واحفظها مثلاً على ذاكرة USB.',
   'Sicherung herunterladen': 'تنزيل النسخة الاحتياطية', 'Sicherung wiederherstellen': 'استعادة نسخة احتياطية', 'Alle Daten löschen': 'حذف كل البيانات', 'noch nie': 'أبداً',
-  'öffnen und ein neues Projekt „Office Home“ anlegen.': 'افتحه وأنشئ مشروعاً جديداً باسم «Office Home».', 'aktivieren.': 'فعّله.', 'Extern': 'خارجي (External)', 'In Produktion': 'قيد الإنتاج (In production)', 'Desktop-App': 'تطبيق سطح المكتب (Desktop app)',
-  'Client-ID und Clientschlüssel unten einfügen und „Mit Google verbinden“ klicken.': 'الصق معرّف العميل والسر في الأسفل وانقر «الربط مع Google».', ', Anwendungstyp': '، نوع التطبيق', ', App-Name „Office Home“, deine E-Mail. Danach den Status auf': '، اسم التطبيق «Office Home»، بريدك. بعدها اضبط الحالة على',
+  'öffnen und ein neues Projekt „Home Office“ anlegen.': 'افتحه وأنشئ مشروعاً جديداً باسم «Home Office».', 'aktivieren.': 'فعّله.', 'Extern': 'خارجي (External)', 'In Produktion': 'قيد الإنتاج (In production)', 'Desktop-App': 'تطبيق سطح المكتب (Desktop app)',
+  'Client-ID und Clientschlüssel unten einfügen und „Mit Google verbinden“ klicken.': 'الصق معرّف العميل والسر في الأسفل وانقر «الربط مع Google».', ', Anwendungstyp': '، نوع التطبيق', ', App-Name „Home Office“, deine E-Mail. Danach den Status auf': '، اسم التطبيق «Home Office»، بريدك. بعدها اضبط الحالة على',
   'setzen (sonst läuft die Anmeldung nach 7 Tagen ab). Die Warnung „App nicht überprüft“ beim Verbinden mit „Erweitert → Weiter“ bestätigen – es ist deine eigene App.': '(وإلا تنتهي صلاحية الربط بعد 7 أيام). وعند تحذير «التطبيق غير موثّق» اختر «متقدم ← متابعة» – إنه تطبيقك أنت.',
   '„OAuth-Zustimmungsbildschirm“: Nutzertyp': '«شاشة الموافقة OAuth»: نوع المستخدم', '„APIs und Dienste“ → „Bibliothek“ →': '«APIs والخدمات» ← «المكتبة» ←', '„Anmeldedaten“ → „Anmeldedaten erstellen“ →': '«بيانات الاعتماد» ← «إنشاء بيانات اعتماد» ←',
   // Tresor
@@ -164,12 +164,12 @@ const W = {
   'Neue Person': 'شخص جديد', 'Person hinzufügen ': 'إضافة شخص', 'Neuer Kontakt ': 'جهة اتصال جديدة', 'Wirklich löschen?': 'هل تريد الحذف فعلاً؟', 'schließen': 'إغلاق', 'Mehr': 'المزيد',
   // Büro-Platzhalter
   'Das Büro läuft in einem eigenen Fenster': 'المكتب يعمل في نافذة مستقلة', 'Büro-Fenster nach vorne holen': 'إحضار نافذة المكتب إلى الأمام', 'Zurück ins Programm holen': 'إعادته إلى البرنامج',
-  'Du kannst das Fenster auf einen anderen Bildschirm ziehen und dort groß machen. Office Home merkt sich Bildschirm, Position und Größe für das nächste Mal.': 'يمكنك سحب النافذة إلى شاشة أخرى وتكبيرها هناك. يتذكر Office Home الشاشة والموضع والحجم للمرة القادمة.',
+  'Du kannst das Fenster auf einen anderen Bildschirm ziehen und dort groß machen. Home Office merkt sich Bildschirm, Position und Größe für das nächste Mal.': 'يمكنك سحب النافذة إلى شاشة أخرى وتكبيرها هناك. يتذكر Home Office الشاشة والموضع والحجم للمرة القادمة.',
   'Die Mitarbeiter arbeiten dort weiter mit deinen Daten – Rückfragen erscheinen im Büro-Fenster und als Zahl neben „Büro“ hier im Menü.': 'يواصل الموظفون العمل هناك ببياناتك – والأسئلة تظهر في نافذة المكتب وكرقم بجانب «المكتب» في القائمة هنا.',
   // Meldungen
   'Fristen kannst du unter „Fristen & Aufgaben“ als .ics-Datei in deinen Kalender (Outlook, Google, Apple) übernehmen – mit Erinnerung 2 Tage vorher.': 'يمكنك نقل المهل من «المهل والمهام» كملف .ics إلى تقويمك (Outlook، Google، Apple) – مع تذكير قبل يومين.',
   '– am besten 3–4 Wörter, z. B. „Birne-Fahrrad-Wolke-7“. Ohne dieses Passwort (oder den Wiederherstellungsschlüssel) kann': '– والأفضل 3–4 كلمات، مثلاً «Birne-Fahrrad-Wolke-7». بدون كلمة المرور هذه (أو مفتاح الاستعادة)',
-  'Der Scanner (PDF-Erstellung, Drucker, Handy) funktioniert nur im installierten Office-Home-Programm.': 'الماسح (إنشاء PDF، الطابعة، الهاتف) يعمل فقط في برنامج Office Home المثبّت.',
+  'Der Scanner (PDF-Erstellung, Drucker, Handy) funktioniert nur im installierten Home-Office-Programm.': 'الماسح (إنشاء PDF، الطابعة، الهاتف) يعمل فقط في برنامج Home Office المثبّت.',
   'Drucken / PDF': 'طباعة / PDF', 'Einschreiben': 'بريد مسجّل (Einschreiben)', 'Einschreiben mit Rückschein': 'بريد مسجّل مع إشعار استلام (Rückschein)', 'Per Fax vorab': 'مسبقاً بالفاكس', '(ohne Betreff)': '(بدون موضوع)',
   'Brief löschen?': 'حذف الرسالة؟', 'Vorlage löschen?': 'حذف القالب؟', 'Diese Seite löschen?': 'حذف هذه الصفحة؟', 'Erledigt': 'تم', 'Keine Datei hinterlegt': 'لا يوجد ملف مرفق', 'Sicherung erstellt': 'تم إنشاء النسخة الاحتياطية'
 };
@@ -219,7 +219,7 @@ Object.assign(W, {
   'übergibt die Akte': 'يسلّم الملف', 'Morgenbesprechung beginnt': 'يبدأ الاجتماع الصباحي', 'Brief im Archiv abgelegt': 'حُفظت الرسالة في الأرشيف', 'Neuer Brief im Briefkasten': 'رسالة جديدة في صندوق البريد', 'Monatsstatistik aktualisiert': 'تم تحديث الإحصائيات الشهرية',
   'aktualisiert die Monatsstatistik': 'يحدّث الإحصائيات الشهرية', 'prüft den erkannten Termin': 'يفحص الموعد المُستخرج', 'Termin aus Dokument erkannt': 'تم استخراج موعد من مستند', 'sichtet den neuen Datenbestand': 'يراجع البيانات الجديدة',
   'prüft alle Fristen': 'يفحص كل المهل', 'Keine Frist überfällig': 'لا توجد مهلة متأخرة', 'bereitet die Termine für morgen vor': 'يحضّر مواعيد الغد', 'prüft Kündigungsfristen': 'يفحص مهل الإلغاء', 'prüft die festen Zahlungen der Woche': 'يفحص الدفعات الثابتة لهذا الأسبوع', 'sichtet das Archiv': 'يراجع الأرشيف',
-  'Noch einmal': 'مرة أخرى', 'Begrüßung': 'الترحيب', 'Rückfrage': 'سؤال', 'Rückfrage geklärt': 'تم توضيح السؤال', 'Antwort erhalten': 'وصل الرد', 'Frage von': 'سؤال من', 'Öffnet in Office Home': 'يفتح في Office Home', 'Jetzt:': 'الآن:',
+  'Noch einmal': 'مرة أخرى', 'Begrüßung': 'الترحيب', 'Rückfrage': 'سؤال', 'Rückfrage geklärt': 'تم توضيح السؤال', 'Antwort erhalten': 'وصل الرد', 'Frage von': 'سؤال من', 'Öffnet in Home Office': 'يفتح في Home Office', 'Jetzt:': 'الآن:',
   'Danke, ich mache weiter!': 'شكراً، سأتابع!', 'Hier, für dich!': 'تفضّل، هذا لك!', 'Heute noch nichts erledigt.': 'لم يُنجز شيء اليوم بعد.', 'Bereich öffnen': 'فتح القسم', 'Kamera folgen': 'متابعة بالكاميرا', 'Letzte Ereignisse': 'آخر الأحداث',
   'Büro-Einstellungen': 'إعدادات المكتب', 'Wenn das Büro nicht sichtbar ist': 'عندما لا يكون المكتب ظاهراً', '3D anhalten, Mitarbeiter arbeiten weiter': 'إيقاف العرض ثلاثي الأبعاد، والموظفون يتابعون العمل', 'alles weiterlaufen lassen': 'استمرار كل شيء',
   'Leise Büro-Geräusche': 'أصوات مكتب هادئة', 'Büro-Geräusche': 'أصوات المكتب', 'Grafik': 'الرسوميات', 'höchste Qualität': 'أعلى جودة', 'ausgewogen': 'متوازنة', 'leicht': 'خفيفة', 'Kamera dreht sich langsam': 'الكاميرا تدور ببطء', 'Über den Köpfen': 'فوق الرؤوس',
@@ -240,7 +240,7 @@ Object.assign(W, {
 });
 const BQ = '„(.+?)“', bq = x => '«' + x + '»';
 R.unshift(
-  [/^(Begrüßung|Rückfrage geklärt|Rückfrage|Antwort erhalten|Neuer Brief im Briefkasten|Frage von|Öffnet in Office Home): (.+)$/, (m, a, b) => W[a] + ': ' + T(b)],
+  [/^(Begrüßung|Rückfrage geklärt|Rückfrage|Antwort erhalten|Neuer Brief im Briefkasten|Frage von|Öffnet in Home Office): (.+)$/, (m, a, b) => W[a] + ': ' + T(b)],
   [/^Frage von (.+)$/, (m, a) => 'سؤال من ' + a], [/^Live · (.+)$/, (m, a) => 'مباشر · ' + T(a)], [/^(\d+) arbeiten$/, (m, a) => a + ' يعملون'], [/^Rückfragen an dich \((\d+)\)$/, (m, a) => 'أسئلة لك (' + a + ')'], [/^· noch (\d+) Aufgabe\(n\)$/, (m, a) => '· متبقٍ ' + a + ' مهام'],
   [new RegExp('^liest ' + BQ + '( mit Gemini)?$'), (m, a, g) => 'يقرأ ' + bq(a) + (g ? ' بواسطة Gemini' : '')], [new RegExp('^' + BQ + ' (geprüft und verteilt|gelesen und verteilt)$'), (m, a) => 'تم فحص ' + bq(a) + ' وتوزيعه'],
   [new RegExp('^legt ' + BQ + ' ab$'), (m, a) => 'يحفظ ' + bq(a)], [new RegExp('^' + BQ + ' im Archiv abgelegt$'), (m, a) => 'حُفظ ' + bq(a) + ' في الأرشيف'],
@@ -265,7 +265,11 @@ R.unshift(
   [/^(\d+) Fristen diese Woche, (\d+) überfällig$/, (m, a, b) => a + ' مهل هذا الأسبوع، ' + b + ' متأخرة'], [/^(.+): kündbar bis (.+)$/, (m, a, b) => a + ': قابل للإلغاء حتى ' + b],
   [/^(.+) ins Adressbuch übernommen$/, (m, a) => 'أُضيف ' + a + ' إلى دفتر العناوين'], [/^ergänzt (.+) im Adressbuch$/, (m, a) => 'يكمل بيانات ' + a + ' في دفتر العناوين'],
   [/^(Guten Morgen|Guten Tag|Guten Abend)! (\d+) (?:neuer Brief|neue Briefe)(?: heute| im Kasten), (\d+) (?:Frist|Fristen)(?: fällig| heute)? und (\d+) (?:Termin|Termine) diese Woche\.$/,
-    (m, g, a, b, c) => ({ 'Guten Morgen': 'صباح الخير!', 'Guten Tag': 'نهارك سعيد!', 'Guten Abend': 'مساء الخير!' }[g]) + ' ' + a + ' رسائل جديدة اليوم، ' + b + ' مهل مستحقة، و' + c + ' مواعيد هذا الأسبوع.'],
+    (m, g, a, b, c) => { const z = (n, keine, eins, zwei, viele, einzahl) => { n = +n; return n === 0 ? keine : n === 1 ? eins : n === 2 ? zwei : n <= 10 ? n + ' ' + viele : n + ' ' + einzahl; };
+      return ({ 'Guten Morgen': 'صباح الخير!', 'Guten Tag': 'نهارك سعيد!', 'Guten Abend': 'مساء الخير!' }[g]) + ' '
+        + z(a, 'لا رسائل جديدة اليوم', 'رسالة جديدة واحدة اليوم', 'رسالتان جديدتان اليوم', 'رسائل جديدة اليوم', 'رسالة جديدة اليوم') + '، '
+        + z(b, 'لا مهل مستحقة', 'مهلة مستحقة واحدة', 'مهلتان مستحقتان', 'مهل مستحقة', 'مهلة مستحقة') + '، و'
+        + z(c, 'لا مواعيد هذا الأسبوع', 'موعد واحد هذا الأسبوع', 'موعدان هذا الأسبوع', 'مواعيد هذا الأسبوع', 'موعداً هذا الأسبوع') + '.'; }],
   [/^Heute: (\d+) Termine?, (\d+) Fristen? fällig, (\d+) (?:offener Vorgang|offene Vorgänge)\.(?: Als Nächstes: (.+) am (\S+?)(?: um (\S+?))?\.)?$/,
     (m, a, b, c, x, d, u) => 'اليوم: ' + a + ' مواعيد، ' + b + ' مهل مستحقة، ' + c + ' ملفات مفتوحة.' + (x ? ' التالي: ' + x + ' في ' + d + (u ? ' الساعة ' + u : '') + '.' : '')]
 );

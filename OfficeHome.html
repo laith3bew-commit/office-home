@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Office Home</title>
+<title>Home Office</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('oh-theme')||'system'}catch(e){document.documentElement.dataset.theme='system'}try{if(localStorage.getItem('oh-lang')==='ar'){document.documentElement.dir='rtl'}}catch(e){}</script>
 <style>
 @font-face{font-family:'Manrope';src:url('fonts/manrope-latin-300-normal.woff2') format('woff2');font-weight:300;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -400,7 +400,7 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 <script src="i18n.js"></script>
 <div class="app">
   <aside class="side">
-    <div class="logo"><svg width="36" height="36" viewBox="0 0 200 200" aria-hidden="true"><rect x="6" y="6" width="188" height="188" rx="48" fill="#F4F0E8"/><path d="M84 64 V132 H124" fill="none" stroke="#1B2A44" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124" cy="70" r="9" fill="#4F6785"/></svg>Office Home</div>
+    <div class="logo"><svg width="36" height="36" viewBox="0 0 200 200" aria-hidden="true"><rect x="6" y="6" width="188" height="188" rx="48" fill="#F4F0E8"/><path d="M84 64 V132 H124" fill="none" stroke="#1B2A44" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124" cy="70" r="9" fill="#4F6785"/></svg>Home Office</div>
     <nav class="nav" id="nav"></nav>
     <div id="updChip"></div>
     <div class="foot">Daten nur auf diesem Computer.<br><a href="#/settings">Datensicherung</a></div>
@@ -423,7 +423,7 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 <script>
 'use strict';
 /* =========================================================
-   Office Home – Familienbüro (offline, lokale Datenhaltung)
+   Home Office – Familienbüro (offline, lokale Datenhaltung)
    ========================================================= */
 
 // ---------- Hilfsfunktionen ----------
@@ -977,7 +977,7 @@ VIEWS.dashboard = () => {
   return `
   <div class="head"><div class="grow"><h1>Übersicht</h1><p class="sub" style="margin:0">${fmtDateLong(today())}${UI.person !== 'all' ? ' · ' + esc(getPerson(UI.person)?.role) : ''}</p></div>
     <button class="btn" data-act="newTask">${icon('plus')}Frist</button><button class="btn" data-act="newCase">${icon('plus')}Vorgang</button><button class="btn" data-act="newDoc">${icon('plus')}Dokument</button><a class="btn pri" href="#/brief/new">${icon('brief')}Brief schreiben</a></div>
-  ${setupMissing ? `<div class="banner blue">${icon('info')}<div><b>Willkommen bei Office Home!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.<br><a href="#" data-act="setMode" data-id="demo">Oder zuerst im Demo-Modus mit vielen Beispieldaten ausprobieren →</a></div></div>` : ''}
+  ${setupMissing ? `<div class="banner blue">${icon('info')}<div><b>Willkommen bei Home Office!</b> Trage zuerst <a href="#/settings">deine eigenen Daten</a> (als Bevollmächtigter) und die <a href="#/persons">Daten deiner Eltern</a> ein – dann werden Briefe automatisch richtig ausgefüllt.<br><a href="#" data-act="setMode" data-id="demo">Oder zuerst im Demo-Modus mit vielen Beispieldaten ausprobieren →</a></div></div>` : ''}
   ${overdue.length ? `<div class="banner red">${icon('achtung')}<div><b>${overdue.length} überfällige Frist${overdue.length > 1 ? 'en' : ''}!</b> ${overdue.slice(0, 3).map(i => esc(i.title)).join(' · ')}</div></div>` : ''}
   ${needBackup && !setupMissing ? `<div class="banner amber">${icon('save')}<div>${lb ? 'Letzte Datensicherung am ' + fmtDate(lb) + '.' : 'Noch keine Datensicherung erstellt.'} <a href="#" data-act="backup">Jetzt sichern</a></div></div>` : ''}
   <div class="kpis">
@@ -1991,7 +1991,7 @@ async function restore(){
   if (MODE === 'demo') return alert('Im Demo-Modus nicht möglich. Bitte oben zuerst auf „Live“ umschalten.');
   const f = await pickFile('.json,application/json'); if (!f) return;
   let data; try { data = JSON.parse(await f.text()); } catch (e) { return alert('Datei ist keine gültige Sicherung.'); }
-  if (data.app !== 'OfficeHome' || !data.state) return alert('Datei ist keine Office-Home-Sicherung.');
+  if (data.app !== 'OfficeHome' || !data.state) return alert('Datei ist keine Home-Office-Sicherung.');
   if (!confirm('Achtung: Alle aktuellen Daten werden durch die Sicherung vom ' + fmtDate((data.exported || '').slice(0, 10)) + ' ersetzt. Fortfahren?')) return;
   if (DB.db) await DB.clear('files');
   for (const [id, x] of Object.entries(data.files || {})) await filePut(id, {name:x.name, type:x.type, blob: await dataURLtoBlob(x.data)});
@@ -2013,7 +2013,7 @@ function exportICS(){
   for (const t of byPerson(S.tasks)) if (!t.done && t.due) add(t.due, t.title + (getPerson(t.personId) ? ' (' + getPerson(t.personId).role + ')' : ''), t.notes);
   for (const c of byPerson(S.contracts)) { const i = contractInfo(c); if (i.cancelBy) add(i.cancelBy, 'Kündigen bis: ' + c.provider, 'Vertragsende ' + fmtDate(i.end)); }
   if (!ev.length) return toast('Keine Fristen mit Datum vorhanden');
-  download('OfficeHome-Fristen.ics', new Blob(['BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Office Home//DE\r\nCALSCALE:GREGORIAN\r\n' + ev.join('\r\n') + '\r\nEND:VCALENDAR\r\n'], {type:'text/calendar'}));
+  download('HomeOffice-Fristen.ics', new Blob(['BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Home Office//DE\r\nCALSCALE:GREGORIAN\r\n' + ev.join('\r\n') + '\r\nEND:VCALENDAR\r\n'], {type:'text/calendar'}));
   toast(ev.length + ' Termine exportiert');
 }
 
@@ -2132,7 +2132,7 @@ Object.assign(ACT, {
 });
 
 // ---------- Gedächtnis (Memory-Engine, nur Desktop) ----------
-// Office Home liest über „mem search“ aus dem Gedächtnis und schreibt Notizen (gesendete Briefe/E-Mails,
+// Home Office liest über „mem search“ aus dem Gedächtnis und schreibt Notizen (gesendete Briefe/E-Mails,
 // Vorgänge) sowie Erinnerungen hinein. Welche Person in welchen Arbeitsbereich gehört, steht in settings.memory.map.
 const MEM = {status:null, loading:false};
 const MEM_KINDS = ['Brief per Post', 'E-Mail', 'Fax', 'Antrag / Formular', 'Persönlich abgegeben', 'Telefonat', 'Notiz'];
@@ -2149,7 +2149,7 @@ async function memLoadStatus(){
 }
 function memCardHTML(){
   const m = memCfg(), st = MEM.status;
-  let body = `<p style="margin-top:0">Verbindet Office Home mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.</p>
+  let body = `<p style="margin-top:0">Verbindet Home Office mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>Memory-Ordner:</b> <span class="small">${m.root ? esc(m.root) : '<span class="muted">nicht gewählt</span>'}</span>
       <span style="flex:1"></span><button class="btn" data-act="memPick">${icon('vorgaenge')}Ordner wählen</button>${m.root ? '<button class="btn dan" data-act="memOff">' + icon('schliessen') + 'Verbindung trennen</button>' : ''}</div>`;
   if (m.root && st && !st.ok) body += `<p style="color:var(--danger)">${esc(st.message || 'Nicht erreichbar')}</p>`;
@@ -2184,7 +2184,7 @@ async function memSearch(){
     : '<div class="muted small">Nichts gefunden. Andere Begriffe versuchen.</div>';
 }
 
-// Gemeinsames Formular: Notiz ins Gedächtnis + optional Erinnerung (Gedächtnis und Office Home).
+// Gemeinsames Formular: Notiz ins Gedächtnis + optional Erinnerung (Gedächtnis und Home Office).
 function memRecord({title, kind, to, ref, body, personId, caseId, caseTitle, date, remindText}){
   const m = memCfg(); const p = getPerson(personId);
   const fields = [
@@ -2194,7 +2194,7 @@ function memRecord({title, kind, to, ref, body, personId, caseId, caseTitle, dat
     {k:'body', l:'Inhalt (wird mit gespeichert)', t:'textarea', rows:9, full:1},
     {k:'remind', l:'Erinnerung anlegen', t:'checkbox'}, {k:'days', l:'Erinnerung nach (Tagen)', t:'number'},
     {k:'remindText', l:'Erinnerungstext', full:1},
-    {k:'localTask', l:'Erinnerung auch als Frist in Office Home', t:'checkbox', full:1}
+    {k:'localTask', l:'Erinnerung auch als Frist in Home Office', t:'checkbox', full:1}
   ];
   openForm({title:'Im Gedächtnis festhalten', fields, saveLabel:'Festhalten',
     data:{ws:memWsFor(personId), kind:kind || MEM_KINDS[0], title, date:date || today(), to, body, remind:true, days:m.remindDays || 14, remindText, localTask:true},
@@ -2204,7 +2204,7 @@ function memRecord({title, kind, to, ref, body, personId, caseId, caseTitle, dat
         person: p ? personName(p) : '', body:v.body, reminder: v.remind ? fmtDate(due) + ' – ' + v.remindText : ''});
       if (!r.ok) { alert('Festhalten fehlgeschlagen: ' + r.message); return false; }
       if (v.remind && v.remindText) {
-        const t = await window.officeHome.memTask(m.root, {title:v.remindText, due, note:'aus Office Home: ' + v.title});
+        const t = await window.officeHome.memTask(m.root, {title:v.remindText, due, note:'aus Home Office: ' + v.title});
         if (!t.ok) alert('Notiz gespeichert, aber Erinnerung fehlgeschlagen: ' + t.message);
         if (v.localTask) S.tasks.push({id:uid(), title:v.remindText, due, personId:personId || '', caseId:caseId || '', priority:'normal', notes:'Festgehalten: ' + v.title, done:false, created:today()});
       }
@@ -2443,9 +2443,9 @@ function mcpPerson(q){
 }
 function mcpFilter(list, q){ if (!q) return list; const p = mcpPerson(q); if (!p) throw new Error('Person „' + q + '“ nicht gefunden. Bekannt: ' + S.persons.map(x => x.role).join(', ')); return list.filter(x => !x.personId || x.personId === p.id); }
 const mcpPN = id => { const p = getPerson(id); return p ? p.role : 'Allgemein'; };
-const mcpHead = () => MODE === 'demo' ? '(Hinweis: Office Home ist im DEMO-MODUS – das sind Beispieldaten, nicht die echten Daten.)\n\n' : '';
+const mcpHead = () => MODE === 'demo' ? '(Hinweis: Home Office ist im DEMO-MODUS – das sind Beispieldaten, nicht die echten Daten.)\n\n' : '';
 const mcpDate = d => d ? fmtDate(d) : '—';
-function mcpNeedWrite(){ if (!mcpCfg().write) throw new Error('Schreiben ist in Office Home nicht erlaubt (Einstellungen → Claude-Anbindung → „Claude darf eintragen“).'); }
+function mcpNeedWrite(){ if (!mcpCfg().write) throw new Error('Schreiben ist in Home Office nicht erlaubt (Einstellungen → Claude-Anbindung → „Claude darf eintragen“).'); }
 function mcpDeadlines(days, who){
   const items = deadlineItems().filter(i => daysUntil(i.date) <= days);
   return (who ? mcpFilter(items, who) : items).sort((a, b) => a.date.localeCompare(b.date));
@@ -2525,7 +2525,7 @@ const MCP_TOOLS = {
   brief_entwurf: a => { mcpNeedWrite(); const p = mcpPerson(a.person), k = a.kontakt_id ? getContact(a.kontakt_id) : null, c = a.vorgang_id ? getCase(a.vorgang_id) : null;
     const L = newLetter(new URLSearchParams()); Object.assign(L, {personId:p ? p.id : (c ? c.personId : L.personId), contactId:k ? k.id : '', recipient:k ? contactAddress(k) : String(a.empfaenger || '').replace(/\\n/g, '\n'),
       subject:String(a.betreff).trim(), body:String(a.text).trim(), salutation:a.anrede || L.salutation, caseId:c ? c.id : '', ref:c && c.ref ? c.ref : '', updated:new Date().toISOString()});
-    delete L.isNew; S.letters.push(L); return `Briefentwurf gespeichert: „${L.subject}“. Er steht in Office Home unter „Brief schreiben → Gespeicherte Briefe“ zum Prüfen, Unterschreiben und Drucken.`; },
+    delete L.isNew; S.letters.push(L); return `Briefentwurf gespeichert: „${L.subject}“. Er steht in Home Office unter „Brief schreiben → Gespeicherte Briefe“ zum Prüfen, Unterschreiben und Drucken.`; },
   buchung_anlegen: a => { mcpNeedWrite(); const p = mcpPerson(a.person), amt = Math.abs(Number(a.betrag) || 0); if (!amt) throw new Error('Betrag fehlt.');
     const type = a.art === 'ein' ? 'ein' : 'aus';
     const b = {id:uid(), date:/^\d{4}-\d{2}-\d{2}$/.test(a.datum || '') ? a.datum : today(), type, amount:amt, category:BK_ALL.includes(a.kategorie) ? a.kategorie : autoCategory(a.empfaenger || '', a.beschreibung || '', type),
@@ -2534,7 +2534,7 @@ const MCP_TOOLS = {
 };
 const MCP_WRITE = ['aufgabe_anlegen', 'aufgabe_erledigen', 'notiz_anlegen', 'verlauf_eintragen', 'brief_entwurf', 'buchung_anlegen'];
 async function mcpHandle(tool, args){
-  if (!mcpCfg().enabled) return {ok:false, error:'Die Claude-Anbindung ist in Office Home ausgeschaltet.'};
+  if (!mcpCfg().enabled) return {ok:false, error:'Die Claude-Anbindung ist in Home Office ausgeschaltet.'};
   const f = MCP_TOOLS[tool]; if (!f) return {ok:false, error:'Unbekanntes Werkzeug: ' + tool};
   try {
     const text = f(args || {});
@@ -2547,13 +2547,13 @@ let MCPI = null;
 function mcpCardHTML(){
   const c = mcpCfg(), i = MCPI;
   return `<h3>${icon('ki')}Claude-Anbindung (MCP)</h3>
-    <p style="margin-top:0">Claude Desktop oder Claude Code können Office Home lesen – mit deinem normalen Claude-Abo, ohne API-Schlüssel. Die Daten bleiben hier; Claude bekommt nur, was du in einer Unterhaltung abfragst.</p>
+    <p style="margin-top:0">Claude Desktop oder Claude Code können Home Office lesen – mit deinem normalen Claude-Abo, ohne API-Schlüssel. Die Daten bleiben hier; Claude bekommt nur, was du in einer Unterhaltung abfragst.</p>
     <div class="fld cb"><input type="checkbox" id="mcpOn" data-act="mcpToggle" ${c.enabled ? 'checked' : ''}><label for="mcpOn"><b>Verbindung einschalten</b> ${i ? (i.running ? '<span class="badge green">läuft</span>' : '<span class="badge">aus</span>') : ''}</label></div>
     <div class="fld cb"><input type="checkbox" id="mcpWr" data-act="mcpWrite" ${c.write ? 'checked' : ''} ${c.enabled ? '' : 'disabled'}><label for="mcpWr">Claude darf eintragen (Aufgaben, Notizen, Verlauf, Briefentwürfe, Buchungen)</label></div>
     ${c.enabled && i ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
         <button class="btn pri" data-act="mcpInstall">${icon('ki')}${i.installed ? 'In Claude Desktop erneut eintragen' : 'In Claude Desktop eintragen'}</button>
         <button class="btn" data-act="mcpCopyCode">${icon('kopieren')}Befehl für Claude Code kopieren</button></div>
-      <p class="small muted" style="margin:0">${i.installed ? '✓ In Claude Desktop eingetragen. ' : ''}Danach Claude Desktop einmal ganz beenden (auch im Infobereich) und neu starten. Office Home muss geöffnet sein, wenn Claude zugreift.<br>Beispielfragen: „Welche Fristen sind bei Mutter überfällig?“ · „Was habe ich im Oktober für Lebensmittel ausgegeben?“ · „Schreib einen Widerspruch für den Vorgang Rollator als Entwurf.“</p>` : ''}`;
+      <p class="small muted" style="margin:0">${i.installed ? '✓ In Claude Desktop eingetragen. ' : ''}Danach Claude Desktop einmal ganz beenden (auch im Infobereich) und neu starten. Home Office muss geöffnet sein, wenn Claude zugreift.<br>Beispielfragen: „Welche Fristen sind bei Mutter überfällig?“ · „Was habe ich im Oktober für Lebensmittel ausgegeben?“ · „Schreib einen Widerspruch für den Vorgang Rollator als Entwurf.“</p>` : ''}`;
 }
 async function mcpRefresh(){ if (!DESKTOP || !window.officeHome.mcpInfo) return; MCPI = await window.officeHome.mcpInfo(); const el = $('#mcpCard'); if (el) el.innerHTML = mcpCardHTML(); }
 async function initMcp(){
@@ -2705,7 +2705,7 @@ Object.assign(ACT, {
     if (a.length < 10) return err.textContent = 'Mindestens 10 Zeichen.'; if (a !== b) return err.textContent = 'Die Passwörter stimmen nicht überein.';
     err.textContent = 'Wird angelegt …'; await vaultCreate(a); VT._secret = {v:a, viaRec:false}; render(); },
   vRecDone: () => { if (!confirm('Hast du den Wiederherstellungsschlüssel wirklich notiert? Er wird danach nicht mehr angezeigt.')) return; VT.recShown = ''; render(); },
-  vPrintRec: () => outputPrint(`<div style="font-family:Arial;padding:25mm"><h1 style="font-size:16pt">Office Home – Tresor: Wiederherstellungsschlüssel</h1><p>Erstellt am ${fmtDate(today())}. Sicher aufbewahren. Mit diesem Schlüssel lässt sich der Tresor öffnen, wenn das Hauptpasswort vergessen wurde.</p><p style="font:20pt monospace;letter-spacing:2px;border:1px solid #000;padding:6mm;text-align:center">${esc(VT.recShown)}</p></div>`, 'Tresor-Wiederherstellungsschluessel', false),
+  vPrintRec: () => outputPrint(`<div style="font-family:Arial;padding:25mm"><h1 style="font-size:16pt">Home Office – Tresor: Wiederherstellungsschlüssel</h1><p>Erstellt am ${fmtDate(today())}. Sicher aufbewahren. Mit diesem Schlüssel lässt sich der Tresor öffnen, wenn das Hauptpasswort vergessen wurde.</p><p style="font:20pt monospace;letter-spacing:2px;border:1px solid #000;padding:6mm;text-align:center">${esc(VT.recShown)}</p></div>`, 'Tresor-Wiederherstellungsschluessel', false),
   vUnlock: async () => { const i = $('#vPw'), err = $('#vErr'); if (!i || !i.value) return; if (VT.until > Date.now()) return;
     err.textContent = 'Wird geprüft …'; const v = i.value;
     try { await vaultUnlock(v, false); VT._secret = {v, viaRec:false}; render(); }
@@ -2881,7 +2881,7 @@ VIEWS.scan = () => {
   const head = `<div class="head"><div class="grow"><h1>${icon('scanner')}Scanner</h1><p class="sub" style="margin:0">Briefe mit Drucker, Handy oder aus Dateien erfassen – jede Sendung wird ein PDF und kann direkt als Dokument abgelegt werden.</p></div>
     ${DESKTOP ? `<button class="btn" data-act="scanPrinter">${icon('print')}Mit Drucker scannen</button><button class="btn" data-act="scanPhone">${icon('phone')}Mit Handy scannen</button>` : ''}
     <button class="btn pri" data-act="scanFiles">${icon('upload')}Dateien hinzufügen</button></div>`;
-  if (!DESKTOP) return head + `<div class="banner amber">Der Scanner (PDF-Erstellung, Drucker, Handy) funktioniert nur im installierten Office-Home-Programm.</div>`;
+  if (!DESKTOP) return head + `<div class="banner amber">Der Scanner (PDF-Erstellung, Drucker, Handy) funktioniert nur im installierten Home-Office-Programm.</div>`;
   const c = scanCfg(), P = SCANUI.phone, L = S.scans || [];
   return head + `
   <div class="grid g2" style="margin-bottom:14px">
@@ -3276,9 +3276,9 @@ function noticeCard(title, lines, acts = []){
 let BG = null;
 function calCardHTML(){
   const k = KI.status || {}, g = GS.status || {}, demo = MODE === 'demo';
-  const stepList = ['<a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> öffnen und ein neues Projekt „Office Home“ anlegen.',
+  const stepList = ['<a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> öffnen und ein neues Projekt „Home Office“ anlegen.',
     '„APIs und Dienste“ → „Bibliothek“ → <b>Google Calendar API</b> aktivieren.',
-    '„OAuth-Zustimmungsbildschirm“: Nutzertyp <b>Extern</b>, App-Name „Office Home“, deine E-Mail. Danach den Status auf <b>In Produktion</b> setzen (sonst läuft die Anmeldung nach 7 Tagen ab). Die Warnung „App nicht überprüft“ beim Verbinden mit „Erweitert → Weiter“ bestätigen – es ist deine eigene App.',
+    '„OAuth-Zustimmungsbildschirm“: Nutzertyp <b>Extern</b>, App-Name „Home Office“, deine E-Mail. Danach den Status auf <b>In Produktion</b> setzen (sonst läuft die Anmeldung nach 7 Tagen ab). Die Warnung „App nicht überprüft“ beim Verbinden mit „Erweitert → Weiter“ bestätigen – es ist deine eigene App.',
     '„Anmeldedaten“ → „Anmeldedaten erstellen“ → <b>OAuth-Client-ID</b>, Anwendungstyp <b>Desktop-App</b>.',
     'Client-ID und Clientschlüssel unten einfügen und „Mit Google verbinden“ klicken.'];
   return `<h3>${icon('kalender')}Kalender & KI</h3>
@@ -3295,7 +3295,7 @@ function calCardHTML(){
       </form></div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" data-act="kiSave">${icon('speichern')}Speichern</button>${k.hasKey ? `<button class="btn dan" data-act="kiDel">${icon('loeschen')}Schlüssel löschen</button>` : ''}</div></div>
     <div><b>Google Kalender (beide Richtungen)</b>
-      <p class="small muted" style="margin:4px 0 10px">Termine aus Office Home erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.</p>
+      <p class="small muted" style="margin:4px 0 10px">Termine aus Home Office erscheinen in deinem Google Kalender (und damit auf dem Handy mit Erinnerung); Termine aus Google erscheinen hier.</p>
       ${g.connected ? `<p><span class="badge green">verbunden</span> ${esc(g.email || '')}<br><span class="small muted">Letzter Abgleich: ${calCfg().gLastSync ? new Date(calCfg().gLastSync).toLocaleString('de-DE') : 'noch nie'}${GS.msg ? ' · Fehler: ' + esc(GS.msg) : ''}</span></p>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="gSyncNow">${icon('update')}Jetzt abgleichen</button><button class="btn dan" data-act="gDisconnect">${icon('schliessen')}Trennen</button></div>`
       : `${g.hasClient ? '<p><span class="badge">Zugang eingetragen</span></p>' : `<ol class="small" style="padding-left:18px;margin:0 0 10px">${stepList.map(s => `<li style="margin-bottom:4px">${s}</li>`).join('')}</ol>`}
@@ -3306,7 +3306,7 @@ function calCardHTML(){
     </div>
   </div>
   <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)"><b>Erinnerungen</b>
-    <p class="small muted" style="margin:4px 0 8px">Windows meldet sich 1 Woche und 1 Tag vorher (bei Terminen mit Uhrzeit auch 1 Stunde vorher). Damit das auch bei geschlossenem Fenster klappt, läuft Office Home mit einem Symbol neben der Uhr weiter.</p>
+    <p class="small muted" style="margin:4px 0 8px">Windows meldet sich 1 Woche und 1 Tag vorher (bei Terminen mit Uhrzeit auch 1 Stunde vorher). Damit das auch bei geschlossenem Fenster klappt, läuft Home Office mit einem Symbol neben der Uhr weiter.</p>
     <div style="display:flex;gap:18px;flex-wrap:wrap"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="bgSet" data-id="tray" ${!BG || BG.tray ? 'checked' : ''}>Beim Schließen im Hintergrund weiterlaufen</label>
     <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-act="bgSet" data-id="autostart" ${!BG || (BG.tray && BG.autostart) ? 'checked' : ''} ${BG && !BG.tray ? 'disabled' : ''}>Mit Windows starten (unsichtbar)</label></div></div>`;
 }
@@ -3358,7 +3358,7 @@ const buTheme = () => { const t = themeGet(); return t === 'system' ? (matchMedi
 const buPost = m => { if (BU.extern) { if (BU.geladen) window.officeHome.bueroAnFenster(m); return; } if (BU.frame && BU.geladen) BU.frame.contentWindow.postMessage(m, '*'); };
 VIEWS.office = () => BU.extern ? `<div class="head"><div class="grow"><h1>${icon('alle')}Büro</h1></div></div>
   <div class="card" style="max-width:640px"><h3>${icon('info')}Das Büro läuft in einem eigenen Fenster</h3>
-    <p style="margin-top:0">Du kannst das Fenster auf einen anderen Bildschirm ziehen und dort groß machen. Office Home merkt sich Bildschirm, Position und Größe für das nächste Mal.</p>
+    <p style="margin-top:0">Du kannst das Fenster auf einen anderen Bildschirm ziehen und dort groß machen. Home Office merkt sich Bildschirm, Position und Größe für das nächste Mal.</p>
     <p class="small muted">Die Mitarbeiter arbeiten dort weiter mit deinen Daten – Rückfragen erscheinen im Büro-Fenster und als Zahl neben „Büro“ hier im Menü.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="bueroVor">${icon('alle')}Büro-Fenster nach vorne holen</button><button class="btn" data-act="bueroZurueck">${icon('pfeil-links')}Zurück ins Programm holen</button></div></div>`
   : `<div id="bueroPlatz" style="height:100%;min-height:300px"></div>`;

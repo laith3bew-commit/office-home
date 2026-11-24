@@ -1,4 +1,4 @@
-// Office Home – Desktop-Programm (Electron-Hauptprozess)
+// Home Office – Desktop-Programm (Electron-Hauptprozess)
 'use strict';
 const { app, BrowserWindow, ipcMain, dialog, shell, Menu, nativeTheme, Tray, nativeImage, safeStorage, Notification } = require('electron');
 const path = require('path');
@@ -32,9 +32,9 @@ const AR = () => prefsRead().lang === 'ar';
 function trayMenu() {
   if (!tray) return;
   const a = AR();
-  tray.setToolTip(a ? 'Office Home – التذكيرات تعمل' : 'Office Home – Erinnerungen aktiv');
+  tray.setToolTip(a ? 'Home Office – التذكيرات تعمل' : 'Home Office – Erinnerungen aktiv');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: a ? 'فتح Office Home' : 'Office Home öffnen', click: showWin },
+    { label: a ? 'فتح Home Office' : 'Home Office öffnen', click: showWin },
     { label: a ? 'التقويم' : 'Kalender', click: () => { showWin(); win.webContents.send('oh:openCal', ''); } },
     { type: 'separator' },
     { label: a ? 'إنهاء (لا مزيد من التذكيرات)' : 'Beenden (keine Erinnerungen mehr)', click: () => { quitting = true; app.quit(); } }
@@ -59,7 +59,8 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1400, height: 900, minWidth: 900, minHeight: 600,
     show: !startHidden,
-    title: 'Office Home',
+    title: 'Home Office',
+    icon: path.join(__dirname, 'build', 'icon.png'),
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
     autoHideMenuBar: true,
     webPreferences: {
@@ -79,8 +80,8 @@ function createWindow() {
     e.preventDefault(); win.hide();
     const p = prefsRead();
     if (!p.trayHintShown && Notification.isSupported()) {
-      new Notification(AR() ? { title: 'Office Home يعمل في الخلفية', body: 'التذكيرات ستستمر. الفتح أو الإنهاء من الرمز بجانب الساعة.' }
-        : { title: 'Office Home läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
+      new Notification(AR() ? { title: 'Home Office يعمل في الخلفية', body: 'التذكيرات ستستمر. الفتح أو الإنهاء من الرمز بجانب الساعة.' }
+        : { title: 'Home Office läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
       p.trayHintShown = true; prefsWrite(p);
     }
   });
@@ -134,7 +135,7 @@ ipcMain.handle('oh:openFile', async (e, name, buffer) => {
 });
 
 ipcMain.handle('oh:version', () => app.getVersion());
-// Darstellung: Fensterrahmen und Systemdialoge folgen der Wahl in Office Home (hell / dunkel / System)
+// Darstellung: Fensterrahmen und Systemdialoge folgen der Wahl in Home Office (hell / dunkel / System)
 ipcMain.handle('oh:setTheme', (e, v) => { nativeTheme.themeSource = v === 'dunkel' ? 'dark' : v === 'hell' ? 'light' : 'system'; return true; });
 
 // ---------- Programm-Update über GitHub Releases ----------
@@ -249,7 +250,7 @@ ipcMain.handle('oh:memSearch', async (e, root, wsPath, query) => {
 ipcMain.handle('oh:memNote', async (e, root, wsPath, n) => {
   try {
     const info = memInfo(root); n = n || {};
-    const date = isoDay(n.date); const title = oneLine(n.title, 160) || 'Eintrag aus Office Home';
+    const date = isoDay(n.date); const title = oneLine(n.title, 160) || 'Eintrag aus Home Office';
     const dir = path.join(memWsDir(info, wsPath), '.memory', 'office-home', date.slice(0, 7));
     fs.mkdirSync(dir, { recursive: true });
     let file = path.join(dir, `${date}-${slugify(title)}.md`); let k = 2;
@@ -297,9 +298,9 @@ const mcpPending = new Map();
 
 function mcpForward(tool, args) {
   return new Promise(resolve => {
-    if (!win || win.isDestroyed()) return resolve({ ok: false, error: 'Office Home-Fenster ist nicht geöffnet.' });
+    if (!win || win.isDestroyed()) return resolve({ ok: false, error: 'Home Office-Fenster ist nicht geöffnet.' });
     const id = ++mcpSeq;
-    const timer = setTimeout(() => { mcpPending.delete(id); resolve({ ok: false, error: 'Office Home hat nicht rechtzeitig geantwortet.' }); }, 15000);
+    const timer = setTimeout(() => { mcpPending.delete(id); resolve({ ok: false, error: 'Home Office hat nicht rechtzeitig geantwortet.' }); }, 15000);
     mcpPending.set(id, r => { clearTimeout(timer); resolve(r); });
     win.webContents.send('oh:mcpCall', { id, tool, args });
   });
@@ -352,7 +353,7 @@ ipcMain.handle('oh:mcpInfo', () => {
   return { running: !!mcpServer, desktopConfig: file, desktopFound: fs.existsSync(path.dirname(file)), installed, entry: en,
     claudeCode: `claude mcp add office-home --scope user -e ELECTRON_RUN_AS_NODE=1 -e OH_MCP_FILE=${q(en.env.OH_MCP_FILE)} -- ${q(en.command)} ${en.args.map(q).join(' ')}` };
 });
-// Trägt Office Home in die Konfiguration von Claude Desktop ein (vorher Sicherungskopie, andere Einträge bleiben erhalten).
+// Trägt Home Office in die Konfiguration von Claude Desktop ein (vorher Sicherungskopie, andere Einträge bleiben erhalten).
 ipcMain.handle('oh:mcpInstallDesktop', async () => {
   try {
     const file = claudeDesktopConfig(); fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -388,7 +389,7 @@ ipcMain.handle('oh:bueroFenster', (e, theme) => {
     b = { x: a.x + 40, y: a.y + 40, width: Math.max(800, Math.min(1600, a.width - 80)), height: Math.max(560, Math.min(1000, a.height - 80)) };
   }
   bueroWin = new BrowserWindow(Object.assign({}, b, {
-    minWidth: 640, minHeight: 420, title: 'Büro – Office Home', autoHideMenuBar: true,
+    minWidth: 640, minHeight: 420, title: 'Büro – Home Office', autoHideMenuBar: true,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'buero-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }

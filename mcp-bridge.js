@@ -1,6 +1,6 @@
-// Office Home – MCP-Brücke (stdio) für Claude Desktop / Claude Code.
-// Läuft als eigener Node-Prozess (Office Home.exe mit ELECTRON_RUN_AS_NODE=1) und leitet jeden
-// Werkzeugaufruf an das laufende Office Home weiter (nur 127.0.0.1, mit Zugangsschlüssel aus mcp.json).
+// Home Office – MCP-Brücke (stdio) für Claude Desktop / Claude Code.
+// Läuft als eigener Node-Prozess (Home Office.exe mit ELECTRON_RUN_AS_NODE=1) und leitet jeden
+// Werkzeugaufruf an das laufende Home Office weiter (nur 127.0.0.1, mit Zugangsschlüssel aus mcp.json).
 // Keine Abhängigkeiten, keine Daten auf der Festplatte außer dem Lesen von mcp.json.
 'use strict';
 const http = require('http');
@@ -33,15 +33,15 @@ const TOOLS = [
 function callApp(tool, args) {
   return new Promise(resolve => {
     let cfg;
-    try { cfg = JSON.parse(fs.readFileSync(CFG, 'utf8')); } catch (e) { return resolve({ ok: false, error: 'Office Home ist nicht geöffnet oder die Claude-Verbindung ist in den Einstellungen ausgeschaltet.' }); }
+    try { cfg = JSON.parse(fs.readFileSync(CFG, 'utf8')); } catch (e) { return resolve({ ok: false, error: 'Home Office ist nicht geöffnet oder die Claude-Verbindung ist in den Einstellungen ausgeschaltet.' }); }
     const body = JSON.stringify({ tool, args: args || {} });
     const req = http.request({ host: '127.0.0.1', port: cfg.port, path: '/call', method: 'POST', timeout: 20000,
       headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body), 'x-oh-token': cfg.token } }, res => {
       let d = ''; res.setEncoding('utf8'); res.on('data', c => d += c);
-      res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { resolve({ ok: false, error: 'Ungültige Antwort von Office Home.' }); } });
+      res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { resolve({ ok: false, error: 'Ungültige Antwort von Home Office.' }); } });
     });
     req.on('timeout', () => req.destroy(new Error('timeout')));
-    req.on('error', () => resolve({ ok: false, error: 'Office Home ist nicht geöffnet. Bitte das Programm starten und erneut versuchen.' }));
+    req.on('error', () => resolve({ ok: false, error: 'Home Office ist nicht geöffnet. Bitte das Programm starten und erneut versuchen.' }));
     req.end(body);
   });
 }
@@ -54,7 +54,7 @@ async function handle(m) {
     case 'initialize':
       return ok({ protocolVersion: (m.params && m.params.protocolVersion) || '2025-06-18', capabilities: { tools: {} },
         serverInfo: { name: 'office-home', version: '1.0.0' },
-        instructions: 'Office Home ist das Familienbüro des Nutzers (Fristen, Vorgänge, Briefe, Finanzen seiner Eltern). Antworte auf Deutsch, außer der Nutzer schreibt in einer anderen Sprache. Schreibende Werkzeuge nur nach ausdrücklichem Wunsch des Nutzers verwenden.' });
+        instructions: 'Home Office ist das Familienbüro des Nutzers (Fristen, Vorgänge, Briefe, Finanzen seiner Eltern). Antworte auf Deutsch, außer der Nutzer schreibt in einer anderen Sprache. Schreibende Werkzeuge nur nach ausdrücklichem Wunsch des Nutzers verwenden.' });
     case 'ping': return ok({});
     case 'tools/list': return ok({ tools: TOOLS });
     case 'tools/call': {

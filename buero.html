@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Büro</title>
-<!-- Office Home · Büro: 3D-Großraumbüro mit 8 Mitarbeitern.
+<!-- Home Office · Büro: 3D-Großraumbüro mit 8 Mitarbeitern.
      Figuren nach Swipii Worker3D (Heike-Kühn-Design-System) und dem HM-Team-Büro, Farben Leon Brand Kit v1,
      Raumaufteilung nach Leons Referenzbild (Besprechung hinten links, Lounge Mitte, Arbeitsplätze hinten rechts,
      Küche vorne links, Empfang + Glasbüro der Leitung vorne rechts).
-     Läuft eigenständig (Demo) oder in Office Home (iframe, Daten per postMessage). -->
+     Läuft eigenständig (Demo) oder in Home Office (iframe, Daten per postMessage). -->
 <style>
   @font-face { font-family:"Manrope"; src:url("fonts/manrope-latin-400-normal.woff2") format("woff2"); font-weight:400; }
   @font-face { font-family:"Manrope"; src:url("fonts/manrope-latin-600-normal.woff2") format("woff2"); font-weight:600; }
@@ -89,7 +89,7 @@
 "use strict";
 const V3 = THREE.Vector3, PI = Math.PI;
 const Q = new URLSearchParams(location.search);
-const BRUECKE = window.bueroBridge || null;                       // eigenes Fenster (Office Home Desktop)
+const BRUECKE = window.bueroBridge || null;                       // eigenes Fenster (Home Office Desktop)
 const FENSTER = !!BRUECKE;
 const IM_PROGRAMM = window.parent !== window || FENSTER;
 const anProgramm = m => { if (BRUECKE) BRUECKE.send(m); else if (window.parent !== window) parent.postMessage(m, "*"); };
@@ -292,7 +292,7 @@ B(.5, .62, .4, F.stahl, 0, .95, 0, briefkasten); B(.06, .62, .06, F.rahmen, 0, .
 const kastenUmschlag = B(.3, .02, .2, F.papier, 0, 1.28, 0, briefkasten); kastenUmschlag.visible = false;
 B(1.6, .6, .4, F.weiss, 3.8, .3, 6.6, raum); pflanze(3.3, 6.6, .4, F.weiss).position.y = .62;
 
-/* Tresor im Glasbüro (Tür öffnet sich mit dem Tresor in Office Home) */
+/* Tresor im Glasbüro (Tür öffnet sich mit dem Tresor in Home Office) */
 const tresor = G(9.45, 0, 6.35, raum, -PI / 2 - .3);
 B(.8, 1.1, .7, DUNKEL ? "#2E3B55" : "#3B4252", 0, .55, 0, tresor);
 const tresorTuerAchse = G(-.38, 0, .36, tresor); const tresorTuer = B(.74, 1.0, .06, F.stahl, .37, .55, 0, tresorTuerAchse);
@@ -661,7 +661,7 @@ function zeigePanel(m) {
     ${m.erledigt.length ? `<ul>${m.erledigt.map(x => `<li>${esc(x.text)} <span style="color:var(--muted)">· ${x.zeit.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}</span></li>`).join("")}</ul>` : '<p class="sub">Heute noch nichts erledigt.</p>'}
     <div class="acts"><button class="btn" id="poffen">Bereich öffnen</button><button class="btn" id="pfolgen">Kamera folgen</button></div>`;
   panel.querySelector("#pzu").onclick = () => { fokus = null; panel.classList.remove("an"); };
-  panel.querySelector("#poffen").onclick = () => { if (IM_PROGRAMM) anProgramm({ typ: "buero-oeffnen", route: m.route }); else alert("Öffnet in Office Home: " + m.route); };
+  panel.querySelector("#poffen").onclick = () => { if (IM_PROGRAMM) anProgramm({ typ: "buero-oeffnen", route: m.route }); else alert("Öffnet in Home Office: " + m.route); };
   panel.querySelector("#pfolgen").onclick = () => { fokus = m; };
 }
 
@@ -683,7 +683,7 @@ tonIcon(); tonBtn.onclick = () => { EINST.ton = !EINST.ton; speichereEinst(); to
 
 /* ---------- Eigenes Fenster ---------- */
 const fensterBtn = document.getElementById("fensterBtn");
-if (FENSTER) { fensterBtn.style.display = ""; document.getElementById("fensterTxt").textContent = "Zurück ins Programm"; fensterBtn.title = "Fenster schließen – das Büro erscheint wieder in Office Home"; document.title = "Büro – Office Home"; }
+if (FENSTER) { fensterBtn.style.display = ""; document.getElementById("fensterTxt").textContent = "Zurück ins Programm"; fensterBtn.title = "Fenster schließen – das Büro erscheint wieder in Home Office"; document.title = "Büro – Home Office"; }
 fensterBtn.onclick = () => anProgramm({ typ: FENSTER ? "buero-zurueck" : "buero-fenster" });
 if (IM_PROGRAMM) setTimeout(() => anProgramm({ typ: "buero-hallo" }), 300);
 
@@ -712,7 +712,7 @@ addEventListener("drop", e => {
   dateien.forEach(d => { log(null, "Neuer Brief im Briefkasten: " + d.name); holePost({ an: "sekretariat", text: "liest „" + d.name + "“ mit Gemini", fertig: "„" + d.name + "“ gelesen und verteilt", weiter: [{ an: "archiv", traegt: true, text: "legt den Brief ab", fertig: "Brief im Archiv abgelegt" }] }); });
 });
 
-/* ---------- Daten aus Office Home (alle 5 Sekunden) ---------- */
+/* ---------- Daten aus Home Office (alle 5 Sekunden) ---------- */
 let letzterStand = 0;
 addEventListener("message", e => empfang(e.data || {}));
 if (BRUECKE) BRUECKE.on(d => empfang(d || {}));
@@ -843,7 +843,7 @@ function schleife(jetzt) {
     m.div.querySelector("b").style.background = STATUS[m.status].farbe; const txt = statusText(m), stel = m.div.querySelector(".st"); if (stel.textContent !== txt) stel.textContent = txt;
     m.div.style.transform = `translate(${Math.round(sx - m.div.offsetWidth / 2)}px,${Math.round(sy - m.div.offsetHeight)}px)`;
     if (m.blase) { if (sek > m.blase.bis) { m.blase.el.remove(); m.blase = null; } else { m.fig.kopf.getWorldPosition(v); v.y += .25; v.x += .25; v.project(cam);
-      m.blase.el.style.transform = `translate(${Math.round((v.x + 1) / 2 * W + 10)}px,${Math.round((1 - v.y) / 2 * H - m.div.offsetHeight - m.blase.el.offsetHeight - 4)}px)`; m.blase.el.style.opacity = v.z > 1 ? 0 : 1; } }
+      m.blase.el.style.transform = `translate(${Math.max(8, Math.min(W - m.blase.el.offsetWidth - 8, Math.round((v.x + 1) / 2 * W + 10)))}px,${Math.max(8, Math.round((1 - v.y) / 2 * H - m.div.offsetHeight - m.blase.el.offsetHeight - 4))}px)`; m.blase.el.style.opacity = v.z > 1 ? 0 : 1; } }
   });
 }
 requestAnimationFrame(schleife);

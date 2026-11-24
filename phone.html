@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Office Home – Scannen</title>
+<title>Home Office – Scannen</title>
 <style>
   :root{--b:#16324f;--a:#2563eb;--ok:#15803d;--bg:#f3f5f9;--line:#e3e7ee;--mut:#6b7280}
   *{box-sizing:border-box} body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:#1c2533}
@@ -22,9 +22,9 @@
 </style>
 </head>
 <body>
-<header>Office Home · Scannen</header>
+<header>Home Office · Scannen</header>
 <main>
-  <p class="hint">Fotografiere jede Seite einzeln, möglichst auf dunklem Untergrund. Office Home schneidet die Seite zu und macht sie gut lesbar. Alle Seiten eines Briefes ergeben ein PDF.</p>
+  <p class="hint">Fotografiere jede Seite einzeln, möglichst auf dunklem Untergrund. Home Office schneidet die Seite zu und macht sie gut lesbar. Alle Seiten eines Briefes ergeben ein PDF.</p>
   <label class="big" for="cam">📷 Seite fotografieren</label>
   <input id="cam" type="file" accept="image/*" capture="environment">
   <label class="big sec" for="files">📁 Fotos oder PDF auswählen</label>
@@ -60,15 +60,15 @@ async function send(file){
     const body = isPdf ? file : await shrink(file);
     const r = await fetch(`/upload?t=${T}&b=${batch}`, {method:'POST', headers:{'content-type': isPdf ? 'application/pdf' : 'image/jpeg', 'x-name': encodeURIComponent(file.name || 'Handy-Foto')}, body});
     const j = await r.json(); if (!j.ok) throw new Error(j.error || 'Fehler');
-    tile.querySelector('span').textContent = n + ' ✓'; msg('Seite ' + n + ' ist in Office Home angekommen.');
-  } catch (e) { tile.querySelector('span').textContent = n + ' ✗'; msg('Senden fehlgeschlagen: ' + e.message + ' – ist Office Home noch geöffnet und im selben WLAN?', 'err'); }
+    tile.querySelector('span').textContent = n + ' ✓'; msg('Seite ' + n + ' ist in Home Office angekommen.');
+  } catch (e) { tile.querySelector('span').textContent = n + ' ✗'; msg('Senden fehlgeschlagen: ' + e.message + ' – ist Home Office noch geöffnet und im selben WLAN?', 'err'); }
   busy--; $('#done').disabled = busy > 0 || !count;
 }
 $('#cam').onchange = e => { for (const f of e.target.files) send(f); e.target.value = ''; };
 $('#files').onchange = e => { for (const f of e.target.files) send(f); e.target.value = ''; };
 $('#done').onclick = async () => {
   await fetch(`/done?t=${T}&b=${batch}`, {method:'POST'});
-  msg('Fertig! ' + count + ' Seite(n) liegen jetzt im Scanner von Office Home. Du kannst den nächsten Brief fotografieren.');
+  msg('Fertig! ' + count + ' Seite(n) liegen jetzt im Scanner von Home Office. Du kannst den nächsten Brief fotografieren.');
   batch = Date.now().toString(36); count = 0; $('#grid').innerHTML = ''; $('#done').disabled = true;
 };
 </script>
