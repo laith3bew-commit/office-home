@@ -1357,7 +1357,8 @@ VIEWS.dashboard = () => {
   const mon = contracts.reduce((s, c) => s + monthly(c), 0);
   const cancelSoon = contracts.filter(c => { const i = contractInfo(c); return i.cancelBy && daysUntil(i.cancelBy) <= S.settings.contractDays && daysUntil(i.cancelBy) >= 0; });
   const me = S.settings.me;
-  const setupMissing = !me.name || S.persons.every(p => !p.lastName);
+  // Willkommens-Hinweis nur beim allerersten Start (solange die Einrichtung nicht abgeschlossen ist)
+  const setupMissing = !(S.settings.setup && S.settings.setup.fertig) && (!me.name || S.persons.every(p => !p.lastName));
   const lb = S.settings.lastBackup; const needBackup = !lb || daysUntil(lb) < -14;
   const byCat = {}; contracts.forEach(c => byCat[c.category || 'Sonstiges'] = (byCat[c.category || 'Sonstiges'] || 0) + monthly(c));
   const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]); const maxCat = cats.length ? cats[0][1] : 1;

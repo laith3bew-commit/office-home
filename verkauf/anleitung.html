@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Home Office – Installation und Einrichtung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Leon Brandkit v1 */
+  :root{--navy:#1B2A44;--stahl:#4F6785;--nebel:#A9B8CA;--papier:#F4F0E8;--weiss:#FFFFFF;--linie:#D9DFE7;--hell:#EEF1F5;}
+  @page{size:A4;margin:16mm 16mm 18mm 16mm;}
+  @page :first{margin:0;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Manrope',system-ui,sans-serif;font-size:10.2pt;line-height:1.55;color:var(--navy);background:var(--weiss);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  a{color:var(--stahl);font-weight:600;text-decoration:none;border-bottom:1px solid var(--nebel)}
+  h1,h2,h3{margin:0}
+  .hand{font-family:'Kalam',cursive;font-weight:300}
+
+  /* Titelseite */
+  .cover{height:297mm;width:210mm;background:var(--navy);color:var(--papier);position:relative;overflow:hidden;page-break-after:always;padding:30mm 22mm}
+  .cover .ring{position:absolute;border-radius:50%;border:1.5px solid rgba(169,184,202,.25)}
+  .cover .logo{width:30mm;height:30mm;border-radius:7mm;background:var(--papier);display:flex;align-items:center;justify-content:center;margin-bottom:16mm}
+  .cover .logo img{width:22mm;height:22mm}
+  .cover .ueber{font-size:10pt;letter-spacing:.28em;text-transform:uppercase;color:var(--nebel);font-weight:700}
+  .cover h1{font-family:'Kalam',cursive;font-weight:400;font-size:54pt;line-height:1.05;margin:4mm 0 6mm;color:var(--papier)}
+  .cover .unter{font-size:15pt;color:var(--nebel);max-width:140mm;font-weight:500}
+  .cover .fuss{position:absolute;left:22mm;right:22mm;bottom:22mm;display:flex;justify-content:space-between;font-size:9pt;color:var(--nebel);border-top:1px solid rgba(169,184,202,.35);padding-top:5mm}
+  .cover .inhalt{margin-top:22mm;display:grid;grid-template-columns:1fr 1fr;gap:2.4mm 10mm;max-width:150mm;font-size:10pt}
+  .cover .inhalt div{display:flex;gap:3mm;color:var(--papier)}
+  .cover .inhalt b{color:var(--nebel);font-weight:700;min-width:7mm}
+
+  /* Inhalt */
+  .kapitel{page-break-before:always}
+  .kapitel.erst{page-break-before:auto}
+  .kopf{display:flex;align-items:flex-end;gap:5mm;border-bottom:2px solid var(--navy);padding-bottom:3mm;margin-bottom:6mm}
+  .kopf .nr{font-family:'Kalam',cursive;font-size:34pt;line-height:.9;color:var(--stahl);font-weight:400}
+  .kopf h2{font-size:19pt;font-weight:800;letter-spacing:-.01em}
+  .kopf .zeile{font-size:9.5pt;color:var(--stahl);font-weight:500}
+  h3{font-size:12pt;font-weight:800;margin:6mm 0 2.5mm;color:var(--navy)}
+  p{margin:0 0 3mm}
+  ul,ol{margin:0 0 3mm;padding-left:6mm}
+  li{margin:0 0 1.4mm}
+  .lead{font-size:11.2pt;color:var(--stahl);font-weight:500;margin-bottom:5mm}
+
+  .schritte{counter-reset:s;list-style:none;padding:0;margin:0 0 4mm}
+  .schritte>li{counter-increment:s;position:relative;padding:2.6mm 3mm 2.6mm 13mm;margin:0 0 2.2mm;background:var(--papier);border-radius:3mm;break-inside:avoid}
+  .schritte>li::before{content:counter(s);position:absolute;left:3mm;top:2.4mm;width:7mm;height:7mm;border-radius:50%;background:var(--navy);color:var(--papier);font-weight:800;font-size:9pt;display:flex;align-items:center;justify-content:center}
+  .schritte>li b.t{display:block;font-weight:800}
+
+  .box{border-radius:3mm;padding:3.5mm 4.5mm;margin:0 0 4mm;break-inside:avoid}
+  .box.info{background:var(--hell);border-left:1.2mm solid var(--stahl)}
+  .box.wichtig{background:var(--navy);color:var(--papier)}
+  .box.wichtig a{color:var(--papier);border-color:var(--stahl)}
+  .box.papier{background:var(--papier)}
+  .box .titel{font-weight:800;font-size:9pt;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1.5mm;display:block}
+  .box.info .titel{color:var(--stahl)}
+  .box.wichtig .titel{color:var(--nebel)}
+
+  table{width:100%;border-collapse:collapse;margin:0 0 4mm;font-size:9.2pt;break-inside:auto}
+  th{background:var(--navy);color:var(--papier);text-align:left;font-weight:700;padding:2mm 2.5mm}
+  th:first-child{border-top-left-radius:2mm} th:last-child{border-top-right-radius:2mm}
+  td{padding:2mm 2.5mm;border-bottom:1px solid var(--linie);vertical-align:top}
+  tr:nth-child(even) td{background:#FAF8F3}
+  tr{break-inside:avoid}
+  code,.k{font-family:'Courier Prime',Consolas,monospace;background:var(--hell);padding:.2mm 1.4mm;border-radius:1mm;font-size:9pt}
+  .knopf{display:inline-block;background:var(--navy);color:var(--papier);border-radius:5mm;padding:0 2.6mm;font-size:8.6pt;font-weight:700;line-height:1.7}
+  .pfad{font-weight:700;color:var(--stahl)}
+
+  .karten{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin:0 0 4mm}
+  .karte{background:var(--papier);border-radius:3mm;padding:3.2mm 4mm;break-inside:avoid}
+  .karte h4{margin:0 0 1mm;font-size:10.5pt;font-weight:800}
+  .karte p{margin:0;font-size:9.2pt}
+  .links td:first-child{font-weight:700;width:42mm}
+  .check{list-style:none;padding:0}
+  .check li{padding-left:8mm;position:relative;margin-bottom:2mm}
+  .check li::before{content:"";position:absolute;left:0;top:1mm;width:4mm;height:4mm;border:1.5px solid var(--stahl);border-radius:1mm}
+  .zitat{font-family:'Kalam',cursive;font-size:15pt;color:var(--stahl);font-weight:300;margin:2mm 0 5mm}
+  .inhaltsv{list-style:none;padding:0;margin:0;column-count:2;column-gap:10mm}
+  .inhaltsv li{display:flex;gap:3mm;padding:1.6mm 0;border-bottom:1px solid var(--linie);break-inside:avoid}
+  .inhaltsv b{color:var(--stahl);min-width:7mm}
+</style>
+</head>
+<body>
+
+<!-- ============ TITEL ============ -->
+<section class="cover">
+  <div class="ring" style="width:190mm;height:190mm;right:-70mm;top:-50mm"></div>
+  <div class="ring" style="width:130mm;height:130mm;right:-40mm;top:-20mm"></div>
+  <div class="ring" style="width:260mm;height:260mm;right:-120mm;bottom:-150mm"></div>
+  <div class="logo"><img src="../build/icon.svg" alt=""></div>
+  <div class="ueber">Anleitung · Version 2.17</div>
+  <h1>Home Office</h1>
+  <div class="unter">Installation, Aktivierung und Einrichtung Schritt für Schritt – mit allen Links und Werkzeugen, die du brauchst.</div>
+  <div class="inhalt">
+    <div><b>01</b>Was ist Home Office?</div>
+    <div><b>08</b>Google Kalender &amp; Drive</div>
+    <div><b>02</b>Was du brauchst</div>
+    <div><b>09</b>E-Mail verbinden</div>
+    <div><b>03</b>Installation</div>
+    <div><b>10</b>Die Bereiche im Überblick</div>
+    <div><b>04</b>Systemprüfung</div>
+    <div><b>11</b>Sicherung &amp; Updates</div>
+    <div><b>05</b>Aktivierung</div>
+    <div><b>12</b>Datenschutz &amp; Kosten</div>
+    <div><b>06</b>Einrichtungs-Assistent</div>
+    <div><b>13</b>Probleme &amp; Lösungen</div>
+    <div><b>07</b>Gemini (KI) verbinden</div>
+    <div><b>14</b>Checkliste</div>
+  </div>
+  <div class="fuss"><span>Home Office – das Büro für den Papierkram der Familie</span><span>Windows 10 / 11</span></div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section class="kapitel erst">
+  <div class="kopf"><div class="nr">01</div><div><h2>Was ist Home Office?</h2><div class="zeile">Ein Programm für den ganzen Papierkram einer Familie</div></div></div>
+  <p class="lead">Home Office hilft dir, den Schriftverkehr für dich und deine Familie zu erledigen – zum Beispiel, wenn du eine Vollmacht für deine Eltern hast. Alles an einem Ort: Personen, Dokumente, Briefe, Fristen, Termine, Verträge, Geld und E-Mail.</p>
+  <div class="karten">
+    <div class="karte"><h4>Personen &amp; Vollmachten</h4><p>Für jede Person (Vater, Mutter, Ehefrau …) ein eigener Bereich, eigene Farbe und ein eigener Ordner auf dem Computer.</p></div>
+    <div class="karte"><h4>Dokumente lesen lassen</h4><p>Die KI Google Gemini liest Bescheide und Briefe und schlägt Fristen, Termine und Einträge vor.</p></div>
+    <div class="karte"><h4>Briefe nach DIN 5008</h4><p>181 Vorlagen, automatisch mit Absender, Empfänger und Aktenzeichen. Drucken, als PDF oder als E-Mail senden.</p></div>
+    <div class="karte"><h4>Fristen &amp; Termine</h4><p>Erinnerungen von Windows, Abgleich mit Google Kalender – die Termine erscheinen auch auf dem Handy.</p></div>
+    <div class="karte"><h4>E-Mail</h4><p>Postfach verbinden, Mails lesen und schreiben. Das Büro erkennt wichtige Post und fragt nach.</p></div>
+    <div class="karte"><h4>Das Büro</h4><p>Ein 3D-Büro mit 8 Mitarbeitern zeigt, was gerade passiert, und stellt Rückfragen.</p></div>
+    <div class="karte"><h4>Verträge &amp; Finanzen</h4><p>Laufzeiten, Kündigungsfristen und monatliche Kosten im Blick.</p></div>
+    <div class="karte"><h4>Tresor</h4><p>Passwörter und Nummern verschlüsselt mit einem Hauptpasswort.</p></div>
+  </div>
+  <div class="box wichtig"><span class="titel">Das Wichtigste zuerst</span>
+    Ohne deine Bestätigung trägt Home Office nichts ein. Die KI und die Mitarbeiter im Büro machen nur <b>Vorschläge</b> – du entscheidest. E-Mails werden nie gelöscht. Alle Daten bleiben auf deinem Computer.</div>
+  <h3>Demo und Live</h3>
+  <p>Oben im Programm gibt es den Schalter <span class="knopf">Live | Demo</span>. Im <b>Demo-Modus</b> siehst du alles mit Beispieldaten und kannst gefahrlos ausprobieren. Im <b>Live-Modus</b> arbeitest du mit deinen echten Daten. Die beiden Bereiche sind vollständig getrennt.</p>
+  <h3>Sprache</h3>
+  <p>Die Oberfläche gibt es auf <b>Deutsch</b> und <b>Arabisch</b>. Briefe an Ämter werden immer auf Deutsch geschrieben.</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">02</div><div><h2>Was du brauchst</h2><div class="zeile">Werkzeuge und Konten – mit Links</div></div></div>
+  <table>
+    <tr><th style="width:38mm">Was</th><th>Wofür</th><th style="width:52mm">Wo</th></tr>
+    <tr><td><b>Windows 10 oder 11</b></td><td>Home Office läuft nur unter Windows.</td><td>–</td></tr>
+    <tr><td><b>Setup-Datei</b></td><td>Das Programm selbst (<code>OfficeHome-Setup-….exe</code>). Liegt im Paket.</td><td><a href="https://github.com/laith3bew-commit/office-home/releases/latest">github.com/laith3bew-commit/office-home/releases/latest</a></td></tr>
+    <tr><td><b>Aktivierungsschlüssel</b></td><td>Schaltet den Live-Modus frei. Gilt für ein Gerät.</td><td>Vom Verkäufer (siehe Kapitel 05)</td></tr>
+    <tr><td><b>Google-Konto</b></td><td>Für Gemini (KI), Google Kalender und Drive.</td><td><a href="https://accounts.google.com/signup">accounts.google.com/signup</a></td></tr>
+    <tr><td><b>Gemini-API-Schlüssel</b></td><td>Damit die KI Dokumente und Mails lesen kann.</td><td><a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a></td></tr>
+    <tr><td><b>Google Cloud Console</b></td><td>Eigener Zugang für Kalender und Drive.</td><td><a href="https://console.cloud.google.com">console.cloud.google.com</a></td></tr>
+    <tr><td><b>Google Kalender</b></td><td>Kalender „Home Office“ anlegen.</td><td><a href="https://calendar.google.com">calendar.google.com</a></td></tr>
+    <tr><td><b>E-Mail mit IMAP</b></td><td>mail.de, GMX, WEB.DE, Gmail, T-Online … mit App-Passwort.</td><td>Beim eigenen Anbieter (Kapitel 09)</td></tr>
+    <tr><td><b>PDF-Programm</b></td><td>Zum Öffnen von PDFs (empfohlen).</td><td><a href="https://get.adobe.com/reader/">get.adobe.com/reader</a></td></tr>
+    <tr><td><b>Claude Desktop</b> <i>(optional)</i></td><td>Claude installiert und richtet alles mit dir ein.</td><td><a href="https://claude.ai/download">claude.ai/download</a></td></tr>
+    <tr><td><b>App Installer / winget</b> <i>(optional)</i></td><td>Damit Claude Zusatzprogramme installieren kann.</td><td><a href="https://apps.microsoft.com/detail/9NBLGGH4NRV3">Microsoft Store: App Installer</a></td></tr>
+    <tr><td><b>Obsidian</b> <i>(optional)</i></td><td>Notizen und Gedächtnis als Markdown-Dateien.</td><td><a href="https://obsidian.md">obsidian.md</a></td></tr>
+  </table>
+  <div class="box info"><span class="titel">Zeit einplanen</span>
+    Installation und Aktivierung: ca. 10 Minuten. Gemini: ca. 5 Minuten. Google Kalender: ca. 15–20 Minuten. E-Mail: ca. 5 Minuten. Du kannst jeden Teil auch später erledigen.</div>
+  <div class="box papier"><span class="titel">Geheimnisse bleiben geheim</span>
+    Passwörter, API-Schlüssel, Client-Secrets und App-Passwörter gibst du <b>nur im Programm</b> ein – nie in einen Chat, auch nicht bei Claude. Windows speichert sie verschlüsselt.</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">03</div><div><h2>Installation</h2><div class="zeile">Mit Claude oder selbst</div></div></div>
+  <h3>Weg A – Claude installiert und erklärt alles</h3>
+  <ol class="schritte">
+    <li><b class="t">Claude öffnen</b>Claude Desktop (<a href="https://claude.ai/download">claude.ai/download</a>) oder claude.ai im Browser.</li>
+    <li><b class="t">Paket übergeben</b>Den entpackten Ordner <code>HomeOffice-Paket-…</code> oder die Datei <code>ANLEITUNG_FUER_CLAUDE.md</code> an Claude geben.</li>
+    <li><b class="t">Auftrag schreiben</b><span class="zitat" style="display:block;margin:1mm 0 0">„Installiere mir Home Office und richte es mit mir Schritt für Schritt ein.“</span></li>
+    <li><b class="t">Mitmachen</b>Claude fragt zuerst nach deiner Sprache und gibt dir dann immer nur einen Schritt. Schreib „fertig“, wenn du ihn erledigt hast.</li>
+  </ol>
+  <h3>Weg B – selbst installieren</h3>
+  <ol class="schritte">
+    <li><b class="t">Paket entpacken</b>Rechtsklick auf <code>HomeOffice-Paket-….zip</code> → <span class="pfad">Alle extrahieren</span>.</li>
+    <li><b class="t">Setup starten</b>Doppelklick auf <code>OfficeHome-Setup-….exe</code>.</li>
+    <li><b class="t">Windows-Warnung</b>Es erscheint „Der Computer wurde durch Windows geschützt“, weil das Programm nicht digital signiert ist. Klicke auf <span class="pfad">Weitere Informationen</span> → <span class="pfad">Trotzdem ausführen</span>.</li>
+    <li><b class="t">Installieren</b>Ordner bestätigen → <span class="knopf">Installieren</span> → <span class="knopf">Fertig stellen</span>.</li>
+    <li><b class="t">Starten</b>Auf dem Desktop liegt jetzt die Verknüpfung <b>„Home Office“</b>. Doppelklick – das Programm öffnet sich.</li>
+  </ol>
+</section>
+
+<!-- ============ 4 + 5 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">04</div><div><h2>Systemprüfung</h2><div class="zeile">Fehlt etwas auf deinem Computer?</div></div></div>
+  <p>Kurz nach dem ersten Start prüft Home Office, ob alles da ist: Windows-Version, PowerShell, Windows-Bilderfassung (für den Scanner), ein PDF-Programm, Internet, Claude Desktop und winget. Fehlt etwas Wichtiges, öffnet sich das Fenster <b>„Systemprüfung“</b>.</p>
+  <ul>
+    <li><span class="knopf">Selbst installieren</span> öffnet die offizielle Download-Seite.</li>
+    <li><span class="knopf">Claude installiert es</span> kopiert einen fertigen Auftrag. Füge ihn bei Claude ein – Claude installiert die Programme über <code>winget</code> und fragt vor jedem Schritt.</li>
+    <li>Danach im Programm <span class="knopf">Erneut prüfen</span>.</li>
+  </ul>
+  <p>Später jederzeit: <span class="pfad">Einstellungen → Allgemein → Systemprüfung → Jetzt prüfen</span>. Einen Scanner-Treiber findest du auf der Seite deines Druckerherstellers.</p>
+
+  <div class="kopf" style="margin-top:10mm"><div class="nr">05</div><div><h2>Aktivierung</h2><div class="zeile">Ein Schlüssel für ein Gerät</div></div></div>
+  <p>Ohne Aktivierung läuft nur der <b>Demo-Modus</b>. Der Knopf „Live“ zeigt ein Schloss.</p>
+  <ol class="schritte">
+    <li><b class="t">Geräte-ID kopieren</b><span class="pfad">Einstellungen → Allgemein → Aktivierung</span>. Dort steht deine Geräte-ID (Form <code>XXXXX-XXXXX-XXXXX-XXXXX</code>) mit dem Knopf <span class="knopf">Kopieren</span>.</li>
+    <li><b class="t">An den Verkäufer senden</b>Schick die Geräte-ID an den Verkäufer, bei dem du Home Office gekauft hast.</li>
+    <li><b class="t">Schlüssel eingeben</b>Du bekommst einen Schlüssel, der mit <code>HO1-</code> beginnt. Einfügen → <span class="knopf">Aktivieren</span>.</li>
+    <li><b class="t">Los geht's</b>Das Programm wechselt in den Live-Modus und der Einrichtungs-Assistent startet.</li>
+  </ol>
+  <div class="box info"><span class="titel">Neuer Computer?</span>
+    Der Schlüssel gilt nur für dieses Gerät. Auf einem anderen PC meldet das Programm „Dieser Schlüssel gehört zu einem anderen Gerät“. Für einen neuen PC bekommst du einen neuen Schlüssel vom Verkäufer.</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">06</div><div><h2>Der Einrichtungs-Assistent</h2><div class="zeile">Beim ersten Start im Live-Modus</div></div></div>
+  <table>
+    <tr><th style="width:34mm">Schritt</th><th>Was du machst</th></tr>
+    <tr><td><b>Sprache</b></td><td>Deutsch oder العربية.</td></tr>
+    <tr><td><b>Willkommen</b></td><td>Kurze Erklärung. „Erst die Demo ansehen“ öffnet den Demo-Modus; der Knopf „Live“ bringt dich zurück.</td></tr>
+    <tr><td><b>Deine Daten</b></td><td>Name, Anschrift, Telefon, E-Mail – erscheinen als Absender in deinen Briefen.</td></tr>
+    <tr><td><b>Name &amp; Farben</b></td><td>Eigener Programmname und vier Lieblingsfarben (fertige Farbwelt, Farbwähler oder Farbcode wie <code>#1B2A44</code>). Die dunkelste Farbe wird Seitenleiste und Schrift, die hellste der Hintergrund. Briefe bleiben auf weißem Papier.</td></tr>
+    <tr><td><b>Personen</b></td><td>Für wen erledigst du Papierkram? Vater, Mutter, Ehefrau, Schwester … auch mehrfach.</td></tr>
+    <tr><td><b>Je Person</b></td><td>Name, Geburtsdatum, Anschrift und ein <b>Ordner</b>: „Vorhandenen Ordner wählen“ oder „Neuen Ordner anlegen“ (<code>Dokumente\Home Office\&lt;Name&gt;</code>).</td></tr>
+    <tr><td><b>Unterlagen</b></td><td>Dateien im Ordner ansehen und auswählen. Nichts wird verschoben oder gelöscht; neue Dokumente kommen als Kopie in <code>&lt;Ordner&gt;\Home Office\</code>.</td></tr>
+    <tr><td><b>Gedächtnis</b></td><td>„Mein Gedächtnis“, „Obsidian“ oder „Ohne“. Für den Anfang reicht „Ohne“.</td></tr>
+    <tr><td><b>Verbindungen</b></td><td>Gemini und Google Kalender (Kapitel 07 und 08). „Zurück zur Einrichtung“ bringt dich wieder hierher.</td></tr>
+    <tr><td><b>E-Mail</b></td><td>Postfach verbinden, Zeitraum wählen, dann jede Mail einzeln „Hinzufügen“ oder „Überspringen“ (Kapitel 09).</td></tr>
+    <tr><td><b>Fertig</b></td><td>Rundgang durch alle Bereiche.</td></tr>
+  </table>
+  <div class="box info"><span class="titel">Keine Eile</span>
+    Mit „Später“ kannst du jederzeit aufhören. Unten erscheint dann „Einrichtung fortsetzen“. Rundgang und Assistent findest du wieder unter <span class="pfad">Einstellungen → Allgemein → Hilfe</span>. Zu jeder Seite gibt es Hilfe über den Knopf <span class="knopf">?</span> oben rechts.</div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">07</div><div><h2>Gemini (KI) verbinden</h2><div class="zeile">Damit Home Office Dokumente und Mails lesen kann</div></div></div>
+  <ol class="schritte">
+    <li><b class="t">Google AI Studio öffnen</b><a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a> – mit deinem Google-Konto anmelden.</li>
+    <li><b class="t">Schlüssel erstellen</b><span class="knopf">API-Schlüssel erstellen</span> (bzw. „Create API key“). Gibt es noch kein Projekt, legt Google eins an.</li>
+    <li><b class="t">Abrechnung einrichten (empfohlen)</b>Im Bereich „Billing“ ein Rechnungskonto verknüpfen. Dann ist der kostenpflichtige Tarif aktiv: höhere Limits, und Google verwendet deine Inhalte nicht zum Training. Preise: <a href="https://ai.google.dev/gemini-api/docs/pricing">ai.google.dev/gemini-api/docs/pricing</a></li>
+    <li><b class="t">Schlüssel kopieren</b>Er beginnt mit <code>AIza…</code>.</li>
+    <li><b class="t">In Home Office einfügen</b><span class="pfad">Einstellungen → Kalender, Google &amp; KI → Gemini-API-Schlüssel</span>. Modell auf „automatisch“ lassen → <span class="knopf">Speichern</span>.</li>
+    <li><b class="t">Testen</b>Unter <b>Dokumente</b> ein PDF hochladen. Nach kurzer Zeit erscheint im runden <b>Command-Knopf</b> unten rechts eine Karte mit Vorschlägen.</li>
+  </ol>
+  <h3>Häufige Meldungen</h3>
+  <table>
+    <tr><th style="width:55mm">Meldung</th><th>Bedeutung</th></tr>
+    <tr><td><b>high demand</b></td><td>Google ist gerade überlastet. Später auf „Noch einmal lesen“ klicken.</td></tr>
+    <tr><td><b>model … no longer available</b></td><td>Löst Home Office selbst: Es wählt automatisch ein neueres Modell.</td></tr>
+    <tr><td><b>API key not valid</b></td><td>Schlüssel falsch kopiert – neu einfügen und speichern.</td></tr>
+  </table>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">08</div><div><h2>Google Kalender &amp; Drive</h2><div class="zeile">Termine aufs Handy – und Vollmacht-Links</div></div></div>
+  <p>Du brauchst ein eigenes kleines Google-Cloud-Projekt. Für diese Nutzung ist es kostenlos. Nimm überall <b>dasselbe Google-Konto</b>.</p>
+  <ol class="schritte">
+    <li><b class="t">Kalender „Home Office“ anlegen</b><a href="https://calendar.google.com">calendar.google.com</a> → links bei „Weitere Kalender“ auf <b>+</b> → „Neuen Kalender erstellen“ → Name <b>Home Office</b>.</li>
+    <li><b class="t">Projekt anlegen</b><a href="https://console.cloud.google.com">console.cloud.google.com</a> → oben Projektauswahl → <span class="knopf">Neues Projekt</span> → Name „Home Office“.</li>
+    <li><b class="t">APIs einschalten</b><span class="pfad">APIs und Dienste → Bibliothek</span>: <b>Google Calendar API</b> und <b>Google Drive API</b> jeweils „Aktivieren“.</li>
+    <li><b class="t">Zustimmungsbildschirm</b><span class="pfad">Google Auth Platform → Branding</span>: App-Name „Home Office“, deine E-Mail als Support- und Entwickler-Kontakt. Zielgruppe <b>Extern</b>. Dann unter „Zielgruppe“ <span class="knopf">App veröffentlichen</span> → Status <b>In Produktion</b> (sonst läuft die Anmeldung nach 7 Tagen ab). Eine Prüfung durch Google ist nicht nötig.</li>
+    <li><b class="t">Zugangsdaten erstellen</b><span class="pfad">Clients → Client erstellen → OAuth-Client-ID</span> → Typ <b>Desktop-App</b> → Name „Home Office“ → Erstellen. <b>Client-ID</b> und <b>Clientschlüssel</b> kopieren.</li>
+    <li><b class="t">In Home Office eintragen</b><span class="pfad">Einstellungen → Kalender, Google &amp; KI</span> → Client-ID und Clientschlüssel einfügen → <span class="knopf">Zugang speichern</span> → <span class="knopf">Mit Google verbinden</span>.</li>
+    <li><b class="t">Im Browser bestätigen</b>Anmelden. Bei „Google hat diese App nicht überprüft“: <span class="pfad">Erweitert → Zu Home Office wechseln</span> – es ist deine eigene App. <b>Alle Häkchen</b> setzen → Weiter. Fenster schließen.</li>
+    <li><b class="t">Kalender wählen</b>Unter „Kalender für Home Office“ sollte <b>Home Office</b> stehen.</li>
+    <li><b class="t">Handy</b>Google-Kalender-App mit demselben Konto → Einstellungen → Konto → Häkchen bei <b>Home Office</b>. Was du am Handy einträgst, kommt nach höchstens 10 Minuten ins Programm („Jetzt abgleichen“ holt es sofort).</li>
+  </ol>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">09</div><div><h2>E-Mail verbinden</h2><div class="zeile">IMAP/SMTP mit App-Passwort</div></div></div>
+  <table>
+    <tr><th style="width:24mm">Anbieter</th><th style="width:38mm">IMAP-Server</th><th style="width:40mm">SMTP-Server</th><th>Vorbereitung</th></tr>
+    <tr><td><b>mail.de</b></td><td><code>imap.mail.de</code></td><td><code>smtp.mail.de</code></td><td>Einstellungen → POP3/IMAP einschalten; bei Zwei-Faktor ein App-Passwort.</td></tr>
+    <tr><td><b>GMX</b></td><td><code>imap.gmx.net</code></td><td><code>mail.gmx.net</code></td><td>Einstellungen → POP3/IMAP Abruf → Zugriff erlauben.</td></tr>
+    <tr><td><b>WEB.DE</b></td><td><code>imap.web.de</code></td><td><code>smtp.web.de</code></td><td>Einstellungen → POP3/IMAP Abruf → Zugriff erlauben.</td></tr>
+    <tr><td><b>Gmail</b></td><td><code>imap.gmail.com</code></td><td><code>smtp.gmail.com</code></td><td>Bestätigung in zwei Schritten an, dann App-Passwort: <a href="https://myaccount.google.com/apppasswords">myaccount.google.com/apppasswords</a></td></tr>
+    <tr><td><b>T-Online</b></td><td><code>secureimap.t-online.de</code></td><td><code>securesmtp.t-online.de</code></td><td>E-Mail-Passwort im Kundencenter anlegen.</td></tr>
+  </table>
+  <div class="box info"><span class="titel">Outlook / Hotmail</span>Microsoft hat die Anmeldung mit Passwort abgeschaltet – diese Postfächer gehen derzeit nicht.</div>
+  <ol class="schritte">
+    <li><b class="t">Konto anlegen</b>Menü <b>E-Mail</b> (oder im Assistenten „E-Mail-Konto verbinden“). Adresse, App-Passwort, Absendername, „Gehört zu“ (meist „Mir“) und Server eintragen → <span class="knopf">Verbinden und testen</span>.</li>
+    <li><b class="t">Zeitraum wählen</b>Letzte Woche, letzter Monat, letztes Jahr, alle (die neuesten 1000) oder keine → „E-Mails holen“.</li>
+    <li><b class="t">Einzeln durchgehen</b>Jede Mail: <span class="knopf">Hinzufügen</span> (das Büro liest sie und macht Vorschläge) oder <span class="knopf">Überspringen</span>. Tastatur: → hinzufügen, ← überspringen.</li>
+    <li><b class="t">Danach automatisch</b>Die Sekretärin prüft jede Stunde das Postfach und fragt bei neuer Post nach.</li>
+  </ol>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">10</div><div><h2>Die Bereiche im Überblick</h2><div class="zeile">Was wo zu finden ist</div></div></div>
+  <table>
+    <tr><th style="width:36mm">Bereich</th><th>Was du dort machst</th></tr>
+    <tr><td><b>Übersicht</b></td><td>Heute wichtig: überfällige Fristen, nächste Termine, Büro-Team mit Status, letzte Dokumente und Briefe.</td></tr>
+    <tr><td><b>Command</b><br><code>Strg+K</code></td><td>Runder Knopf unten rechts. Fragen („Versichertennummer Mutter“), Befehle („Frist morgen Jobcenter anrufen“). Hier erscheinen die Karten aus dem Eingang – eingetragen wird erst nach „Bestätigen“. „Aufgabe hinzufügen“ lässt Gemini einen Brief entwerfen.</td></tr>
+    <tr><td><b>Brief schreiben</b></td><td>181 Vorlagen nach DIN 5008, auch mehrseitig. Gelb markierte Stellen noch ausfüllen. Drucken, PDF oder „Als E-Mail senden“ (PDF als Anhang).</td></tr>
+    <tr><td><b>Dokumente</b></td><td>Hochladen, scannen, per Handy fotografieren (QR-Code, gleiches WLAN). Gemini liest und schlägt vor.</td></tr>
+    <tr><td><b>Fristen &amp; Aufgaben</b></td><td>Alles mit Datum, Erinnerung von Windows.</td></tr>
+    <tr><td><b>Kalender</b></td><td>Termine, Abgleich mit Google Kalender „Home Office“.</td></tr>
+    <tr><td><b>Vorgänge</b></td><td>Zusammengehörige Schreiben, Fristen und Dokumente zu einem Fall.</td></tr>
+    <tr><td><b>Personen</b></td><td>Daten, Vollmachten (als Link teilbar über Google Drive), Ordner auf dem Computer.</td></tr>
+    <tr><td><b>Adressbuch</b></td><td>Ämter, Kassen, Ärzte, Vermieter – mit Aktenzeichen je Person.</td></tr>
+    <tr><td><b>Verträge &amp; Finanzen</b></td><td>Laufzeiten, Kündigungsfristen, Zahlungen, Kosten je Monat.</td></tr>
+    <tr><td><b>E-Mail</b></td><td>Posteingang, Gesendet, Schreiben mit Anhängen.</td></tr>
+    <tr><td><b>Büro</b></td><td>3D-Büro mit 8 Mitarbeitern; Rückfragen beantworten. Ohne deine Zustimmung entscheidet niemand.</td></tr>
+    <tr><td><b>Tresor</b></td><td>Passwörter verschlüsselt. <b>Wiederherstellungsschlüssel unbedingt aufschreiben!</b></td></tr>
+    <tr><td><b>Einstellungen</b></td><td>Deine Daten, Name &amp; Farben, Aktivierung, Google &amp; KI, Sicherung &amp; Update, Hilfe.</td></tr>
+  </table>
+  <p>Neue Einträge zeigen im Menü eine Zahl wie <span class="knopf">+2</span>. Sie verschwindet, wenn du den Bereich ansiehst. Der zuständige Mitarbeiter erinnert dich, wenn du etwas länger nicht angesehen hast.</p>
+</section>
+
+<!-- ============ 11 + 12 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">11</div><div><h2>Sicherung &amp; Updates</h2><div class="zeile">Deine Daten liegen nur auf diesem Computer</div></div></div>
+  <ul>
+    <li><b>Sicherung:</b> <span class="pfad">Einstellungen → Sicherung &amp; Update → Sicherung herunterladen</span>. Mach das regelmäßig und bewahre die Datei auf einem USB-Stick oder in der Cloud auf. Home Office erinnert dich nach 14 Tagen.</li>
+    <li><b>Neuer PC:</b> Home Office installieren, aktivieren, dann „Sicherung wiederherstellen“.</li>
+    <li><b>Updates:</b> Home Office prüft alle 10 Minuten, ob es eine neue Version gibt, und meldet sich. Installieren unter <span class="pfad">Einstellungen → Sicherung &amp; Update</span>. Was neu ist, zeigt danach das Fenster „Neu in dieser Version“.</li>
+  </ul>
+  <div class="box info"><span class="titel">Komplett neu installieren</span>
+    Erst über <span class="pfad">Windows-Einstellungen → Apps</span> deinstallieren, dann den Ordner <code>%APPDATA%\Office Home</code> löschen (vorher sichern!). Sonst findet das Programm deine alten Daten wieder.</div>
+
+  <div class="kopf" style="margin-top:10mm"><div class="nr">12</div><div><h2>Datenschutz &amp; Kosten</h2><div class="zeile">Ehrlich und klar</div></div></div>
+  <ul>
+    <li>Alle Daten bleiben auf deinem Computer unter <code>%APPDATA%\Office Home</code>. Passwörter und Schlüssel verschlüsselt Windows.</li>
+    <li>An <b>Google Gemini</b> geht nur, was gelesen werden soll (Dokument oder Mail) – und nur, wenn du Gemini eingerichtet hast.</li>
+    <li>Im <b>kostenlosen</b> Gemini-Tarif darf Google Inhalte zur Verbesserung nutzen. Für persönliche Dokumente ist der <b>kostenpflichtige</b> Tarif empfohlen. Aktuelle Preise: <a href="https://ai.google.dev/gemini-api/docs/pricing">ai.google.dev/gemini-api/docs/pricing</a></li>
+    <li>Google Kalender und Drive sind für diese Nutzung kostenlos.</li>
+    <li>Home Office kann nur den Programmnamen und die vier Farben ändern. Alles andere ist fest gebaut und wird vom Hersteller gepflegt. Änderungen am Installationsordner verhindern den Start.</li>
+  </ul>
+</section>
+
+<!-- ============ 13 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">13</div><div><h2>Probleme &amp; Lösungen</h2><div class="zeile">Wenn etwas nicht klappt</div></div></div>
+  <table>
+    <tr><th style="width:62mm">Problem</th><th>Lösung</th></tr>
+    <tr><td>Windows blockiert das Setup</td><td>„Weitere Informationen“ → „Trotzdem ausführen“.</td></tr>
+    <tr><td>„Live“ hat ein Schloss</td><td>Programm ist noch nicht aktiviert – Kapitel 05.</td></tr>
+    <tr><td>„Schlüssel gehört zu einem anderen Gerät“</td><td>Neue Geräte-ID an den Verkäufer schicken.</td></tr>
+    <tr><td>Keine Vorschläge nach dem Hochladen</td><td>Gemini-Schlüssel prüfen (Kapitel 07). Bei „high demand“ später erneut lesen.</td></tr>
+    <tr><td>Google: „Zugriff blockiert“ / access_denied</td><td>App unter „Zielgruppe“ auf „In Produktion“ setzen oder eigenes Konto als Testnutzer eintragen.</td></tr>
+    <tr><td>Google: „invalid_grant“</td><td>In Home Office „Trennen“ und neu verbinden.</td></tr>
+    <tr><td>„Google Drive ist noch nicht freigegeben“</td><td>Drive API aktivieren, dann trennen und neu verbinden.</td></tr>
+    <tr><td>Termine nicht auf dem Handy</td><td>In der Kalender-App den Kalender „Home Office“ einschalten; im Programm „Jetzt abgleichen“.</td></tr>
+    <tr><td>E-Mail: Anmeldung fehlgeschlagen</td><td>IMAP beim Anbieter freischalten, App-Passwort statt normalem Passwort verwenden, Server prüfen.</td></tr>
+    <tr><td>Handy-Scan findet den PC nicht</td><td>Gleiches WLAN; Windows-Firewall-Frage mit „Private Netzwerke“ erlauben.</td></tr>
+    <tr><td>Tresor-Passwort vergessen</td><td>Mit dem Wiederherstellungsschlüssel öffnen.</td></tr>
+  </table>
+  <div class="box wichtig"><span class="titel">Hilfe</span>Knopf <b>?</b> oben rechts erklärt jede Seite. Den Rundgang startest du unter Einstellungen → Allgemein → Hilfe. Und Claude hilft dir mit der Datei <code>ANLEITUNG_FUER_CLAUDE.md</code> aus dem Paket.</div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section class="kapitel">
+  <div class="kopf"><div class="nr">14</div><div><h2>Checkliste</h2><div class="zeile">Zum Abhaken</div></div></div>
+  <ul class="check">
+    <li>Home Office installiert, Verknüpfung „Home Office“ auf dem Desktop</li>
+    <li>Systemprüfung ohne fehlende Programme</li>
+    <li>Aktiviert (Einstellungen → Allgemein → Aktivierung: „aktiviert“)</li>
+    <li>Assistent: eigene Daten, Name &amp; Farben, Personen, Ordner</li>
+    <li>Gemini-Schlüssel gespeichert – Test: Dokument hochladen, Karte im Command</li>
+    <li>Google verbunden, Kalender „Home Office“ gewählt und am Handy sichtbar</li>
+    <li>E-Mail verbunden, alte Mails durchgegangen</li>
+    <li>Rundgang gemacht, Hilfe „?“ gefunden</li>
+    <li>Tresor: Wiederherstellungsschlüssel aufgeschrieben</li>
+    <li>Erste Sicherung heruntergeladen und sicher abgelegt</li>
+  </ul>
+  <div class="box papier" style="margin-top:8mm">
+    <span class="titel">Alle Links auf einen Blick</span>
+    <table class="links" style="margin:0">
+      <tr><td>Programm</td><td><a href="https://github.com/laith3bew-commit/office-home/releases/latest">github.com/laith3bew-commit/office-home/releases/latest</a></td></tr>
+      <tr><td>Claude Desktop</td><td><a href="https://claude.ai/download">claude.ai/download</a></td></tr>
+      <tr><td>Google-Konto</td><td><a href="https://accounts.google.com/signup">accounts.google.com/signup</a></td></tr>
+      <tr><td>Gemini-Schlüssel</td><td><a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a></td></tr>
+      <tr><td>Gemini-Preise</td><td><a href="https://ai.google.dev/gemini-api/docs/pricing">ai.google.dev/gemini-api/docs/pricing</a></td></tr>
+      <tr><td>Google Cloud Console</td><td><a href="https://console.cloud.google.com">console.cloud.google.com</a></td></tr>
+      <tr><td>Google Kalender</td><td><a href="https://calendar.google.com">calendar.google.com</a></td></tr>
+      <tr><td>Gmail App-Passwort</td><td><a href="https://myaccount.google.com/apppasswords">myaccount.google.com/apppasswords</a></td></tr>
+      <tr><td>PDF-Programm</td><td><a href="https://get.adobe.com/reader/">get.adobe.com/reader</a></td></tr>
+      <tr><td>App Installer (winget)</td><td><a href="https://apps.microsoft.com/detail/9NBLGGH4NRV3">apps.microsoft.com/detail/9NBLGGH4NRV3</a></td></tr>
+      <tr><td>Obsidian</td><td><a href="https://obsidian.md">obsidian.md</a></td></tr>
+    </table>
+  </div>
+</section>
+
+</body>
+</html>

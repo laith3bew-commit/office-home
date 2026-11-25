@@ -5,6 +5,11 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.17.1', datum: '2026-11-25', de: [
+        'Übersicht: Der Willkommens-Hinweis erscheint nur noch beim allerersten Start – nach der Einrichtung ist er weg.'
+      ], ar: [
+        'الصفحة الرئيسية: رسالة الترحيب بتطلع بس أول مرة بتشغّل البرنامج – بعد الإعداد بتختفي.'
+      ] },
     { v: '2.17.0', datum: '2026-11-25', de: [
         'Neue Installation: Ein Assistent richtet Home Office Schritt für Schritt ein – Sprache, eigene Daten, Personen (Vater, Mutter, Ehefrau, Schwester …), je Person ein Ordner auf dem Computer, Gemini, Google Kalender und E-Mail.',
         'Ordner je Person: Home Office zeigt die vorhandenen Dateien, du wählst aus, was übernommen wird; neue Dokumente werden als Kopie dort abgelegt; die Frage-Leiste sucht auch im Ordner.',
