@@ -136,18 +136,18 @@ Absender ist ${c.absender || 'der Bevollmächtigte'}${c.person ? ', der im Namen
 Vorliegend: das Schreiben bzw. die E-Mail (Dateien/Text oben) und die bisherige Auswertung:
 ${JSON.stringify(c.analyse || {}).slice(0, 6000)}
 
-AUFTRAG VON LEON: ${String(c.auftrag || '').slice(0, 2000)}
+AUFTRAG DES NUTZERS: ${String(c.auftrag || '').slice(0, 2000)}
 
 Schreibe dazu einen Brief auf Deutsch (sachlich, höflich, klar, wie ein deutscher Geschäftsbrief nach DIN 5008).
 Regeln:
 - Nur den Brieftext: keine Absender- oder Empfängeranschrift, kein Datum, keine Unterschrift, keine Grußformel im Feld "text".
-- Aktenzeichen, Kundennummern, Beträge und Daten nur verwenden, wenn sie in den Unterlagen stehen. Was fehlt oder Leon entscheiden muss, in eckige Klammern setzen, z. B. [Datum einsetzen].
+- Aktenzeichen, Kundennummern, Beträge und Daten nur verwenden, wenn sie in den Unterlagen stehen. Was fehlt oder der Nutzer entscheiden muss, in eckige Klammern setzen, z. B. [Datum einsetzen].
 ${c.person ? '- Im ersten Satz einmal erwähnen, dass du in Vollmacht für ' + c.person + ' schreibst – nicht öfter.\n' : ''}- Bezug nehmen auf das Schreiben (Datum/Betreff, wenn bekannt).
-- Den Auftrag genau umsetzen; nichts zusagen oder bestätigen, was Leon nicht verlangt hat.
+- Den Auftrag genau umsetzen; nichts zusagen oder bestätigen, was der Nutzer nicht verlangt hat.
 Antworte NUR mit JSON:
 {"betreff": "kurzer Betreff (mit Aktenzeichen, falls vorhanden)", "anrede": "z. B. Sehr geehrte Frau X, / Sehr geehrte Damen und Herren,", "text": "Brieftext mit Absätzen (\\n\\n)", "gruss": "Mit freundlichen Grüßen",
  "empfaenger": "Name der Stelle/Person, an die der Brief geht", "empfaenger_anschrift": "Anschrift mehrzeilig (\\n), falls bekannt, sonst leer", "email": "E-Mail-Adresse des Empfängers, falls im Schreiben genannt, sonst leer",
- "hinweis": "kurzer Hinweis an Leon auf Deutsch, was er prüfen oder ergänzen muss (leer, wenn nichts)"}`;
+ "hinweis": "kurzer Hinweis an den Nutzer auf Deutsch, was er prüfen oder ergänzen muss (leer, wenn nichts)"}`;
   ipcMain.handle('oh:kiSchreiben', async (e, doc) => {
     try {
       if (!String(doc.auftrag || '').trim()) return { ok: false, message: 'Bitte einen Auftrag eingeben.' };

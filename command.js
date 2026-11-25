@@ -164,6 +164,12 @@
       }
       step('Gedächtnis durchsucht: ' + mem.length + ' Treffer');
     } else memNote = DESKTOP ? 'Gedächtnis ist nicht verbunden (Einstellungen → Claude & Gedächtnis).' : 'Das Gedächtnis gibt es nur im installierten Programm.';
+    // 2b) Ordner der Person auf dem Computer (Dateinamen + Textdateien) – ohne Gedächtnis-Engine
+    if (p && p.ordner && DESKTOP && window.officeHome.ordnerSuche) {
+      const r = await window.officeHome.ordnerSuche(p.ordner, words.join(' ') || text);
+      if (r && r.ok) { mem = mem.concat(r.hits.map(h => ({ title: h.title, path: 'Ordner: ' + h.rel, snippet: h.snippet || '' }))); if (r.hits.length) memNote = ''; }
+      step('Ordner von ' + p.role + ' durchsucht: ' + ((r && r.hits && r.hits.length) || 0) + ' Treffer');
+    }
     // 3) Wert herausziehen
     let wert = null, quelle = null;
     for (const d of docs) if (d.wert) { wert = d.wert; quelle = 'Dokument „' + d.d.title + '“'; break; }

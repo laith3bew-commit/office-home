@@ -29,12 +29,14 @@ function applyAutostart() {
 }
 // Sprache der Oberfläche (de/ar) – für Symbol neben der Uhr und Windows-Meldungen
 const AR = () => prefsRead().lang === 'ar';
+// Sichtbarer Programmname (eigener Name aus dem Assistenten, Standard „Home Office“)
+const NAME = () => { const n = String(prefsRead().appName || '').trim(); return n || 'Home Office'; };
 function trayMenu() {
   if (!tray) return;
-  const a = AR();
-  tray.setToolTip(a ? 'Home Office – التذكيرات تعمل' : 'Home Office – Erinnerungen aktiv');
+  const a = AR(), n = NAME();
+  tray.setToolTip(a ? n + ' – التذكيرات تعمل' : n + ' – Erinnerungen aktiv');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: a ? 'فتح Home Office' : 'Home Office öffnen', click: showWin },
+    { label: a ? 'فتح ' + n : n + ' öffnen', click: showWin },
     { label: a ? 'التقويم' : 'Kalender', click: () => { showWin(); win.webContents.send('oh:openCal', ''); } },
     { type: 'separator' },
     { label: a ? 'إنهاء (لا مزيد من التذكيرات)' : 'Beenden (keine Erinnerungen mehr)', click: () => { quitting = true; app.quit(); } }
@@ -47,6 +49,9 @@ function makeTray() {
   trayMenu();
   tray.on('click', showWin);
 }
+ipcMain.handle('oh:setAppName', (e, n) => { n = String(n || '').trim().slice(0, 40); const p = prefsRead(); if ((p.appName || '') !== n) { p.appName = n; prefsWrite(p); trayMenu(); } return true; });
+require('./lizenz-main.js')({ ipcMain, prefsRead, prefsWrite });
+require('./system-main.js')({ ipcMain });
 ipcMain.handle('oh:setLang', (e, l) => { const p = prefsRead(); if (p.lang !== l) { p.lang = l === 'ar' ? 'ar' : 'de'; prefsWrite(p); trayMenu(); } return true; });
 ipcMain.handle('oh:bgGet', () => Object.assign(bgPrefs(), { packaged: app.isPackaged }));
 ipcMain.handle('oh:bgSet', (e, v) => {
@@ -59,7 +64,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1400, height: 900, minWidth: 900, minHeight: 600,
     show: !startHidden,
-    title: 'Home Office',
+    title: NAME(),
     icon: path.join(__dirname, 'build', 'icon.png'),
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
     autoHideMenuBar: true,
@@ -80,8 +85,8 @@ function createWindow() {
     e.preventDefault(); win.hide();
     const p = prefsRead();
     if (!p.trayHintShown && Notification.isSupported()) {
-      new Notification(AR() ? { title: 'Home Office يعمل في الخلفية', body: 'التذكيرات ستستمر. الفتح أو الإنهاء من الرمز بجانب الساعة.' }
-        : { title: 'Home Office läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
+      new Notification(AR() ? { title: NAME() + ' يعمل في الخلفية', body: 'التذكيرات ستستمر. الفتح أو الإنهاء من الرمز بجانب الساعة.' }
+        : { title: NAME() + ' läuft weiter', body: 'Erinnerungen kommen weiterhin. Öffnen oder beenden über das Symbol neben der Uhr.' }).show();
       p.trayHintShown = true; prefsWrite(p);
     }
   });
@@ -198,14 +203,21 @@ function memRun(root, args) {
 }
 
 // Prüft den Memory-Ordner und liefert die Arbeitsbereiche aus memory-config.json (nur lesen).
+// Zwei Arten: Memory-Engine (.memory/.system/bin/mem) oder Obsidian-Vault (Ordner mit .obsidian).
+// Obsidian: Arbeitsbereiche = Ordner der obersten Ebene, Suche = eigene Textsuche, Notizen sichtbar unter „Home Office“.
 function memInfo(root) {
-  if (!root || !path.isAbsolute(root)) throw new Error('Kein Memory-Ordner gewählt.');
+  if (!root || !path.isAbsolute(root)) throw new Error('Kein Ordner für das Gedächtnis gewählt.');
   const cfgFile = path.join(root, '.memory', 'memory-config.json');
-  if (!fs.existsSync(path.join(root, '.memory', '.system', 'bin', 'mem')) || !fs.existsSync(cfgFile))
-    throw new Error('In diesem Ordner wurde keine Memory-Engine gefunden.');
+  const istEngine = fs.existsSync(path.join(root, '.memory', '.system', 'bin', 'mem')) && fs.existsSync(cfgFile);
+  if (!istEngine && fs.existsSync(path.join(root, '.obsidian'))) {
+    let ws = []; try { ws = fs.readdirSync(root, { withFileTypes: true }).filter(d => d.isDirectory() && !d.name.startsWith('.')).map(d => ({ slug: d.name, path: d.name })); } catch (e) {}
+    return { root, art: 'obsidian', workstations: ws };
+  }
+  if (!istEngine)
+    throw new Error('In diesem Ordner wurde weder eine Memory-Engine noch ein Obsidian-Vault gefunden. (Einen neuen Vault zuerst einmal in Obsidian öffnen.)');
   const cfg = JSON.parse(fs.readFileSync(cfgFile, 'utf8'));
   const ws = (Array.isArray(cfg.workstations) ? cfg.workstations : []).filter(w => w && w.path).map(w => ({ slug: String(w.slug || w.path), path: String(w.path) }));
-  return { root, workstations: ws };
+  return { root, art: 'memory', workstations: ws };
 }
 // Erlaubt: '' = Hauptordner, ein Arbeitsbereich aus der Konfiguration oder ein vorhandener Unterordner
 // im Memory-Ordner (z. B. „Fa. Akili/Maha“ als Ordner einer Person). Nie außerhalb, nie in .memory selbst.
@@ -215,7 +227,7 @@ function memWsDir(info, wsPath) {
   const dir = path.resolve(root, String(wsPath));
   if (!dir.startsWith(root + path.sep)) throw new Error('Ordner liegt nicht im Memory-Ordner.');
   const rel = path.relative(root, dir).split(path.sep);
-  if (rel.some(s => s === '.memory' || s === '.git' || s === '..')) throw new Error('Ungültiger Ordner.');
+  if (rel.some(s => s === '.memory' || s === '.obsidian' || s === '.git' || s === '..')) throw new Error('Ungültiger Ordner.');
   if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) throw new Error('Ordner nicht gefunden: ' + wsPath);
   let real = dir; try { real = fs.realpathSync(dir); } catch (e) {}
   let realRoot = root; try { realRoot = fs.realpathSync(root); } catch (e) {}
@@ -271,7 +283,7 @@ function parseSearch(out) {
 
 ipcMain.handle('oh:memPickRoot', async e => {
   const w = BrowserWindow.fromWebContents(e.sender);
-  const r = dialog.showOpenDialogSync(w, { title: 'Memory-Ordner wählen', properties: ['openDirectory'] });
+  const r = dialog.showOpenDialogSync(w, { title: 'Memory-Ordner oder Obsidian-Vault wählen', properties: ['openDirectory'] });
   return r && r[0] ? r[0] : '';
 });
 ipcMain.handle('oh:memStatus', async (e, root) => {
@@ -283,6 +295,7 @@ ipcMain.handle('oh:memSearch', async (e, root, wsPath, query, strict) => {
     const info = memInfo(root); const q = oneLine(query, 300);
     if (!q) return { ok: true, hits: [] };
     const dir = memWsDir(info, wsPath);
+    if (info.art === 'obsidian') return { ok: true, hits: memLocalSearch(root, dir, q, strict ? 10 : 8) };
     let hits = [];
     try { hits = parseSearch(await memRun(root, ['search', q, '--cwd', dir, '-n', strict ? '40' : '8'])); } catch (err) { if (!strict) throw err; }
     if (strict && wsPath) {
@@ -317,7 +330,7 @@ ipcMain.handle('oh:memPickDir', async (e, root, current) => {
     const r = dialog.showOpenDialogSync(w, { title: 'Ordner der Person im Gedächtnis wählen', defaultPath: start, properties: ['openDirectory'] });
     if (!r || !r[0]) return { ok: false, cancel: true };
     const dir = path.resolve(r[0]);
-    if (dir === path.resolve(info.root)) return { ok: false, message: 'Bitte nicht den ganzen Memory-Ordner wählen, sondern den Ordner der Person darin.' };
+    if (dir === path.resolve(info.root)) return { ok: false, message: info.art === 'obsidian' ? 'Bitte nicht den ganzen Vault wählen, sondern den Ordner der Person darin (zuerst in Obsidian anlegen).' : 'Bitte nicht den ganzen Memory-Ordner wählen, sondern den Ordner der Person darin.' };
     const rel = relSlash(info.root, dir);
     memWsDir(info, rel);
     return { ok: true, rel };
@@ -328,7 +341,9 @@ ipcMain.handle('oh:memNote', async (e, root, wsPath, n) => {
   try {
     const info = memInfo(root); n = n || {};
     const date = isoDay(n.date); const title = oneLine(n.title, 160) || 'Eintrag aus Home Office';
-    const dir = path.join(memWsDir(info, wsPath), '.memory', 'office-home', date.slice(0, 7));
+    // Obsidian: sichtbarer Ordner „Home Office/JJJJ-MM“ im Ordner der Person (Obsidian zeigt keine Punkt-Ordner)
+    const dir = info.art === 'obsidian' ? path.join(memWsDir(info, wsPath), 'Home Office', date.slice(0, 7))
+      : path.join(memWsDir(info, wsPath), '.memory', 'office-home', date.slice(0, 7));
     fs.mkdirSync(dir, { recursive: true });
     let file = path.join(dir, `${date}-${slugify(title)}.md`); let k = 2;
     while (fs.existsSync(file)) file = path.join(dir, `${date}-${slugify(title)}-${k++}.md`);
@@ -336,14 +351,25 @@ ipcMain.handle('oh:memNote', async (e, root, wsPath, n) => {
       .filter(x => oneLine(x[1])).map(x => `- **${x[0]}:** ${oneLine(x[1], 300)}`).join('\n');
     const text = `---\ntitle: ${JSON.stringify(title)}\ndate: ${date}\nsource: office-home\nkind: ${JSON.stringify(oneLine(n.kind, 60) || 'Notiz')}\n---\n# ${title}\n\n${meta ? meta + '\n\n' : ''}${String(n.body || '').replace(/\r\n/g, '\n').trim()}\n`;
     writeAtomic(file, text);
-    let indexed = true; try { await memRun(root, ['index', '--quick']); } catch (err) { indexed = false; }
+    let indexed = true; if (info.art !== 'obsidian') { try { await memRun(root, ['index', '--quick']); } catch (err) { indexed = false; } }
     return { ok: true, file: path.relative(root, file), indexed };
   } catch (err) { return { ok: false, message: err.message }; }
 });
 // Erinnerung: neue Zeile unter „## Active“ in .memory/context/todos.md (gleiches Format wie das Dashboard).
 ipcMain.handle('oh:memTask', async (e, root, t) => {
   try {
-    memInfo(root); t = t || {};
+    const info = memInfo(root); t = t || {};
+    if (info.art === 'obsidian') {
+      // Obsidian: Aufgabenliste „Home Office/Erinnerungen.md“ im Format des Tasks-Plugins (📅 Fälligkeit)
+      const title = oneLine(t.title, 200); if (!title) throw new Error('Erinnerung ohne Text.');
+      const dir = path.join(root, 'Home Office'); fs.mkdirSync(dir, { recursive: true });
+      const file = path.join(dir, 'Erinnerungen.md');
+      let src = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '# Erinnerungen aus Home Office\n\n';
+      if (!src.endsWith('\n')) src += '\n';
+      const note = oneLine(t.note, 300);
+      writeAtomic(file, src + `- [ ] ${title} 📅 ${isoDay(t.due)}${note ? ' – ' + note : ''}\n`);
+      return { ok: true, id: 'obsidian' };
+    }
     const file = path.join(root, '.memory', 'context', 'todos.md');
     if (!fs.existsSync(file)) throw new Error('Aufgabenliste der Memory nicht gefunden.');
     const title = oneLine(t.title, 200).replace(/[{}]/g, ''); if (!title) throw new Error('Erinnerung ohne Text.');
@@ -466,7 +492,7 @@ ipcMain.handle('oh:bueroFenster', (e, theme) => {
     b = { x: a.x + 40, y: a.y + 40, width: Math.max(800, Math.min(1600, a.width - 80)), height: Math.max(560, Math.min(1000, a.height - 80)) };
   }
   bueroWin = new BrowserWindow(Object.assign({}, b, {
-    minWidth: 640, minHeight: 420, title: 'Büro – Home Office', autoHideMenuBar: true,
+    minWidth: 640, minHeight: 420, title: 'Büro – ' + NAME(), autoHideMenuBar: true,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0F1726' : '#F4F0E8',
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'buero-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
@@ -502,6 +528,7 @@ require('./kalender-main.js')({ app, ipcMain, shell, safeStorage, Notification, 
 
 // ---------- E-Mail: IMAP-Abruf und SMTP-Versand ----------
 require('./mail-main.js')({ app, ipcMain, safeStorage });
+require('./ordner-main.js')({ app, ipcMain, dialog, shell, getWin: () => win });
 
 app.on('second-instance', () => showWin());
 app.whenReady().then(() => {
@@ -511,7 +538,8 @@ app.whenReady().then(() => {
   if (bgPrefs().tray) makeTray();
   applyAutostart();
   // Beim Start still nach Updates suchen; die Oberfläche zeigt dann einen Hinweis.
-  if (app.isPackaged) win.webContents.once('did-finish-load', () => setTimeout(() => getUpdater().checkForUpdates().catch(() => {}), 4000));
+  // … und danach alle 10 Minuten (die Oberfläche meldet eine neue Version nur einmal je Version)
+  if (app.isPackaged) win.webContents.once('did-finish-load', () => { setTimeout(() => getUpdater().checkForUpdates().catch(() => {}), 4000); setInterval(() => getUpdater().checkForUpdates().catch(() => {}), 10 * 60 * 1000); });
 });
 app.on('window-all-closed', () => { if (quitting || !bgPrefs().tray) app.quit(); });
 ipcMain.handle('oh:trayEnsure', () => { if (bgPrefs().tray) makeTray(); else if (tray) { tray.destroy(); tray = null; } return true; });

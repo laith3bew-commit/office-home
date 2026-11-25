@@ -70,13 +70,34 @@ module.exports = function setupMail({ app, ipcMain, safeStorage }) {
     } catch (err) { try { await c.logout(); } catch (e2) {} return { ok: false, message: errText(err) }; }
   });
 
-  // Neue Mails seit dem letzten Abruf (beim ersten Mal: die letzten 7 Tage, höchstens 40).
-  ipcMain.handle('oh:mailAbrufen', async (e, id) => {
+  // Erst-Import (Einrichtung): Mails aus einem Zeitraum (woche/monat/jahr/alle), höchstens `max` (neueste zuerst).
+  // Leicht geladen: Kopf + Text (Anhänge nur als Namen) – die ganze Mail lädt das Programm erst, wenn sie bearbeitet oder geöffnet wird.
+  async function importieren(c, a, list, opts) {
+    const TAGE = { woche: 7, monat: 31, jahr: 366 }, out = [];
+    const box = c.mailbox; const uv = String(box.uidValidity || '');
+    let uids = TAGE[opts.seit] ? await c.search({ since: new Date(Date.now() - TAGE[opts.seit] * 864e5) }, { uid: true }) : await c.search({ all: true }, { uid: true });
+    uids = (uids || []).sort((x, y) => x - y); const gesamt = uids.length;
+    uids = uids.slice(-Math.min(1000, Math.max(10, Number(opts.max) || 300)));
+    if (uids.length) for await (const msg of c.fetch(uids.join(','), { uid: true, envelope: true, internalDate: true, size: true, source: { maxLength: 300000 } }, { uid: true })) {
+      let text = '', attNamen = [], von = {}, betreff = '', datum = msg.internalDate || new Date();
+      try { const m = await simpleParser(msg.source); text = String(m.text || '').replace(/\n{3,}/g, '\n\n').slice(0, 60000); attNamen = (m.attachments || []).map(x => x.filename).filter(Boolean).slice(0, 25);
+        von = (m.from && m.from.value && m.from.value[0]) || {}; betreff = m.subject || ''; if (m.date) datum = m.date; } catch (err) {}
+      const env = msg.envelope || {}; const ef = (env.from || [])[0] || {};
+      out.push({ uid: msg.uid, msgId: env.messageId || '', from: von.address || ef.address || '', fromName: von.name || ef.name || '', to: (env.to || []).map(t => t.address).join(', '),
+        subject: betreff || env.subject || '(ohne Betreff)', date: new Date(datum).toISOString(), html: '', text, atts: [], attNamen, voll: false, gross: (msg.size || 0) > 300000 });
+    }
+    const neu = list.find(x => x.id === a.id); neu.uidValidity = uv; if (uids.length) neu.lastUid = Math.max(neu.uidValidity === uv ? (Number(a.lastUid) || 0) : 0, ...uids); neu.lastCheck = new Date().toISOString();
+    speichereKonten(list);
+    return { ok: true, mails: out, gesamt };
+  }
+  // Neue Mails seit dem letzten Abruf (beim ersten Mal: die letzten 7 Tage, höchstens 40). Mit opts.seit: Erst-Import (siehe oben).
+  ipcMain.handle('oh:mailAbrufen', async (e, id, opts) => {
     const list = konten(), a = list.find(x => x.id === id); if (!a) return { ok: false, message: 'Konto nicht gefunden.' };
     const c = imap(a); const out = [];
     try {
       await c.connect();
       const lock = await c.getMailboxLock('INBOX');
+      if (opts && opts.seit) { try { const r = await importieren(c, a, list, opts); lock.release(); await c.logout(); return r; } catch (err) { lock.release(); throw err; } }
       try {
         const box = c.mailbox; const uv = String(box.uidValidity || '');
         let uids;

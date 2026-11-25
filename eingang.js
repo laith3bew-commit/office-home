@@ -59,6 +59,7 @@
   async function mailText(m) { if (!m || !m.textFileId) return ''; const f = await fileGet(m.textFileId); return f && f.blob ? await f.blob.text() : ''; }
   async function lesen(it) {
     const m = it.mailId ? M().find(x => x.id === it.mailId) : null;
+    if (m && !m.voll) await mailVoll(m).catch(() => false); // leicht importierte Mail: Anhänge jetzt holen, damit Gemini sie mitliest
     const parts = await teileVon(it), text = m ? await mailText(m) : '';
     if (!parts.length && !text) throw new Error('Keine lesbare Datei (nur PDF und Bilder) und kein Text.');
     const r = await window.officeHome.kiAnalyze({ parts, text, von: m ? (m.fromName ? m.fromName + ' <' + m.from + '>' : m.from) : '', betreff: m ? m.subject : '',
@@ -273,7 +274,7 @@
       <label class="egstep egalle"><input type="checkbox" data-egalle="1"><span><b>Alle auswählen</b><small>${n} E-Mail${n > 1 ? 's' : ''}</small></span></label>
       <div class="egsteps">${it.schritte.map(s => { const m = M().find(x => x.id === s.d.mailId) || {};
         return `<label class="egstep"><input type="checkbox" data-egs="${s.id}" ${s.an ? 'checked' : ''}><span><b>${esc(m.fromName || m.from || '?')}</b><small>${esc(kurz(m.subject, 80))}${(m.atts || []).length ? ' · 📎 ' + m.atts.length : ''}</small></span></label>`; }).join('')}</div>
-      <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">${icon('alle')}Ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="nichtfragen" data-id="${it.id}" title="Bleibt im Posteingang, wird nicht bearbeitet und nicht mehr angeboten">${icon('schliessen')}Nicht mehr fragen</button><button class="btn sm" data-cmd="eg" data-ea="spaeter" data-id="${it.id}">Später</button></div></div>`;
+      <div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">${icon('alle')}Ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="nichtfragen" data-id="${it.id}" title="Bleibt im Posteingang, wird nicht bearbeitet und nicht mehr angeboten">${icon('schliessen')}Nicht mehr fragen</button><button class="btn sm" data-cmd="eg" data-ea="spaeter" data-id="${it.id}">Später</button><button class="btn sm" data-cmd="eg" data-ea="durchgehen" data-id="${it.id}">${icon('mail')}Einzeln durchgehen</button></div></div>`;
   }
   // „Alle auswählen“ in Auswahlkarten
   document.addEventListener('change', e => { const a = e.target.closest('[data-egalle]'); if (!a) return; const box = a.closest('[data-eg]'); if (box) box.querySelectorAll('[data-egs]').forEach(x => { x.checked = a.checked; }); });
@@ -301,6 +302,10 @@
       const n = mailsNichtFragen(mids);
       if (it.status === 'vorschlag') it.titel = it.schritte.length + ' neue E-Mail' + (it.schritte.length > 1 ? 's' : '') + ': ' + [...new Set(it.schritte.map(s => { const m = M().find(x => x.id === s.d.mailId) || {}; return m.fromName || m.from; }))].slice(0, 4).join(', ');
       save(); toast(n + ' E-Mail(s) werden nicht mehr angeboten – sie bleiben im Posteingang'); if (parseHash().route === 'mail') render(); return;
+    }
+    if (a === 'durchgehen' && it.typ === 'mailwahl') {
+      const mids = it.schritte.map(s => s.d.mailId); it.status = 'erledigt'; it.ergebnis = ['Einzeln durchgegangen']; save(); punkt();
+      if (window.ohCommand) window.ohCommand.schliessen(); setTimeout(() => durchgehen(mids), 50); return 'zu';
     }
     if (a === 'ok' && it.typ === 'mailwahl') {
       if (!ids.length) { toast('Bitte zuerst E-Mails markieren.'); return 'bleib'; }
@@ -363,7 +368,7 @@
     m.htmlFileId = ''; if (x.html) { m.htmlFileId = uid(); await filePut(m.htmlFileId, { blob: new Blob([x.html], { type: 'text/html' }), name: 'mail.html', type: 'text/html' }); }
     m.atts = [];
     for (const a of x.atts || []) { const fid = uid(); await filePut(fid, { blob: new Blob([a.data], { type: a.type }), name: a.name, type: a.type }); m.atts.push({ fileId: fid, name: a.name, type: a.type, size: a.size, cid: a.cid || '', inline: !!a.inline }); }
-    m.voll = true;
+    m.voll = x.voll !== false; m.attNamen = x.attNamen || (m.atts || []).filter(a => !a.inline).map(a => a.name); // Erst-Import: nur leicht geladen
   }
   // Ältere Mail (vor dieser Version nur Text + PDF) beim Öffnen vollständig nachladen
   async function mailVoll(m) {
@@ -373,13 +378,15 @@
   }
 
   /* ---------- E-Mail abrufen (Sekretärin, stündlich) ---------- */
-  async function mailsAbrufen(still) {
+  // opts.seit (woche/monat/jahr/alle) = Erst-Import aus der Einrichtung: keine Auswahlkarte, danach einzeln durchgehen
+  async function mailsAbrufen(still, opts) {
     if (!bereit() || !window.officeHome.mailKonten) return { neu: 0 };
+    if (still && S.settings.setup && !S.settings.setup.fertig) return { neu: 0 }; // während der Ersteinrichtung holt nur der Assistent (mit gewähltem Zeitraum)
     const konten = await window.officeHome.mailKonten(); if (!konten.length) return { neu: 0, keinKonto: true };
     buero({ an: 'sekretariat', text: 'prüft das Postfach', dauer: 6 });
-    const neue = [];
+    const neue = []; let gesamt = 0;
     for (const k of konten) {
-      const r = await window.officeHome.mailAbrufen(k.id);
+      const r = await window.officeHome.mailAbrufen(k.id, opts && opts.seit ? { seit: opts.seit, max: opts.max } : undefined); if (r && r.gesamt) gesamt += r.gesamt;
       if (!r || !r.ok) { if (!still) toast('E-Mail ' + k.user + ': ' + ((r && r.message) || 'Fehler')); melde({ typ: 'system', title: 'E-Mail-Abruf fehlgeschlagen (' + k.user + ')', lines: [(r && r.message) || ''], key: 'mailerr:' + k.id + ':' + today() }); continue; }
       for (const x of r.mails || []) {
         if (x.zuGross || M().some(m => m.acc === k.id && m.uid === x.uid)) continue;
@@ -389,6 +396,7 @@
       }
     }
     if (M().length > 1500) S.mails = M().slice(0, 1500);
+    if (opts && opts.seit) { save(); if (parseHash().route === 'mail') render(); return { neu: neue.length, ids: neue.map(m => m.id), gesamt }; }
     if (neue.length) {
       const it = { id: uid(), typ: 'mailwahl', created: new Date().toISOString(), status: 'vorschlag', prio: 'gruen', docIds: [], titel: neue.length + ' neue E-Mail' + (neue.length > 1 ? 's' : '') + ': ' + [...new Set(neue.map(m => m.fromName || m.from))].slice(0, 4).join(', '),
         schritte: neue.map(m => ({ id: uid(), art: 'mail', an: false, farbe: 'gruen', d: { mailId: m.id } })) };
@@ -522,6 +530,7 @@
   const origEmpf = window.buEmpfang;
   if (typeof origEmpf === 'function') window.buEmpfang = function (d) {
     if (d && d.typ === 'buero-antwort' && String(d.id || '').startsWith('demo:')) { const [, art, id] = String(d.id).split(':'); demoAntwort(art, id, d.antwort); return; }
+    if (d && d.typ === 'buero-antwort' && String(d.id || '').startsWith('neu:')) { if (d.antwort === 'Jetzt ansehen') location.hash = '#/' + String(d.id).slice(4); return; }
     if (d && d.typ === 'buero-antwort' && String(d.id || '').startsWith('eingang:')) { if (d.antwort === 'Jetzt ansehen' && window.ohCommand) window.ohCommand.karte(String(d.id).slice(8)); return; }
     return origEmpf.apply(this, arguments);
   };
@@ -555,8 +564,75 @@
     go();
   }
   ACT.demoAufgabe = () => demoStart();
+
+  /* ---------- Neue Einträge je Bereich: Zahl im Menü, verschwindet beim Ansehen; sonst erinnert der zuständige Mitarbeiter ---------- */
+  const NEU_BEREICH = {
+    calendar: { liste: () => S.events || [], ma: 'termine', name: 'Jonas Weber', l: 'Kalender' },
+    tasks: { liste: () => S.tasks, ma: 'fristen', name: 'Anna Lorenz', l: 'Fristen & Aufgaben' },
+    contacts: { liste: () => S.contacts, ma: 'leitung', name: 'Martin Richter', l: 'Adressbuch' },
+    notes: { liste: () => S.notes, ma: 'statistik', name: 'David Schulz', l: 'Notizen' },
+    documents: { liste: () => S.documents, ma: 'archiv', name: 'Clara Neumann', l: 'Dokumente' },
+    finance: { liste: () => S.bookings || [], ma: 'finanzen', name: 'Miriam Hoffmann', l: 'Finanzen' }
+  };
+  const ungesehen = r => NEU_BEREICH[r] ? NEU_BEREICH[r].liste().filter(o => o && o.neu && !o.neu.gesehen) : [];
+  window.ohNeuZahl = r => ungesehen(r).length;
+  window.ohNeuFarbe = r => { const f = ungesehen(r).reduce((p, o) => (RANG[o.neu.farbe] || 0) > (RANG[p] || 0) ? o.neu.farbe : p, 'gruen'); return FARBE[f] || FARBE.gruen; };
+  // Ansehen = Bereich 3 Sekunden offen → als gesehen merken (Punkte bleiben bis zum nächsten Neuzeichnen sichtbar)
+  let sehTimer = null;
+  const gesehenPruefen = () => { clearTimeout(sehTimer); const r = parseHash().route; if (!NEU_BEREICH[r] || !ungesehen(r).length) return;
+    sehTimer = setTimeout(() => { if (parseHash().route !== r || document.hidden) return; const n = ungesehen(r); n.forEach(o => { o.neu.gesehen = true; }); if (n.length) { save(); if (typeof renderNav === 'function') renderNav(r); } }, 3000); };
+  window.addEventListener('hashchange', gesehenPruefen);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) gesehenPruefen(); });
+  // Erinnerung: liegt etwas länger als 2 Stunden ungesehen, fragt der zuständige Mitarbeiter im Büro nach (höchstens alle 6 Stunden je Bereich)
+  function neuErinnern() {
+    if (!bereit()) return; S.neuErinnert = S.neuErinnert || {}; const jetzt = Date.now();
+    for (const [r, b] of Object.entries(NEU_BEREICH)) {
+      const u = ungesehen(r); if (!u.length) continue;
+      const alt = Math.min(...u.map(o => Date.parse(o.neu.at) || jetzt)); if (jetzt - alt < 2 * 3600e3) continue;
+      if (jetzt - (S.neuErinnert[r] || 0) < 6 * 3600e3) continue;
+      S.neuErinnert[r] = jetzt; save();
+      const text = u.length + (u.length === 1 ? ' neuer Eintrag' : ' neue Einträge') + ' unter „' + b.l + '“ – bitte einmal ansehen.';
+      try { buPost({ typ: 'buero-frage', frage: { id: 'neu:' + r, von: b.ma, text, optionen: ['Jetzt ansehen', 'Später'] } }); } catch (e) {}
+      melde({ typ: 'buero', title: b.name + ': ' + text, lines: ['Seit ' + new Date(alt).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' noch nicht angesehen.'], link: '#/' + r, key: 'neuerin:' + r + ':' + today() + ':' + new Date().getHours() });
+    }
+  }
+  (function warte() { if (!window.OH_READY) return setTimeout(warte, 500); gesehenPruefen(); setTimeout(neuErinnern, 60000); setInterval(neuErinnern, 5 * 60 * 1000); })();
+  window.ohNeuErinnern = neuErinnern;
+
+  /* ---------- E-Mails einzeln durchgehen: „Hinzufügen“ (Büro + Gemini) oder „Überspringen“ – nichts wird gelöscht ---------- */
+  async function durchgehen(ids) {
+    const liste = (ids && ids.length ? ids.map(id => M().find(m => m.id === id)) : M().filter(m => m.status === 'neu')).filter(m => m && m.status === 'neu')
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    if (!liste.length) { toast('Keine neuen E-Mails zum Durchgehen.'); return; }
+    if (typeof closeModal === 'function') closeModal();
+    const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal'; document.body.appendChild(bg);
+    let i = 0, dazu = 0, weg = 0;
+    const zeig = async () => {
+      if (i >= liste.length) { bg.innerHTML = `<div class="modal" style="width:min(560px,96vw)"><h3>${icon('erledigt')}Fertig</h3><div style="padding:16px 22px">${dazu} E-Mail(s) ans Büro gegeben, ${weg} übersprungen.<br><span class="small muted">Das Büro liest die hinzugefügten nacheinander – du bekommst im Command für jede eine Karte zum Bestätigen.</span></div><div class="acts"><span class="sp"></span><button class="btn pri" data-dg="x">Schließen</button></div></div>`; return; }
+      const m = liste[i]; const t = m.textFileId ? await fileGet(m.textFileId) : null, text = t && t.blob ? await t.blob.text() : (m.snippet || '');
+      const anh = (m.attNamen && m.attNamen.length ? m.attNamen : (m.atts || []).filter(a => !a.inline).map(a => a.name));
+      bg.innerHTML = `<div class="modal" style="width:min(760px,96vw)"><h3>${icon('mail')}E-Mails durchgehen <span class="small muted" style="font-weight:400">${i + 1} / ${liste.length}</span></h3>
+        <div style="padding:14px 22px;overflow:auto;max-height:62vh"><div class="small muted">${esc(m.fromName ? m.fromName + ' <' + m.from + '>' : m.from)} · ${esc(new Date(m.date).toLocaleString('de-DE'))}</div>
+          <div style="margin:6px 0 8px;font-size:17px;font-weight:700">${esc(m.subject || '(ohne Betreff)')}</div>${anh.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${anh.map(n => `<span class="badge">📎 ${esc(kurz(n, 40))}</span>`).join('')}</div>` : ''}
+          <div class="mbody" style="white-space:pre-wrap;max-height:40vh;overflow:auto">${esc(kurz(text, 4000)) || '<span class="muted">(kein Text)</span>'}</div>
+          <p class="small muted" style="margin:10px 0 0">„Hinzufügen“: das Büro liest die E-Mail mit Gemini und schlägt dir vor, was eingetragen werden soll – erst nach deiner Bestätigung. „Überspringen“: bleibt im Posteingang, wird nicht bearbeitet.</p></div>
+        <div class="acts"><button class="btn" data-dg="x">Später weitermachen</button>${i ? '<button class="btn" data-dg="zurueck">Zurück</button>' : ''}<span class="sp"></span><button class="btn" data-dg="weg">${icon('schliessen')}Überspringen</button><button class="btn pri" data-dg="dazu">${icon('plus')}Hinzufügen</button></div></div>`;
+    };
+    bg.addEventListener('click', async e => {
+      const b = e.target.closest('[data-dg]'); if (!b) return; const a = b.dataset.dg;
+      if (a === 'x') { bg.remove(); if (parseHash().route === 'mail') render(); return; }
+      if (a === 'zurueck') { i = Math.max(0, i - 1); const m = liste[i]; if (m.status !== 'neu') { if (m.status === 'buero') dazu--; else weg--; m.status = 'neu'; L().forEach(x => { if (x.mailId === m.id && x.status === 'warte') x.status = 'ignoriert'; }); save(); } return zeig(); }
+      const m = liste[i];
+      if (a === 'dazu') { m.status = 'buero'; m.gelesen = true; neu({ typ: 'mail', titel: m.subject || '(ohne Betreff)', von: m.fromName || m.from, mailId: m.id, personId: m.personId || '' }); dazu++; }
+      if (a === 'weg') { m.status = 'ignoriert'; m.gelesen = true; weg++; }
+      save(); i++; zeig();
+    });
+    const taste = e => { if (!document.body.contains(bg)) return document.removeEventListener('keydown', taste); if (e.target.closest('input,textarea')) return; if (e.key === 'ArrowRight' || e.key === 'Enter') bg.querySelector('[data-dg=dazu]')?.click(); if (e.key === 'ArrowLeft') bg.querySelector('[data-dg=weg]')?.click(); };
+    document.addEventListener('keydown', taste);
+    await zeig();
+  }
   window.EG = { neu, offen, listeHTML, karteHTML, aktion: async (id, a, panel) => { const it = L().find(x => x.id === id); if (it && it.typ === 'sammel' && a === 'ok') { const box = panel && panel.querySelector(`[data-eg="${id}"]`); await sammelOk(it, box ? [...box.querySelectorAll('[data-egs]')].filter(x => x.checked).map(x => x.dataset.egs) : []); return; } return aktion(id, a, panel); },
-    aktualisieren, mailsAbrufen, mailsNichtFragen, mailVoll, punkt, FARBE, demoStart, demoNeustart };
+    aktualisieren, mailsAbrufen, mailsNichtFragen, mailVoll, punkt, FARBE, demoStart, demoNeustart, durchgehen };
   // Sammelkarte nutzt dieselbe Darstellung wie Mailwahl/Vorschlag
   const kh = karteHTML; window.EG.karteHTML = id => { const it = L().find(x => x.id === id); if (it && it.typ === 'sammel' && it.status === 'vorschlag') return `<div class="egkarte" data-eg="${it.id}"><div class="eghead">${dot('gruen', true)}<b>${esc(it.titel)}</b></div><div class="egsteps">${it.schritte.map(s => `<label class="egstep"><input type="checkbox" data-egs="${s.id}" ${s.an ? 'checked' : ''}><span><b>${esc(s.text)}</b><small>${esc(s.sub)}</small></span></label>`).join('')}</div><div class="acts"><button class="btn sm pri" data-cmd="eg" data-ea="ok" data-id="${it.id}">Ausgewählte ans Büro</button><button class="btn sm" data-cmd="eg" data-ea="ignorieren" data-id="${it.id}">Keine</button></div></div>`; return kh(id); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

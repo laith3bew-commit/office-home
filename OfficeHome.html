@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home Office</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('oh-theme')||'system'}catch(e){document.documentElement.dataset.theme='system'}try{if(localStorage.getItem('oh-lang')==='ar'){document.documentElement.dir='rtl'}}catch(e){}</script>
+<script src="farben.js"></script>
 <style>
 @font-face{font-family:'Manrope';src:url('fonts/manrope-latin-300-normal.woff2') format('woff2');font-weight:300;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Manrope';src:url('fonts/manrope-latin-ext-300-normal.woff2') format('woff2');font-weight:300;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
@@ -67,6 +68,10 @@ button{font:inherit}
 .nav a.on::after{content:'';width:6px;height:6px;border-radius:50%;background:#A9B8CA;margin-left:auto}
 .nav a .cnt{margin-left:auto;background:#A9B8CA;color:#1B2A44;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:700}
 .nav a.on .cnt{margin-left:auto} .nav a.on:has(.cnt)::after{margin-left:6px}
+.nav a .cntneu{margin-inline-start:auto;background:var(--c);color:#1B2A44;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:700;box-shadow:0 0 10px color-mix(in srgb,var(--c) 70%,transparent)}
+.nav a .cntneu + .cnt{margin-inline-start:4px}
+.nav a.on:has(.cntneu)::after{margin-left:6px}
+.app.sidemini .side:not(.peek) .nav a .cntneu{position:absolute;top:2px;inset-inline-end:6px;font-size:9px;padding:0 4px;line-height:14px}
 .side .foot{padding:14px 20px;font-size:11px;color:var(--brand-muted);border-top:1px solid rgba(169,184,202,.14)}
 .side .foot a{color:#A9B8CA}
 svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;--icon-dot:var(--accent2)}
@@ -229,6 +234,14 @@ html[dir=rtl] .langsw button{font-family:'Manrope','IBM Plex Sans Arabic',sans-s
 .letter{position:relative;width:210mm;min-height:297mm;background:#fff;color:#000;padding:0 20mm 0 25mm;
   font-family:var(--lf,Arial),Arial,sans-serif;font-size:var(--ls,11pt);line-height:1.38;box-shadow:0 4px 18px rgba(0,0,0,.18)}
 .letter .pgend{position:absolute;left:0;right:0;top:279mm;border-top:1px dashed #f87171}
+/* Mehrseitige Briefe (briefSeiten) */
+.letter.lfolge{margin-top:8mm}
+.letter.lfolge .l-body{padding-top:24mm}
+.letter .l-fkopf{position:absolute;left:25mm;right:40mm;top:12mm;font-size:8pt;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.letter .l-seite{position:absolute;right:20mm;top:276mm;font-size:8pt;color:#555}
+.letter.lfolge .l-seite{top:12mm}
+.letter .l-btext[data-folge]{cursor:text}
+.letter.ganz{height:auto}
 .letter .l-head{position:absolute;left:25mm;right:20mm;top:14mm}
 .letter .l-head .n{font-size:15pt;font-weight:700;letter-spacing:.2px}
 .letter .l-head .a{font-size:8.5pt;color:#333;margin-top:1mm}
@@ -470,6 +483,50 @@ body.is-demo .mainwrap{box-shadow:inset 0 4px 0 var(--accent2)}
 .egbrief{background:#fff;color:#1B2A44;border-radius:8px;padding:10px 12px;margin:4px 0;font-size:12.5px;line-height:1.5}
 .egbrief .muted{color:#4F6785}
 .egbtext{white-space:pre-wrap;margin-top:6px;max-height:230px;overflow:auto}
+/* Dashboard: Büro-Team */
+.teamkarte .teamleg{display:flex;gap:12px;flex-wrap:wrap;margin:-2px 0 8px;color:var(--muted)}
+.teamkarte .teamleg span{display:flex;gap:5px;align-items:center}.teamkarte .teamleg i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.teamkarte .teamleg b{color:var(--ink)}
+.teamframe{display:block;width:100%;height:190px;border:0;border-radius:14px;background:var(--panel2)}
+/* Ersteinrichtung (einrichtung.js) */
+.ohsetup{position:fixed;inset:0;z-index:950;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);display:grid;place-items:center;padding:16px;overflow:auto}
+body.ohsetup-an #cmdOrb{display:none}
+.ohsbox{width:min(780px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.35);overflow:hidden}
+.ohskopf{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.ohskopf .grow,.ohsfuss .grow{flex:1}
+.ohslogo{width:30px;height:30px;border-radius:9px;background:var(--ink);color:var(--panel);display:grid;place-items:center;font:700 16px var(--font-head,inherit)}
+.ohsfort{height:4px;background:var(--line)}.ohsfort i{display:block;height:100%;background:var(--accent2,#4F6785);transition:width .3s}
+.ohsinhalt{padding:20px 26px;overflow:auto}
+.ohsinhalt h2{margin:0 0 8px;font-family:var(--font-head,inherit)}
+.ohsfuss{display:flex;gap:8px;align-items:center;padding:12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.ohswahl{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.ohswahl .btn.big{font-size:18px;padding:14px 30px}
+.ohswahl.klein{flex-direction:column;gap:6px;margin:10px 0}
+.ohsradio{display:flex;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.ohsliste{margin:8px 0 14px;padding-inline-start:20px;display:flex;flex-direction:column;gap:5px}
+.ohsform{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.ohsform .fld input{width:100%;box-sizing:border-box}
+.ohschips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.ohspers{display:flex;flex-direction:column;gap:6px}
+.ohsprow{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.ohsprow input{flex:1;min-width:0;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit}
+.ohsprow select{padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit}
+.ohsordner{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);border-radius:14px}
+.ohsverb{padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+.ohsgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0} @media (max-width:700px){.ohsgrid{grid-template-columns:1fr}}
+.ohsgwahl{display:flex;flex-direction:column;gap:4px;text-align:start;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--ink);cursor:pointer;font:inherit}
+.ohsgwahl:hover{background:var(--hover)} .ohsgwahl.on{border-color:var(--accent2);box-shadow:0 0 0 2px var(--focus)} .ohsgwahl .small{color:var(--muted)}
+.ohsverb .badge{float:inline-end}
+.ohsverb p{margin:6px 0 8px}
+.ohspill{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:940;display:flex;gap:8px;align-items:center;padding:10px 18px;border-radius:999px;border:1px solid var(--line);background:var(--ink);color:var(--panel);font:600 14px var(--font,inherit);cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+@media (max-width:640px){.ohsform{grid-template-columns:1fr}}
+/* Hilfe je Seite + Rundgang */
+.ohhilfe{border:1px solid color-mix(in srgb,var(--accent2,#4F6785) 45%,var(--line));margin-bottom:14px}
+.ohhkopf{display:flex;gap:8px;align-items:center}.ohhkopf .grow{flex:1}
+.ohhilfe ul{margin:8px 0 10px;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.ohhilfe .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ohhbtn{width:36px;height:36px;border-radius:50%;padding:0;font-weight:700;margin-inline-end:8px}
+.pordner{margin:10px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}
 .egalle{background:var(--hover);border-style:dashed}
 .egerg{margin:0;padding-inline-start:18px;font-size:13px;display:flex;flex-direction:column;gap:4px}
 /* Command (Strg+K): schwebender Knopf + Glasfenster */
@@ -635,7 +692,9 @@ html[dir=rtl] .cmdq{align-self:flex-start;border-radius:14px 14px 14px 4px}
   body{background:#fff}
   body>*:not(#print-root){display:none!important}
   #print-root{display:block}
-  #print-root .letter{box-shadow:none;min-height:0}
+  #print-root .letter{box-shadow:none;page:brief;height:297mm;min-height:0;overflow:hidden;break-after:page;margin:0}
+  #print-root .letter:last-child{break-after:auto}
+  @page brief{size:A4;margin:0}
   #print-root .pgend{display:none}
   #print-root mark{background:none}
   #print-root .report{box-shadow:none;width:auto;padding:15mm 18mm 0}
@@ -901,6 +960,9 @@ function migrate(st){
   st.settings.memory = Object.assign({}, d.settings.memory, st.settings.memory);
   st.settings.memory.map = Object.assign({}, st.settings.memory.map);
   normStoredDigits(st);
+  // Ersteinrichtung (ab 2.17): bestehende Installationen mit Daten gelten als eingerichtet – kein Assistent, keine Hilfe-Karten
+  if (st.settings.setup === undefined) { const hatDaten = (st.persons || []).some(p => p.firstName || p.lastName) || (st.documents || []).length || (st.letters || []).length || !!(st.settings.me && st.settings.me.name);
+    st.settings.setup = hatDaten ? {fertig:true, tour:true, hilfeAus:true} : {fertig:false}; }
   for (const pp of st.persons || []) { if (pp.id === 'p_vater' && pp.color === '#2563eb') pp.color = '#4F6785'; if (pp.id === 'p_mutter' && pp.color === '#db2777') pp.color = '#A9B8CA'; }
   return st;
 }
@@ -1263,7 +1325,8 @@ function parseHash(){
 function renderNav(route){
   const act = ROUTE_NAV[route] ?? route;
   $('#nav').innerHTML = NAV.map(n => n.grp ? `<div class="grp">${n.grp}</div>` : (() => { const c = n.cnt ? n.cnt() : 0;
-    return `<a href="#/${n.r}" class="${act === n.r ? 'on' : ''}" title="${esc(n.l)}">${icon(n.i)}<span class="lbl">${n.l}</span>${c ? `<span class="cnt">${c}</span>` : ''}</a>`; })()).join('');
+    const nz = MODE === 'live' && window.ohNeuZahl ? window.ohNeuZahl(n.r) : 0; // neu aus dem Eingang, noch nicht angesehen
+    return `<a href="#/${n.r}" class="${act === n.r ? 'on' : ''}" title="${esc(n.l)}${nz ? ' – ' + nz + ' neu' : ''}">${icon(n.i)}<span class="lbl">${n.l}</span>${nz ? `<span class="cntneu" style="--c:${window.ohNeuFarbe(n.r)}">+${nz}</span>` : ''}${c ? `<span class="cnt">${c}</span>` : ''}</a>`; })()).join('');
   $('#modesw').innerHTML = modeSwitchHTML();
   $('#pills').innerHTML = `<button class="pill ${UI.person === 'all' ? 'on' : ''}" data-act="pfilter" data-id="all">Alle</button>` +
     S.persons.map(p => `<button class="pill ${UI.person === p.id ? 'on' : ''}" data-act="pfilter" data-id="${p.id}"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.role)}</button>`).join('');
@@ -1744,9 +1807,31 @@ function dashStatsHTML(){
     <div class="card" data-go="#/finance" style="cursor:pointer"><h3>${icon('buchung')}Geldfluss ${esc(MON_SHORT[Number(ym.slice(5)) - 1])} <span class="r muted small">Finanzen →</span></h3>
       <div class="bignum" style="color:${ein - aus < 0 ? 'var(--danger)' : 'var(--ok)'}">${eur(ein - aus)}</div><div class="small muted">+${eur(ein)} · −${eur(aus)}</div>
       ${svgGroupBars(per, [{l:'Einnahmen', c:'var(--c-in)'}, {l:'Ausgaben', c:'var(--c-out)'}], {h:150, fmt:v => eur(v)})}</div>
-    <div class="card"><h3>${icon('clock')}Fristen-Ausblick <a class="r small" href="#/stats">Alle Statistiken →</a></h3><div class="bignum">${items.filter(i => { const d = daysUntil(i.date); return d >= 0 && d <= 30; }).length} <small>in 30 Tagen</small></div>${svgBars(bars, {h:150})}</div>
+    ${teamKarteHTML()}
   </div>`;
 }
+/* Dashboard-Karte „Büro-Team“ (statt Fristen-Ausblick): die 8 Mitarbeiter in 3D (team.html, Swipii-Worker3D) mit Live-Status aus dem Büro */
+function teamZaehlen(){ const t = BU.team || []; return {arbeit:t.filter(x => x.lampe === 'arbeit').length, pause:t.filter(x => x.lampe === 'pause').length, aus:t.filter(x => x.lampe === 'aus').length}; }
+function teamKarteHTML(){
+  const z = teamZaehlen();
+  return `<div class="card teamkarte"><h3>${icon('alle')}Büro-Team <a class="r small" href="#/office">Büro öffnen →</a></h3>
+    <div class="bignum"><span id="teamArbeit">${z.arbeit}</span> <small>arbeiten gerade</small></div>
+    <div class="small teamleg"><span><i style="background:#3DDC97"></i>arbeitet <b id="teamA">${z.arbeit}</b></span><span><i style="background:#F2B544"></i>Pause <b id="teamP">${z.pause}</b></span><span><i style="background:#FF5D5D"></i>außer Dienst <b id="teamX">${z.aus}</b></span></div>
+    <iframe id="teamFrame" class="teamframe" src="team.html" title="Büro-Team" onload="teamSenden()"></iframe></div>`;
+}
+function teamSenden(){
+  const f = document.getElementById('teamFrame');
+  if (f && f.contentWindow) { // Farben des Programms (Brand Kit bzw. eigene Farben aus farben.js), hell/dunkel nach aktuellem Hintergrund
+    const cs = getComputedStyle(document.documentElement), v = n => (cs.getPropertyValue(n) || '').trim();
+    const bg = v('--bg') || '#F4F0E8', m = bg.match(/^#?([0-9a-f]{6})$/i), hell = m ? (parseInt(m[1].slice(0, 2), 16) * .299 + parseInt(m[1].slice(2, 4), 16) * .587 + parseInt(m[1].slice(4, 6), 16) * .114) > 140 : true;
+    f.contentWindow.postMessage({typ:'farben', f:{brand:v('--brand') || '#1B2A44', akzent:v('--accent2') || '#4F6785', nebel:v('--brand-muted') || '#A9B8CA', papier:hell ? bg : (v('--brand-ink') || '#F4F0E8'), dunkel:!hell}}, '*');
+    if (BU.team) f.contentWindow.postMessage({typ:'team', leute:BU.team}, '*');
+  }
+  const z = teamZaehlen(), s = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  if (BU.team) { s('teamArbeit', z.arbeit); s('teamA', z.arbeit); s('teamP', z.pause); s('teamX', z.aus); }
+}
+// Hell/Dunkel oder eigene Farben geändert → Team-Karte sofort umfärben (nicht erst bei der nächsten Büro-Meldung)
+new MutationObserver(() => { if (document.getElementById('teamFrame')) setTimeout(teamSenden, 50); }).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme', 'style', 'class']});
 function statusBadge(s){ const m = {'offen':'blue', 'in Bearbeitung':'amber', 'wartet auf Antwort':'amber', 'erledigt':'green'}; return `<span class="badge ${m[s] || ''}">${esc(s || 'offen')}</span>`; }
 
 // Vorgänge
@@ -1928,7 +2013,7 @@ VIEWS.persons = () => `<div class="head"><div class="grow"><h1>Personen & Vollma
     <div>Anschrift</div><div>${esc(addrOneLine(p)) || '—'}</div><div>Telefon / E-Mail</div><div>${esc([p.phone, p.email].filter(Boolean).join(' · ')) || '—'}</div>
     <div>Steuer-ID</div><div>${esc(p.taxId) || '—'}</div><div>Rentenvers.-Nr.</div><div>${esc(p.pensionNo) || '—'}</div><div>Krankenkasse</div><div>${esc(p.healthInsurance) || '—'}</div>
     ${p.notes ? `<div>Notizen</div><div style="white-space:pre-wrap">${esc(p.notes)}</div>` : ''}</div>
-    ${poaBoxHTML(p, poaDoc)}</div>`; }).join('')}</div>
+    ${typeof ordnerZeile === 'function' ? ordnerZeile(p) : ''}${poaBoxHTML(p, poaDoc)}</div>`; }).join('')}</div>
   <div class="banner blue">${icon('info')}<div>Tipp: Die Daten von Vater und Mutter bleiben getrennt. Über die Auswahl oben („Alle / Vater / Mutter“) siehst du jeweils nur die Unterlagen einer Person.</div></div>`;
 
 // Kontakte
@@ -2015,6 +2100,69 @@ function logoOn(L){ return !!(senderIsMe(L) && S.settings.stamp && (L.useLogo ??
 // f = Feld im Formular (recipient, subject, salutation, body, closing); Klick auf die gelbe Stelle springt dorthin
 function markHTML(s, f){ return esc(s).replace(/(\{[^{}\n]+\}|\[[^\[\]\n]+\])/g, f ? `<mark data-f="${f}" title="Klicken: zum Feld springen">$1</mark>` : '<mark>$1</mark>'); }
 function paras(s, f){ return s.split(/\n\s*\n/).map(p => `<p>${markHTML(p, f).replace(/\n/g, '<br>')}</p>`).join(''); }
+/* ---------- Mehrseitige Briefe: nach dem Einsetzen ins DOM auf A4-Seiten verteilen ----------
+   Seite 1 endet vor der Fußzeile (bzw. bei 278 mm), Folgeseiten haben eine Kopfzeile und enden bei 277 mm.
+   Lange Absätze werden an Wortgrenzen geteilt, Grußformel + Unterschrift + Name bleiben zusammen, „Seite x von y“. */
+function absatzTeilen(p, passt){
+  const html = p.innerHTML, tok = html.match(/<[^>]+>|\s+|[^<\s]+/g) || []; if (tok.length < 4) return null;
+  const bau = k => { const st = []; let s = ''; for (let j = 0; j < k; j++) { const t = tok[j]; s += t; if (/^<\//.test(t)) st.pop(); else if (/^<[a-z]/i.test(t) && !/^<br/i.test(t) && !/\/>$/.test(t)) st.push(t); }
+    return {s: s + st.slice().reverse().map(t => '</' + t.match(/^<([a-z0-9]+)/i)[1] + '>').join(''), st}; };
+  let lo = 0, hi = tok.length - 1;
+  while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); p.innerHTML = bau(mid).s; if (passt()) lo = mid; else hi = mid - 1; }
+  if (lo < 3) { p.innerHTML = html; return null; }
+  const {s, st} = bau(lo); p.innerHTML = s;
+  const r = document.createElement('p'); r.innerHTML = st.join('') + tok.slice(lo).join('').replace(/^(\s|<br>)+/i, '');
+  return r;
+}
+function briefSeiten(root){
+  if (!root) return 1;
+  let anzahl = 1;
+  root.querySelectorAll('.letter:not(.lfolge)').forEach(L1 => {
+    let nx = L1.nextElementSibling; while (nx && nx.classList.contains('lfolge')) { const x = nx; nx = nx.nextElementSibling; x.remove(); }
+    L1.querySelectorAll(':scope > .l-seite').forEach(x => x.remove());
+    const pxmm = L1.offsetWidth / 210; if (!pxmm) return;
+    const edit = !!L1.querySelector('[data-ed]'), hatFoot = !!L1.querySelector(':scope > .l-foot');
+    const mmVon = (el, pg) => { const a = el.getBoundingClientRect(), b = pg.getBoundingClientRect(), s = (b.width / pg.offsetWidth) || 1; return {top: (a.top - b.top) / s / pxmm, bottom: (a.bottom - b.top) / s / pxmm}; };
+    const flach = pg => { const out = []; for (const c of pg.querySelector(':scope > .l-body').children) { if (c.matches('.l-text, .l-btext')) out.push(...c.children); else out.push(c); } return out; };
+    const seiten = [L1]; let seite = L1, grenze = hatFoot ? 272 : 278;
+    for (let schutz = 0; schutz < 30; schutz++) {
+      const bl = flach(seite), i = bl.findIndex(b => mmVon(b, seite).bottom > grenze);
+      if (i < 0) break;
+      let cut = i, rest = null; const b = bl[i];
+      const gruss = bl.findIndex(x => x.classList.contains('l-close'));
+      if (gruss >= 0 && i > gruss && i <= gruss + 2) cut = gruss;                 // Grußformel bleibt bei Unterschrift und Name
+      else if (b.tagName === 'P' && !b.classList.contains('l-close') && mmVon(b, seite).top < grenze - 9) rest = absatzTeilen(b, () => mmVon(b, seite).bottom <= grenze);
+      if (cut === 0 && !rest) break;                                             // nicht einmal eine Zeile passt – nicht endlos teilen
+      const neu = document.createElement('div'); neu.className = L1.className.replace(/\bhaslogo\b/g, '') + ' lfolge'; neu.setAttribute('style', L1.getAttribute('style') || '');
+      neu.innerHTML = '<div class="l-fkopf"></div><div class="l-body"></div>';
+      const nb = neu.querySelector('.l-body'); let wrap = null;
+      const imText = el => el.parentElement && el.parentElement.matches('.l-text, .l-btext');
+      const dahin = (el, ausText) => { if (ausText) { if (!wrap) { wrap = document.createElement('div'); wrap.className = 'l-btext'; if (edit) wrap.dataset.folge = 'body'; nb.appendChild(wrap); } wrap.appendChild(el); } else { wrap = null; nb.appendChild(el); } };
+      const bewegen = rest ? [rest, ...bl.slice(i + 1)] : bl.slice(cut);
+      const herkunft = bewegen.map(el => el === rest ? imText(b) : imText(el));
+      bewegen.forEach((el, k) => dahin(el, herkunft[k]));
+      seite.after(neu); seiten.push(neu); seite = neu; grenze = 277;
+    }
+    if (seiten.length > 1) {
+      const N = seiten.length, kopf = (root.querySelector('.l-subj') || {}).textContent || '';
+      seiten.forEach((pg, k) => { const m = document.createElement('div'); m.className = 'l-seite'; m.textContent = 'Seite ' + (k + 1) + ' von ' + N; pg.appendChild(m);
+        const fk = pg.querySelector(':scope > .l-fkopf'); if (fk) fk.textContent = kopf.length > 90 ? kopf.slice(0, 89) + '…' : kopf; });
+      L1.querySelectorAll(':scope > .pgend').forEach(x => x.remove());
+    }
+    anzahl = Math.max(anzahl, seiten.length);
+  });
+  // Bearbeiten in der Vorschau: Klick auf Text der Folgeseite → Textfeld auf Seite 1; beim Schreiben Folgeseiten ausblenden (beim Verlassen wird neu verteilt)
+  if (!root._seitenHook) { root._seitenHook = true;
+    root.addEventListener('mousedown', e => { if (e.target.closest('mark[data-f]')) return; const w = e.target.closest('[data-folge]'); if (!w) return; e.preventDefault();
+      const t = root.querySelector('.letter:not(.lfolge) [data-ed="' + w.dataset.folge + '"]'); if (t) t.focus(); });
+    root.addEventListener('focusin', e => { const ed = e.target.closest('[data-ed]'); const pg = ed && ed.closest('.letter'); if (!pg || pg.classList.contains('lfolge')) return;
+      root.querySelectorAll('.lfolge').forEach(x => { x.style.display = 'none'; }); pg.classList.add('ganz'); });
+  }
+  return anzahl;
+}
+// #print-root ist am Bildschirm unsichtbar → zum Messen kurz unsichtbar einblenden, verteilen, zurücksetzen
+function printSeiten(){ const pr = $('#print-root'); if (!pr || !pr.querySelector('.letter')) return; const alt = pr.getAttribute('style') || '';
+  pr.setAttribute('style', 'display:block;position:absolute;left:-10000px;top:0;visibility:hidden'); try { briefSeiten(pr); } finally { pr.setAttribute('style', alt); } }
 const LETTER_DESIGNS = [
   {v:'klassisch', l:'Klassisch', d:'Schlicht, Name fett oben links'},
   {v:'modern', l:'Modern', d:'Name und Linie in Akzentfarbe'},
@@ -2065,9 +2213,9 @@ function letterHTML(L, design, opt = {}){
     <div class="l-body">
       <div class="l-subj"${ed('subject')}>${markHTML(applyVars(L.subject, L) || '[Betreff]', opt.edit && 'subject')}</div>
       <p${ed('salutation')}>${markHTML(L.salutation, opt.edit && 'salutation')}</p>
-      <div${ed('body')}>${paras(applyVars(L.body, L) || '[Text]', opt.edit && 'body')}</div>
+      <div class="l-text"${ed('body')}>${paras(applyVars(L.body, L) || '[Text]', opt.edit && 'body')}</div>
       ${poaLink ? `<p class="l-poa">Die Vollmacht können Sie hier einsehen, herunterladen und ausdrucken:<br><a href="${esc(poaLink)}">${esc(poaLink)}</a></p>` : ''}
-      <p style="margin-top:5mm"${ed('closing')}>${esc(L.closing)}</p>
+      <p class="l-close" style="margin-top:5mm"${ed('closing')}>${esc(L.closing)}</p>
       <div class="l-sigwrap"><div class="l-sig">${sig}</div></div>
       <div>${esc(snd.name)}${bev ? `<br><span style="font-size:.92em">in Vollmacht für ${esc(anredeName(p))}</span>` : ''}</div>
       ${anl.length ? `<div class="l-anl"><b>Anlage${anl.length > 1 ? 'n' : ''}</b>${anl.map(a => esc(a)).join('<br>')}</div>` : ''}
@@ -2140,12 +2288,13 @@ AFTER.brief = () => {
       el.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, normDigits(e.clipboardData.getData('text/plain'))); });
       el.addEventListener('keydown', e => { if (e.key === 'Escape' || (e.key === 'Enter' && !['body', 'recipient'].includes(k))) { e.preventDefault(); el.blur(); } });
     });
+    const seiten = briefSeiten(sc);
     const w = box.clientWidth - 36, letter = sc.firstElementChild, s = Math.min(1, w / letter.offsetWidth);
-    sc.style.transform = `scale(${s})`; sc.style.height = (letter.offsetHeight * s) + 'px'; sc.style.width = letter.offsetWidth + 'px';
-    const body = letter.querySelector('.l-body'); const limit = letter.offsetWidth * 279 / 210;
+    sc.style.height = ''; const hNat = sc.scrollHeight;
+    sc.style.transform = `scale(${s})`; sc.style.height = (hNat * s) + 'px'; sc.style.width = letter.offsetWidth + 'px';
     const ad = letter.querySelector('.l-addr');
     $('#pvwarn').textContent = ad && ad.scrollHeight > ad.clientHeight + 2 ? 'Achtung: Die Anschrift passt nicht ganz ins Fenster – bitte kürzen (z. B. Abteilung weglassen).'
-      : (body.offsetTop + body.offsetHeight - 10 * letter.offsetWidth / 210) > limit ? 'Hinweis: Text geht über 1 Seite (wird beim Drucken umgebrochen).' : '';
+      : seiten > 1 ? 'Hinweis: Der Brief hat ' + seiten + ' Seiten.' : '';
   };
   AFTER.brief.upd = upd;
   $$('[data-lf]').forEach(el => {
@@ -2232,7 +2381,7 @@ function saveLetter(silent){
 // Ausgabe: im Desktop-Programm über window.officeHome (Drucken bzw. PDF speichern), im Browser über window.print()
 const DESKTOP = !!(window.officeHome && window.officeHome.desktop);
 function outputPrint(html, title, asPDF, onDone){
-  $('#print-root').innerHTML = html;
+  $('#print-root').innerHTML = html; printSeiten();
   const t = document.title; document.title = title.replace(/[\\/:*?"<>|]/g, '').slice(0, 90);
   setTimeout(async () => {
     try {
@@ -2248,7 +2397,7 @@ async function mailLetter(){
   if (letterHasGaps(LD) && !confirm('Es gibt noch gelb markierte Stellen bzw. keinen Empfänger. Trotzdem als E-Mail vorbereiten?')) return;
   saveLetter(true);
   const L = LD, betreff = letterSubject(L);
-  $('#print-root').innerHTML = letterHTML(L);
+  $('#print-root').innerHTML = letterHTML(L); printSeiten();
   const t = document.title; document.title = ('Brief ' + L.date + ' ' + betreff).replace(/[\\/:*?"<>|]/g, '').slice(0, 90);
   await new Promise(r => setTimeout(r, 200));
   let r; try { r = await window.officeHome.pdfDaten(); } finally { document.title = t; $('#print-root').innerHTML = ''; }
@@ -2408,8 +2557,10 @@ VIEWS.settings = (id, q) => {
   return `<div class="head"><div class="grow"><h1>Einstellungen</h1></div></div>
   <div class="setwrap"><nav class="setnav">${SET_SECS.map(x => `<button class="${tab === x.v ? 'on' : ''}" data-act="setTab" data-id="${x.v}">${icon(x.i)}${x.l}</button>`).join('')}</nav>
   <div class="setbody">
-  ${sec('allgemein', `<div class="card"><h3>Darstellung</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="themesw">${[['hell', 'Hell'], ['dunkel', 'Dunkel'], ['system', 'System']].map(([v, l]) => `<button class="${themeGet() === v ? 'on' : ''}" data-act="setTheme" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.</span></div>
-    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px"><b class="small">Sprache der Bedienung</b><span class="themesw langsw no-i18n">${[['de', 'Deutsch'], ['ar', 'العربية']].map(([v, l]) => `<button class="${(window.OH_LANG || 'de') === v ? 'on' : ''}" data-act="setLang" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">Briefe, Vorlagen und Berichte bleiben immer Deutsch (DIN 5008).</span></div></div>`)}
+  ${sec('allgemein', `${lizenzCardHTML()}${DESKTOP ? `<div class="card"><h3>Systemprüfung</h3><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" data-act="sysPruefen">${icon('update')}Jetzt prüfen</button><span class="small muted">Prüft, ob alle Zusatzprogramme da sind (PDF-Programm, Scanner, Internet, Claude …), und zeigt, wie du Fehlendes installierst – selbst oder mit Claude.</span></div></div>` : ''}<div class="card"><h3>Darstellung</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="themesw">${[['hell', 'Hell'], ['dunkel', 'Dunkel'], ['system', 'System']].map(([v, l]) => `<button class="${themeGet() === v ? 'on' : ''}" data-act="setTheme" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.</span></div>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:14px"><b class="small">Sprache der Bedienung</b><span class="themesw langsw no-i18n">${[['de', 'Deutsch'], ['ar', 'العربية']].map(([v, l]) => `<button class="${(window.OH_LANG || 'de') === v ? 'on' : ''}" data-act="setLang" data-id="${v}">${l}</button>`).join('')}</span><span class="small muted">Briefe, Vorlagen und Berichte bleiben immer Deutsch (DIN 5008).</span></div>
+    ${window.ohFarben ? `<div style="margin-top:18px"><b class="small">Name und Farben des Programms</b>${window.ohFarben.auswahlHTML()}</div>` : ''}
+    ${window.ohEinrichtung && MODE === 'live' ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px"><b class="small">Hilfe</b><button class="btn sm" data-act="suTour">${icon('info')}Rundgang starten</button><button class="btn sm" data-act="suHilfe">Hilfe-Karten wieder zeigen</button><button class="btn sm" data-act="suNeu">Einrichtung erneut öffnen</button></div>` : ''}</div>`)}
   ${sec('daten', `<div class="card"><h3>Meine Daten (Bevollmächtigter / Absender)</h3><div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       ${inp('me.name', 'Vor- und Nachname', me.name)}${inp('me.phone', 'Telefon', me.phone)}${inp('me.street', 'Straße und Hausnummer', me.street)}${inp('me.email', 'E-Mail', me.email, 'email')}${inp('me.zip', 'PLZ', me.zip)}${inp('me.city', 'Ort', me.city)}
     </form></div><p class="small muted" style="margin:10px 0 0">Wird automatisch als Absender in Briefe übernommen.</p></div>`)}
@@ -2469,6 +2620,7 @@ VIEWS.settings = (id, q) => {
 };
 AFTER.settings = async () => {
   mcpRefresh();
+  { const b = $('[data-ohf]'); if (b && window.ohFarben) window.ohFarben.binden(b, true); }
   const setVal = el => {
     const path = el.dataset.set.split('.'); let o = S.settings; for (let i = 0; i < path.length - 1; i++) o = o[path[i]];
     let v = el.value; if (el.type === 'checkbox') v = el.checked; else if (v === 'true') v = true; else if (v === 'false') v = false; else if (el.type === 'number' || el.type === 'range' || path[1] === 'size') v = Number(v);
@@ -2556,8 +2708,22 @@ const ACT = {
   briefNewSender: () => editContact(null, c => { LD.senderId = isPrivate(c) ? 'c:' + c.id : LD.senderId; render(); }, {kind:'Privatperson'}),
   ckind: d => { UI.contactKind = d.id; render(); },
   setMode: d => setMode(d.id),
+  sysPruefen: () => { if (window.ohSystem) window.ohSystem.zeigen(true); },
+  lizHin: () => { UI.setTab = 'allgemein'; location.hash = '#/settings?tab=allgemein'; setTimeout(() => { const k = $('#lizCard'); if (k) k.scrollIntoView({block:'center'}); }, 150); },
+  lizKopie: async () => { try { await navigator.clipboard.writeText(LIZ.geraet || ''); toast(TL('Geräte-ID kopiert', 'رقم الجهاز انسخ')); } catch (e) { prompt(TL('Geräte-ID:', 'رقم الجهاز:'), LIZ.geraet || ''); } },
+  lizSetzen: async () => {
+    const k = ($('#lizKey') || {}).value || '', msg = $('#lizMsg');
+    if (!k.trim()) { if (msg) msg.textContent = lizFehler('Bitte den Aktivierungsschlüssel einfügen.'); return; }
+    if (!DESKTOP || !window.officeHome.lizenzSetzen) { if (msg) msg.textContent = lizFehler('Nur im Desktop-Programm.'); return; }
+    const r = await window.officeHome.lizenzSetzen(k.trim()); LIZ = r;
+    if (!r.aktiv) { if (msg) msg.textContent = lizFehler(r.fehler || 'Der Aktivierungsschlüssel ist ungültig.'); return; }
+    toast(TL('Aktiviert – der Live-Modus ist frei', 'تفعّل – الوضع الحقيقي (Live) صار مفتوح')); await setMode('live');
+  },
   setTheme: d => { themeSet(d.id); render(); },
   setLang: d => { if ((window.OH_LANG || 'de') !== d.id && window.ohSetLang) window.ohSetLang(d.id); },
+  suTour: () => { const su = S.settings.setup || (S.settings.setup = {fertig:true}); su.fertig = true; save(); window.ohRundgang && window.ohRundgang(); },
+  suHilfe: () => { const su = S.settings.setup || (S.settings.setup = {fertig:true}); su.hilfe = {}; su.hilfeAus = false; save(); toast('Hilfe-Karten erscheinen wieder beim ersten Öffnen jeder Seite'); },
+  suNeu: () => { if (confirm('Einrichtungs-Assistent erneut öffnen? Vorhandene Daten bleiben erhalten.')) window.ohEinrichtung && window.ohEinrichtung.neuStarten(); },
   demoReset: async () => { if (!confirm('Alle Demo-Daten durch einen frischen Beispiel-Datenbestand ersetzen? Deine echten Daten (Live) bleiben unberührt.')) return; S = buildDemoState(); await flushSave(); location.hash = '#/dashboard'; render(); toast('Demo-Daten neu erzeugt'); },
   briefWide: () => { UI.briefWide = !UI.briefWide; const b = $('.brief'); if (b) b.classList.toggle('wide', UI.briefWide); const btn = $('[data-act=briefWide]'); if (btn) btn.textContent = UI.briefWide ? 'Formular zeigen' : 'Große Vorschau'; if (AFTER.brief.upd) AFTER.brief.upd(); },
   stat: d => { const [k, v] = d.id.split(':'); UI[k] = /Year$/.test(k) ? Number(v) : v; render(); },
@@ -2633,7 +2799,7 @@ function initUpdates(){
   if (!DESKTOP || !window.officeHome.onUpdate) return;
   window.officeHome.version().then(v => { UPD.current = v; updUI(); });
   window.officeHome.onUpdate(d => {
-    if (d.type === 'available') { UPD.state = 'available'; UPD.version = d.version; toast('Neue Version ' + d.version + ' verfügbar'); }
+    if (d.type === 'available') { if (['downloading', 'downloaded'].includes(UPD.state) && UPD.version === d.version) return; const neu = UPD.version !== d.version || UPD.state !== 'available'; UPD.state = 'available'; UPD.version = d.version; if (neu) toast('Neue Version ' + d.version + ' verfügbar'); }
     else if (d.type === 'none') { if (UPD.state === 'checking') UPD.state = 'none'; }
     else if (d.type === 'progress') { UPD.state = 'downloading'; UPD.percent = d.percent; }
     else if (d.type === 'downloaded') { UPD.state = 'downloaded'; UPD.version = d.version; }
@@ -2681,11 +2847,11 @@ async function memLoadStatus(){
 function memCardHTML(){
   const m = memCfg(), st = MEM.status;
   let body = `<p style="margin-top:0">Verbindet Home Office mit deinem Gedächtnis: Beim Schreiben siehst du, was schon bekannt ist (Aktenzeichen, letzte Schreiben), und gesendete Briefe, E-Mails und Vorgänge werden mit Inhalt festgehalten – auf Wunsch mit Erinnerung.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>Memory-Ordner:</b> <span class="small">${m.root ? esc(m.root) : '<span class="muted">nicht gewählt</span>'}</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>Memory-Ordner oder Obsidian-Vault:</b> <span class="small">${m.root ? esc(m.root) : '<span class="muted">nicht gewählt</span>'}</span>
       <span style="flex:1"></span><button class="btn" data-act="memPick">${icon('vorgaenge')}Ordner wählen</button>${m.root ? '<button class="btn dan" data-act="memOff">' + icon('schliessen') + 'Verbindung trennen</button>' : ''}</div>`;
   if (m.root && st && !st.ok) body += `<p style="color:var(--danger)">${esc(st.message || 'Nicht erreichbar')}</p>`;
   if (m.root && st && st.ok) {
-    body += `<p class="small" style="color:var(--ok)">✓ Verbunden · ${st.workstations.length} Arbeitsbereiche gefunden</p>
+    body += `<p class="small" style="color:var(--ok)">✓ Verbunden${st.art === 'obsidian' ? ' mit Obsidian-Vault · ' + st.workstations.length + ' Ordner' : ' · ' + st.workstations.length + ' Arbeitsbereiche gefunden'}</p>
       <div class="modal" style="box-shadow:none;width:100%;max-height:none"><form style="padding:0" onsubmit="return false">
       ${S.persons.map(p => `<div class="fld full"><label>Ordner von ${esc(p.role)}${personName(p) !== p.role ? ' – ' + esc(personName(p)) : ''}</label>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--hover)">${m.map[p.id] ? icon('dokumente') + ' ' + esc(memDirLabel(m.map[p.id])) : '<span class="muted">noch kein Ordner gewählt – Gedächtnis für diese Person aus</span>'}</span>
@@ -2695,7 +2861,8 @@ function memCardHTML(){
       </form></div>
       <p class="small muted">Jede Person bekommt ihren eigenen Ordner im Memory-Ordner (z. B. „Fa. Akili › Maha“). Für eine Person liest Home Office nur Treffer aus diesem Ordner und schreibt nur dorthin (Notizen unter „&lt;Ordner&gt;/.memory/office-home/“). Neue Personen fragen beim Anlegen nach ihrem Ordner. Erinnerungen landen in der Aufgabenliste des Gedächtnisses (Dashboard → Tasks). Keine Passwörter oder PINs in festgehaltene Texte schreiben.</p>`;
   }
-  return `<h3>${icon('gedaechtnis')}Gedächtnis (Memory)</h3>${body}`;
+  if (st && st.ok && st.art === 'obsidian') body = body.replace('Notizen unter „&lt;Ordner&gt;/.memory/office-home/“', 'Notizen unter „&lt;Ordner&gt;/Home Office/“').replace('Aufgabenliste des Gedächtnisses (Dashboard → Tasks)', 'Datei „Home Office/Erinnerungen.md“ im Vault');
+  return `<h3>${icon('gedaechtnis')}Gedächtnis (Memory oder Obsidian)</h3>${body}`;
 }
 function memCardUpdate(){ const c = $('#memCard'); if (c) c.innerHTML = memCardHTML(); }
 
@@ -2801,11 +2968,44 @@ function themeSet(v){ if (!['hell', 'dunkel', 'system'].includes(v)) v = 'system
 let MODE = 'live';
 const stateKey = () => MODE === 'demo' ? 'demoState' : 'state';
 function modeSwitchHTML(){
-  return `<div class="modesw ${MODE}"><button class="${MODE === 'live' ? 'on' : ''}" data-act="setMode" data-id="live">Live</button><button class="${MODE === 'demo' ? 'on' : ''}" data-act="setMode" data-id="demo">Demo</button></div>`
+  return `<div class="modesw ${MODE}"><button class="${MODE === 'live' ? 'on' : ''}" data-act="setMode" data-id="live" ${LIZ.aktiv ? '' : 'title="Erst nach der Aktivierung (Einstellungen → Allgemein → Aktivierung)"'}>${LIZ.aktiv ? '' : icon('schloss')}Live</button><button class="${MODE === 'demo' ? 'on' : ''}" data-act="setMode" data-id="demo">Demo</button></div>`
     + (MODE === 'demo' ? `<span class="demotag">DEMO-MODUS · Beispieldaten <button class="btn sm" data-act="demoReset">${icon('update')}Neu erzeugen</button><button class="btn sm pri" data-act="demoAufgabe">${icon('alle')}Aufgabe probieren</button></span>` : '');
+}
+// ---------- Aktivierung: ohne gültigen Schlüssel (ein Gerät) nur Demo-Modus ----------
+let LIZ = {aktiv:false, geraet:null};
+async function lizenzLaden(){ try { LIZ = DESKTOP && window.officeHome.lizenzStatus ? await window.officeHome.lizenzStatus() : {aktiv:false, geraet:null, fehler:'Nur im Desktop-Programm.'}; } catch (e) { LIZ = {aktiv:false, geraet:null}; } return LIZ; }
+// zweisprachige Texte (Karten mit Markup sind no-i18n und übersetzen sich hier selbst)
+const TL = (de, ar) => (window.OH_LANG === 'ar' ? ar : de);
+const LIZ_FEHLER_AR = {'Die Geräte-ID konnte nicht gelesen werden.':'ما قدرنا نقرا رقم الجهاز.', 'Das ist kein gültiger Aktivierungsschlüssel (er beginnt mit „HO1-“).':'هاد مش مفتاح تفعيل صحيح (لازم يبلّش بـ «HO1-»).',
+  'Der Aktivierungsschlüssel ist ungültig.':'مفتاح التفعيل غلط.', 'Dieser Schlüssel gehört zu einem anderen Gerät. Ein Schlüssel gilt nur für ein Gerät.':'هالمفتاح لجهاز تاني. كل مفتاح بيشتغل على جهاز واحد بس.',
+  'Nur im Desktop-Programm.':'بس ببرنامج سطح المكتب.', 'Bitte den Aktivierungsschlüssel einfügen.':'الصق مفتاح التفعيل لو سمحت.'};
+const lizFehler = t => TL(t, LIZ_FEHLER_AR[t] || t);
+function lizenzSperre(){
+  closeModal(); const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
+  bg.innerHTML = `<div class="modal no-i18n" style="width:min(520px,94vw)"><h3>${icon('schloss')} ${TL('Live-Modus gesperrt', 'الوضع الحقيقي (Live) مقفول')}</h3>
+    <div style="padding:0 18px">${TL(`<p>Das Programm ist noch nicht aktiviert. Bis dahin kannst du alles im <b>Demo-Modus</b> mit Beispieldaten ansehen und ausprobieren.</p>
+    <p>Um mit deinen echten Daten zu arbeiten: <b>Einstellungen → Allgemein → Aktivierung</b> öffnen und den Aktivierungsschlüssel eingeben. Ein Schlüssel gilt nur für dieses eine Gerät.</p>`,
+    `<p>البرنامج لسا مش مفعّل. لحد ما يتفعّل فيك تشوف وتجرّب كل شي بـ<b>الوضع التجريبي (Demo)</b> مع بيانات أمثلة.</p>
+    <p>مشان تشتغل ببياناتك الحقيقية: افتح <b>الإعدادات ← عام ← التفعيل</b> وحط مفتاح التفعيل. كل مفتاح بيشتغل على هالجهاز بس.</p>`)}</div>
+    <div class="acts"><span class="sp"></span><button class="btn" data-c="zu">${TL('Schließen', 'سكّر')}</button><button class="btn pri" data-c="hin">${TL('Zur Aktivierung', 'روح للتفعيل')}</button></div></div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click', e => { const c = e.target.closest('[data-c]'); if (!c && e.target !== bg) return; closeModal(); if (c && c.dataset.c === 'hin') { UI.setTab = 'allgemein'; location.hash = '#/settings?tab=allgemein'; setTimeout(() => { const k = $('#lizCard'); if (k) k.scrollIntoView({block:'center'}); }, 150); } });
+}
+function lizenzCardHTML(){
+  const L = LIZ || {};
+  if (L.aktiv) return `<div class="card no-i18n" id="lizCard"><h3>${TL('Aktivierung', 'التفعيل')}</h3><p style="margin-top:0"><span class="badge green">${TL('aktiviert', 'مفعّل')}</span> ${L.kunde ? TL('für', 'لـ') + ' <b>' + esc(L.kunde) + '</b> ' : ''}${L.datum ? '· ' + TL('seit', 'من') + ' ' + esc(fmtDate(L.datum)) : ''}</p>
+    <p class="small muted">${TL('Geräte-ID', 'رقم الجهاز')}: <b style="font-family:Consolas,monospace">${esc(L.geraet || '')}</b> · ${TL('Der Schlüssel gilt nur für dieses Gerät.', 'المفتاح بيشتغل على هالجهاز بس.')}</p></div>`;
+  return `<div class="card no-i18n" id="lizCard"><h3>${TL('Aktivierung', 'التفعيل')}</h3>
+    <p style="margin-top:0"><span class="badge amber">${TL('nicht aktiviert', 'مش مفعّل')}</span> ${TL('Ohne Aktivierung läuft nur der Demo-Modus. Den Live-Modus mit deinen echten Daten gibt es nach der Aktivierung.', 'بدون تفعيل بيشتغل بس الوضع التجريبي (Demo). الوضع الحقيقي (Live) ببياناتك بيفتح بعد التفعيل.')}</p>
+    <p class="small">${TL('1. Schicke diese <b>Geräte-ID</b> an den Verkäufer:', '١. ابعت <b>رقم الجهاز</b> هاد للبيّاع:')}</p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font:600 16px Consolas,monospace;letter-spacing:1px" dir="ltr">${esc(L.geraet || '–')}</b>${L.geraet ? `<button class="btn sm" data-act="lizKopie">${icon('kopieren')}${TL('Kopieren', 'نسخ')}</button>` : ''}</div>
+    <p class="small" style="margin-top:12px">${TL('2. Den Aktivierungsschlüssel, den du bekommst (beginnt mit „HO1-“), hier einfügen:', '٢. الصق هون مفتاح التفعيل اللي بيوصلك (بيبلّش بـ «HO1-»):')}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="lizKey" dir="ltr" style="flex:1;min-width:240px;font-family:Consolas,monospace" placeholder="HO1-…" autocomplete="off" spellcheck="false"><button class="btn pri" data-act="lizSetzen">${icon('schloss-offen')}${TL('Aktivieren', 'فعّل')}</button></div>
+    <div id="lizMsg" class="small" style="margin-top:6px;color:var(--danger)">${L.fehler && L.geraet ? '' : esc(lizFehler(L.fehler || ''))}</div></div>`;
 }
 async function setMode(m){
   if (m === MODE) return;
+  if (m === 'live' && !LIZ.aktiv) { await lizenzLaden(); if (!LIZ.aktiv) { lizenzSperre(); return; } }
   await flushSave(); vaultLock(true); VT.blob = null; VT._loaded = false; MODE = m;
   if (DB.db) await DB.put('kv', 'mode', m);
   const st = DB.db ? await DB.get('kv', stateKey()) : null;
@@ -4077,6 +4277,7 @@ function buEmpfang(d){
   if (d.typ === 'buero-fenster') buFensterAuf();
   if (d.typ === 'buero-dateien' && d.dateien && d.dateien.length && d.dateien[0] && d.dateien[0].data) d = Object.assign({}, d, {dateien:d.dateien.map(x => new File([x.data], x.name, {type:x.type}))});
   if (d.typ === 'buero-oeffnen' && d.route) location.hash = '#/' + d.route;
+  if (d.typ === 'buero-team' && Array.isArray(d.leute)) { BU.team = d.leute; teamSenden(); }
   if (d.typ === 'buero-fragen') { BU.fragen = Number(d.anzahl) || 0; renderNav(parseHash().route); }
   if (d.typ === 'buero-dateien' && d.dateien && d.dateien.length) queueFiles([...d.dateien]);
   if (d.typ === 'buero-antwort' && d.id) {
@@ -4111,7 +4312,8 @@ function initBuero(){
 
 // ---------- Start ----------
 (async () => {
-  try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
+  await lizenzLaden();
+  try { await DB.open(); MODE = (await DB.get('kv', 'mode')) === 'demo' || !LIZ.aktiv ? 'demo' : 'live'; const st = await DB.get('kv', stateKey()); if (st) S = migrate(st); else if (MODE === 'demo') { S = buildDemoState(); await flushSave(); } }
   catch (e) { DB.db = null; document.body.insertAdjacentHTML('afterbegin', '<div class="banner red" style="margin:0;border-radius:0">Lokaler Speicher nicht verfügbar – bitte mit Google Chrome oder Microsoft Edge öffnen. Änderungen werden sonst nicht gespeichert.</div>'); }
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   document.body.classList.toggle('is-demo', MODE === 'demo');
@@ -4125,5 +4327,7 @@ function initBuero(){
 <script src="eingang.js"></script>
 <script src="email.js"></script>
 <script src="command.js"></script>
+<script src="einrichtung.js"></script>
+<script src="system.js"></script>
 </body>
 </html>

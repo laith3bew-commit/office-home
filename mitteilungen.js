@@ -5,6 +5,25 @@
 (function () {
   /* ---------- Neuigkeiten je Version (neueste zuerst) ---------- */
   const NEU = [
+    { v: '2.17.0', datum: '2026-11-25', de: [
+        'Neue Installation: Ein Assistent richtet Home Office Schritt für Schritt ein – Sprache, eigene Daten, Personen (Vater, Mutter, Ehefrau, Schwester …), je Person ein Ordner auf dem Computer, Gemini, Google Kalender und E-Mail.',
+        'Ordner je Person: Home Office zeigt die vorhandenen Dateien, du wählst aus, was übernommen wird; neue Dokumente werden als Kopie dort abgelegt; die Frage-Leiste sucht auch im Ordner.',
+        'E-Mail: beim Einrichten wählen, ab wann E-Mails geholt werden (Woche, Monat, Jahr, alle), und jede einzeln „Hinzufügen“ oder „Überspringen“ – auch später über „Einzeln durchgehen“.',
+        'Hilfe: „?“ oben erklärt jede Seite; Rundgang durch alle Bereiche unter Einstellungen → Allgemein.',
+        'Updates: Home Office sucht jetzt alle 10 Minuten nach einer neuen Version.',
+        'Briefe: Langer Text geht sauber auf Seite 2 (und weiter) – Fußzeile und Unterschrift überlappen nicht mehr, Grußformel bleibt bei der Unterschrift, „Seite 1 von 2“; gilt für Vorschau, Drucken, PDF und E-Mail.',
+        'Menü: Neben jedem Bereich steht, wie viele neue Einträge die Mitarbeiter eingetragen haben (z. B. „Kalender +2“). Beim Ansehen verschwindet die Zahl; bleibt etwas länger liegen, erinnert dich der zuständige Mitarbeiter im Büro.',
+        'Dashboard: Statt „Fristen-Ausblick“ zeigt die Karte „Büro-Team“ alle Mitarbeiter in 3D mit ihrem Status.'
+      ], ar: [
+        'تثبيت جديد: معالج بيجهّز البرنامج خطوة خطوة – اللغة، بياناتك، الأشخاص (أب، أم، زوجة، أخت …)، مجلد لكل شخص على الكمبيوتر، Gemini، تقويم Google والإيميل.',
+        'مجلد لكل شخص: البرنامج بيورجيك الملفات الموجودة وإنت بتختار شو ينضاف؛ المستندات الجديدة بتنحفظ نسخة منها هونيك؛ والـ Command بيدوّر كمان بالمجلد.',
+        'الإيميل: وقت الإعداد بتختار من إيمتى تنجاب الإيميلات (أسبوع، شهر، سنة، الكل) وبتمرق عليهن وحدة وحدة «إضافة» أو «تخطي» – وكمان بعدين من «Einzeln durchgehen».',
+        'الشرح: زر «؟» فوق بيشرح كل صفحة؛ والجولة بكل الأقسام من الإعدادات ← Allgemein.',
+        'التحديثات: البرنامج صار يدوّر على نسخة جديدة كل 10 دقايق.',
+        'الرسائل: النص الطويل بينتقل مرتب للصفحة 2 (وأكتر) – الفوتر والتوقيع ما عادو يتداخلو، والتحية بتضل مع التوقيع، و«Seite 1 von 2»؛ بالمعاينة والطباعة والـ PDF والإيميل.',
+        'القائمة: جنب كل قسم بيطلع عدد المعلومات الجديدة اللي ضافها الموظفين (مثلاً «Kalender +2»). لما تشوفها بيختفي الرقم؛ وإذا ضلت مدة بدون ما تشوفها، الموظف المسؤول بيذكرك بالمكتب.',
+        'لوحة المتابعة: بدل «Fristen-Ausblick» صار في بطاقة «Büro-Team» بتورجي كل الموظفين ثلاثي الأبعاد مع حالتهم.'
+      ] },
     { v: '2.16.5', datum: '2026-11-25', de: [
         'Farbige Punkte „Neu aus dem Eingang“ stehen jetzt direkt vor dem Titel des Eintrags – im Kalender, bei Aufgaben, Dokumenten, Kontakten, Notizen und Finanzen.',
         'Google Kalender: Du kannst wählen, mit welchem Kalender Home Office abgleicht (Einstellungen → Kalender, Google & KI). Gibt es einen Kalender „Home Office“, wird er automatisch genommen und die bisherigen Termine werden dorthin verschoben – auf dem Handy erscheinen sie dann in diesem Kalender, Termine vom Handy kommen ins Programm.',

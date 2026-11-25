@@ -7,6 +7,13 @@ contextBridge.exposeInMainWorld('officeHome', {
   // Speichert den aktuellen Inhalt von #print-root als PDF (Speichern-Dialog).
   savePDF: (fileName) => ipcRenderer.invoke('oh:savePDF', fileName),
   pdfDaten: () => ipcRenderer.invoke('oh:pdfDaten'),
+  ordnerWaehlen: (titel) => ipcRenderer.invoke('oh:ordnerWaehlen', titel),
+  ordnerAnlegen: (name) => ipcRenderer.invoke('oh:ordnerAnlegen', name),
+  ordnerListe: (dir, max) => ipcRenderer.invoke('oh:ordnerListe', dir, max),
+  ordnerLesen: (dir, rel) => ipcRenderer.invoke('oh:ordnerLesen', dir, rel),
+  ordnerSchreiben: (dir, name, data) => ipcRenderer.invoke('oh:ordnerSchreiben', dir, name, data),
+  ordnerSuche: (dir, q) => ipcRenderer.invoke('oh:ordnerSuche', dir, q),
+  ordnerOeffnen: (dir, rel) => ipcRenderer.invoke('oh:ordnerOeffnen', dir, rel),
   // Öffnet den Druckdialog von Windows für den Inhalt von #print-root.
   print: () => ipcRenderer.invoke('oh:print'),
   // Öffnet ein gespeichertes Dokument mit dem Standardprogramm von Windows.
@@ -29,7 +36,7 @@ contextBridge.exposeInMainWorld('officeHome', {
   mailKonten: () => ipcRenderer.invoke('oh:mailKonten'),
   mailKontoSpeichern: (konto, pass) => ipcRenderer.invoke('oh:mailKontoSpeichern', konto, pass),
   mailKontoLoeschen: (id) => ipcRenderer.invoke('oh:mailKontoLoeschen', id),
-  mailAbrufen: (id) => ipcRenderer.invoke('oh:mailAbrufen', id),
+  mailAbrufen: (id, opts) => ipcRenderer.invoke('oh:mailAbrufen', id, opts),
   mailSenden: (id, m) => ipcRenderer.invoke('oh:mailSenden', id, m),
   mailGesendet: (id, n) => ipcRenderer.invoke('oh:mailGesendet', id, n),
   mailEinzeln: (id, uid, ordner) => ipcRenderer.invoke('oh:mailEinzeln', id, uid, ordner),
@@ -72,6 +79,12 @@ contextBridge.exposeInMainWorld('officeHome', {
   bgSet: (v) => ipcRenderer.invoke('oh:bgSet', v),
   trayEnsure: () => ipcRenderer.invoke('oh:trayEnsure'),
   setLang: (l) => ipcRenderer.invoke('oh:setLang', l),
+  setAppName: (n) => ipcRenderer.invoke('oh:setAppName', n),
+  // Aktivierung (ein Schlüssel je Gerät)
+  lizenzStatus: () => ipcRenderer.invoke('oh:lizenzStatus'),
+  lizenzSetzen: (k) => ipcRenderer.invoke('oh:lizenzSetzen', k),
+  lizenzEntfernen: () => ipcRenderer.invoke('oh:lizenzEntfernen'),
+  systemPruefen: () => ipcRenderer.invoke('oh:systemPruefen'),
   // Büro im eigenen Fenster
   bueroFenster: (theme) => ipcRenderer.invoke('oh:bueroFenster', theme),
   bueroAnFenster: (m) => ipcRenderer.send('oh:bueroAnFenster', m),

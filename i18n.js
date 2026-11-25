@@ -94,6 +94,8 @@ const W = {
   'Übersicht eines Monats zum Drucken oder als PDF – z. B. für die eigenen Unterlagen oder zur Abstimmung in der Familie. Die Auswahl oben (Alle / Vater / Mutter) gilt auch hier.': 'ملخص شهر للطباعة أو كملف PDF – مثلاً لأوراقك أو للتنسيق مع العائلة. الاختيار في الأعلى ينطبق هنا أيضاً. (التقرير نفسه بالألمانية)',
   'Ausdrucken': 'طباعة',
   // Einstellungen
+  'Programm aktivieren': 'فعّل البرنامج', 'Erst nach der Aktivierung (Einstellungen → Allgemein → Aktivierung)': 'بس بعد التفعيل (الإعدادات ← عام ← التفعيل)', 'Name und Farben des Programms': 'اسم البرنامج وألوانو',
+  'Systemprüfung': 'فحص النظام', 'Jetzt prüfen': 'افحص هلأ', 'Prüft, ob alle Zusatzprogramme da sind (PDF-Programm, Scanner, Internet, Claude …), und zeigt, wie du Fehlendes installierst – selbst oder mit Claude.': 'بيفحص إذا كل البرامج الإضافية موجودة (برنامج PDF، السكانر، الإنترنت، Claude …) وبيورجيك كيف تثبّت الناقص – بنفسك أو مع Claude.',
   'Darstellung': 'المظهر', 'Hell': 'فاتح', 'Dunkel': 'داكن', 'System': 'حسب النظام', '„System“ folgt der Einstellung von Windows (hell oder dunkel). Briefe und Berichte bleiben immer auf weißem Papier.': '«حسب النظام» يتبع إعداد Windows (فاتح أو داكن). الرسائل والتقارير تبقى دائماً على ورق أبيض.',
   'Sprache der Bedienung': 'لغة الواجهة', 'Briefe, Vorlagen und Berichte bleiben immer Deutsch (DIN 5008).': 'الرسائل والقوالب والتقارير تبقى دائماً بالألمانية (DIN 5008).',
   'Meine Daten (Bevollmächtigter / Absender)': 'بياناتي (الوكيل / المرسل)', 'Vor- und Nachname': 'الاسم الأول والأخير', 'Straße und Hausnummer': 'الشارع ورقم المنزل', 'PLZ': 'الرمز البريدي', 'Ort': 'المدينة',
@@ -217,7 +219,7 @@ Object.assign(W, {
   'E-Mail': 'الإيميل', 'Konten': 'الحسابات', 'Abrufen': 'جلب البريد', 'Neue E-Mail': 'إيميل جديد', 'Ungelesen': 'غير مقروء', 'Im Büro': 'بالمكتب', 'Erledigt': 'خلص', 'Nicht bearbeitet': 'ما انعالج',
   'Ans Büro (Gemini liest)': 'للمكتب (Gemini بيقرا)', 'Antworten': 'رد', 'Nicht bearbeiten': 'ما تعالجو', 'Senden': 'إرسال', 'E-Mail links auswählen.': 'اختار إيميل من اليسار.', 'Keine E-Mails.': 'ما في إيميلات.',
   'Postfach verbinden': 'ربط صندوق البريد', 'Verbinden und testen': 'ربط وتجربة', 'E-Mail-Adresse': 'عنوان الإيميل', 'Passwort / App-Passwort': 'كلمة السر / App-Passwort', 'Absendername': 'اسم المرسل',
-  'Gehört zu': 'تابع لـ', 'Mir (Leon)': 'إلي (ليون)', 'E-Mail-Konten': 'حسابات الإيميل', 'Eingang': 'الوارد', 'Erst nach deiner Bestätigung wird etwas eingetragen': 'ما بينضاف شي قبل تأكيدك',
+  'Gehört zu': 'تابع لـ', 'Mir': 'إلي', 'E-Mail-Konten': 'حسابات الإيميل', 'Eingang': 'الوارد', 'Erst nach deiner Bestätigung wird etwas eingetragen': 'ما بينضاف شي قبل تأكيدك',
   'Bestätigen': 'تأكيد', 'Später': 'بعدين', 'Verwerfen': 'تجاهل', 'Datei': 'الملف', 'Nichts wird eingetragen, bevor du bestätigst.': 'ما بينضاف شي قبل ما تأكد.', 'Ausgewählte ans Büro': 'المختار للمكتب',
   'Keine': 'ولا شي', 'Noch einmal lesen': 'اقرا مرة تانية', 'Aktualisieren': 'تحديث', 'Allgemein': 'عام',
   'Menü einklappen': 'طي القائمة', 'Menü ausklappen': 'فتح القائمة',

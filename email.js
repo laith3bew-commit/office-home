@@ -22,6 +22,7 @@
     if (!MU.konten) { konten().then(() => { if (parseHash().route === 'mail') render(); }); return `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1></div></div><div class="card"><div class="empty">Lädt …</div></div>`; }
     if (!MU.konten.length) return `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1><p class="sub" style="margin:0">Postfach verbinden – danach prüft die Sekretärin es jede Stunde.</p></div></div>${kontoForm()}`;
     const kopf = `<div class="head"><div class="grow"><h1>${icon('mail')}E-Mail</h1><p class="sub" style="margin:0">${esc(MU.konten.map(k => k.user).join(' · '))}${MU.konten[0] && MU.konten[0].lastCheck ? ' · zuletzt geprüft ' + datum(MU.konten[0].lastCheck) : ''}</p></div>
+      ${MU.ordner !== 'gesendet' && M().some(m => m.status === 'neu') && window.EG && window.EG.durchgehen ? `<button class="btn" data-act="mDurch">${icon('mail')}Einzeln durchgehen (${M().filter(m => m.status === 'neu').length})</button>` : ''}
       <button class="btn" data-act="mKonten">${icon('einstellungen')}Konten</button><button class="btn" data-act="${MU.ordner === 'gesendet' ? 'mGesendetLaden' : 'mAbrufen'}">${icon('update')}${MU.ordner === 'gesendet' ? 'Neu laden' : 'Abrufen'}</button><button class="btn pri" data-act="mNeu">${icon('plus')}Neue E-Mail</button></div>
       <div class="themesw" style="margin-bottom:12px"><button class="${MU.ordner === 'eingang' ? 'on' : ''}" data-act="mOrdner" data-id="eingang">${icon('mail')}Posteingang</button><button class="${MU.ordner === 'gesendet' ? 'on' : ''}" data-act="mOrdner" data-id="gesendet">${icon('update')}Gesendet</button></div>`;
     if (MU.ordner === 'gesendet') return kopf + gesendetHTML();
@@ -31,7 +32,7 @@
     return kopf + `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${tab('alle', 'Alle')}${tab('ungelesen', 'Ungelesen')}${tab('neu', 'Neu')}${tab('buero', 'Im Büro')}${tab('erledigt', 'Erledigt')}${tab('ignoriert', 'Nicht bearbeitet')}</div>
       <div class="mwrap"><div class="card mlist">${list.length ? list.map(m => `<button class="mitem ${m.id === MU.sel ? 'on' : ''} ${m.gelesen ? '' : 'ungel'}" data-act="mOpen" data-id="${m.id}">
           <span class="mtop"><b>${esc(kurz(m.fromName || m.from, 40))}</b><small>${esc(datum(m.date))}</small></span>
-          <span class="msub">${esc(kurz(m.subject, 70))}${(m.atts || []).length ? ' <span class="small">📎' + m.atts.length + '</span>' : ''}</span>
+          <span class="msub">${esc(kurz(m.subject, 70))}${(m.attNamen || m.atts || []).length ? ' <span class="small">📎' + (m.attNamen || m.atts).length + '</span>' : ''}</span>
           <span class="msnip">${esc(kurz(m.snippet, 110))}</span><span class="mst">${(STATUS[m.status] || STATUS.neu)[0]}</span></button>`).join('') : '<div class="empty">Keine E-Mails.</div>'}</div>
         <div class="card mread">${sel ? leseHTML(sel) : '<div class="empty">E-Mail links auswählen.</div>'}</div></div>`;
   };
@@ -137,7 +138,7 @@
         <div class="fld"><label>E-Mail-Adresse</label><input id="mkUser" value="${esc(k.user || '')}" placeholder="name@mail.de" autocomplete="off"></div>
         <div class="fld"><label>Passwort / App-Passwort</label><input id="mkPass" type="password" placeholder="${k.hatPasswort ? '•••••••• (neu eingeben zum Ändern)' : ''}" autocomplete="new-password"></div>
         <div class="fld"><label>Absendername</label><input id="mkName" value="${esc(k.name || S.settings.me.name || '')}"></div>
-        <div class="fld"><label>Gehört zu</label><select id="mkPerson"><option value="">Mir (Leon)</option>${S.persons.map(p => `<option value="${p.id}" ${k.personId === p.id ? 'selected' : ''}>${esc(p.role)}</option>`).join('')}</select></div>
+        <div class="fld"><label>Gehört zu</label><select id="mkPerson"><option value="">Mir${S.settings.me && S.settings.me.name ? ' (' + esc(S.settings.me.name) + ')' : ''}</option>${S.persons.map(p => `<option value="${p.id}" ${k.personId === p.id ? 'selected' : ''}>${esc(p.role)}</option>`).join('')}</select></div>
         <div class="fld"><label>IMAP-Server</label><input id="mkHost" value="${esc(k.host || 'imap.mail.de')}"></div><div class="fld"><label>SMTP-Server</label><input id="mkSmtp" value="${esc(k.smtpHost || 'smtp.mail.de')}"></div>
       </form></div>
       <div style="display:flex;gap:8px;margin-top:10px"><button class="btn pri" data-act="mKontoOk" data-id="${esc(k.id || '')}">${icon('speichern')}Verbinden und testen</button>${k.id ? `<button class="btn dan" data-act="mKontoWeg" data-id="${esc(k.id)}">${icon('loeschen')}Entfernen</button>` : ''}</div>
@@ -194,6 +195,7 @@
     mAttDoc: async d => { const m = mailVon(d.id), f = await fget(d.f); if (!m || !f) return toast('Anhang nicht gefunden');
       editDoc(null, { personId: m.personId || '', sender: m.gesendet ? (S.settings.me.name || '') : (m.fromName || m.from), date: (m.date || '').slice(0, 10), tags: m.gesendet ? 'E-Mail, gesendet' : 'E-Mail' }, new File([f.blob], f.name || 'anhang', { type: f.type || f.blob.type })); },
     mGOpen: d => { MU.gSel = d.id; render(); },
+    mDurch: () => window.EG && window.EG.durchgehen(),
     mGesendetLaden: () => { Object.keys(MU.mem).forEach(fid => { if (MU.urls[fid]) { URL.revokeObjectURL(MU.urls[fid]); delete MU.urls[fid]; } }); MU.mem = {}; MU.gesendet = null; render(); },
     mOpen: d => { MU.sel = d.id; const m = M().find(x => x.id === d.id); if (m && !m.gelesen) { m.gelesen = true; save(); } render(); },
     mAbrufen: async () => { if (!window.EG) return; toast('Postfach wird geprüft …'); const r = await window.EG.mailsAbrufen(false); MU.konten = null; await konten(); toast(r.neu ? r.neu + ' neue E-Mail(s)' : 'Keine neuen E-Mails'); render(); },

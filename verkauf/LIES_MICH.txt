@@ -1,0 +1,38 @@
+HOME OFFICE – Installation mit Claude
+=====================================
+
+So geht's:
+1. Öffne Claude (Claude Desktop oder claude.ai) auf deinem Windows-Computer.
+2. Gib Claude diesen ganzen Ordner (oder die Datei ANLEITUNG_FUER_CLAUDE.md).
+3. Schreibe: „Installiere mir Home Office und richte es mit mir Schritt für Schritt ein.“
+
+Claude installiert das Programm und erklärt dir jeden Schritt: deine Daten, Personen und Ordner,
+Google Kalender, Gemini (KI) und E-Mail. Passwörter und Schlüssel gibst du nur im Programm ein – nie im Chat.
+
+Aktivierung: Ohne Aktivierungsschlüssel läuft nur der Demo-Modus zum Ausprobieren. Unter Einstellungen → Allgemein →
+Aktivierung steht deine Geräte-ID. Schick sie dem Verkäufer, du bekommst einen Schlüssel (HO1-…) für genau dieses Gerät.
+
+Das Programm ist fertig gebaut: Du kannst den Namen und die vier Farben ändern, sonst nichts.
+
+Ohne Claude: OfficeHome-Setup-….exe doppelklicken. Wenn Windows warnt: „Weitere Informationen“ → „Trotzdem ausführen“.
+Beim ersten Start führt dich ein Assistent durch die Einrichtung.
+
+
+هوم أوفيس – التثبيت مع Claude
+================================
+
+الطريقة:
+١. افتح Claude (برنامج Claude Desktop أو موقع claude.ai) على كمبيوترك (ويندوز).
+٢. أعطِ Claude هالمجلد كلو (أو ملف ANLEITUNG_FUER_CLAUDE.md).
+٣. اكتب: «ثبّتلي برنامج Home Office وجهّزو معي خطوة خطوة».
+
+Claude بيثبّت البرنامج وبيشرحلك كل خطوة: بياناتك، الأشخاص والمجلدات، تقويم Google، Gemini (الذكاء الاصطناعي) والإيميل.
+كلمات السر والمفاتيح بتكتبها بس جوّا البرنامج – أبداً مش بالمحادثة.
+
+التفعيل: بدون مفتاح تفعيل بيشتغل بس الوضع التجريبي (Demo) للتجربة. بالإعدادات ← عام ← التفعيل في رقم جهازك.
+ابعتو للبيّاع، وبيوصلك مفتاح (HO1-…) لهالجهاز بس.
+
+البرنامج جاهز ومبني: فيك تغيّر الاسم والأربع ألوان، وغير هيك لا.
+
+بدون Claude: اضغط مرتين على OfficeHome-Setup-….exe. إذا ويندوز حذّرك: «Weitere Informationen» ← «Trotzdem ausführen».
+أول ما يفتح البرنامج، في معالج بيمشي معك بالإعداد.

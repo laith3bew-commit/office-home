@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<!-- Büro-Team fürs Dashboard: dieselben Mitarbeiter wie im 3D-Büro (buero.html → baueFigur, Farben F/HAUT/HAAR, Kleidung je Person,
+     Sitzhaltungen), nebeneinander am Arbeitsplatz. Status per postMessage {typ:'team', leute:[{id,name,rolle,lampe,text,look,kleid}]},
+     Hell/Dunkel per {typ:'farben', f:{dunkel}}. -->
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Manrope,"Segoe UI",sans-serif}
+  #c{position:absolute;inset:0}
+  .lbl{position:absolute;left:0;top:0;font-size:10.5px;font-weight:800;white-space:nowrap;pointer-events:none;padding:1px 7px;border-radius:9px;display:flex;gap:5px;align-items:center}
+  .lbl i{width:6px;height:6px;border-radius:50%;display:inline-block}
+  body.dunkel .lbl{color:#F4F0E8;background:rgba(15,23,38,.72);border:1px solid rgba(169,184,202,.25)}
+  body.hell .lbl{color:#1B2A44;background:rgba(255,255,255,.85);border:1px solid rgba(27,42,68,.12)}
+  #tip{position:absolute;left:8px;bottom:6px;right:8px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+  body.dunkel #tip{color:#A9B8CA} body.hell #tip{color:#4F6785}
+</style></head>
+<body class="dunkel"><div id="c"></div><div id="tip"></div>
+<script src="lib/three.min.js"></script>
+<script>
+'use strict';
+const PI = Math.PI;
+/* ---------- Farben wie im Büro (buero.html: Leon Brand Kit v1) ---------- */
+const FARB = {
+  dunkel: { klar: "#0F1726", boden: "#2A3344", tisch: "#D8DEE6", rahmen: "#0B1220", stahl: "#4F6785", nebel: "#A9B8CA", papier: "#F4F0E8", hose: "#16223A", stuhl: "#2E3B55" },
+  hell: { klar: "#F4F0E8", boden: "#CBC6BE", tisch: "#FBFAF7", rahmen: "#2B3446", stahl: "#4F6785", nebel: "#A9B8CA", papier: "#F4F0E8", hose: "#2A3A55", stuhl: "#1B2A44" }
+};
+const HAUT = ["#D9B396", "#C99A78", "#E3C1A6", "#B8876A", "#A87656"], HAAR = ["#3B302B", "#1F1B18", "#6B5444", "#2E2A2A", "#8A7462"];
+const LAMPE = { arbeit: "#3DDC97", pause: "#F2B544", aus: "#FF5D5D" };
+let DUNKEL = true, F = FARB.dunkel;
+const C = h => new THREE.Color(h);
+let matCache = {};
+function mat(farbe, opt) { const k = farbe + JSON.stringify(opt || {}); if (!matCache[k]) matCache[k] = new THREE.MeshStandardMaterial(Object.assign({ color: C(farbe), roughness: .85, metalness: .02 }, opt || {})); return matCache[k]; }
+function G(x, y, z, p, ry) { const g = new THREE.Group(); g.position.set(x || 0, y || 0, z || 0); if (ry) g.rotation.y = ry; if (p) p.add(g); return g; }
+
+/* ---------- Figur: aus buero.html (baueFigur), ohne Tasse/Handy/Akte ---------- */
+function baueFigur(t, parent) {
+  const L = Object.assign({ haar: "kurz", acc: null, haut: 0, haarF: 0, arbeit: "tippen" }, t.look);
+  const skin = mat(HAUT[L.haut] || HAUT[0], { flatShading: true }), hair = mat(HAAR[L.haarF] || HAAR[0], { flatShading: true }), cloth = mat(t.kleid || F.stahl, { flatShading: true }), pants = mat(F.hose, { flatShading: true }), dunkel = mat(F.rahmen);
+  const root = G(0, 0, 0, parent), huefte = G(0, .95, 0, root);
+  const zyl = (rt, rb, h, m, p, y) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 8), m); o.position.y = y; p.add(o); return o; };
+  const kasten = (w, h, d, m, p, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); p.add(o); return o; };
+  kasten(.32, .14, .2, pants, huefte, 0, 0, 0);
+  const bein = sx => { const ob = G(sx * .09, -.02, 0, huefte); zyl(.065, .055, .42, pants, ob, -.21); const kn = G(0, -.42, 0, ob); zyl(.05, .045, .45, pants, kn, -.225); kasten(.1, .06, .22, dunkel, kn, 0, -.46, .05); return { ob, kn }; };
+  const lb = bein(-1), rb = bein(1), rumpf = G(0, .05, 0, huefte);
+  zyl(.17, .15, .5, cloth, rumpf, .27); kasten(.4, .1, .22, cloth, rumpf, 0, .5, 0); zyl(.05, .055, .08, skin, rumpf, .58);
+  if (t.id === "leitung") { kasten(.05, .3, .01, mat(F.papier), rumpf, 0, .32, .155); kasten(.035, .22, .012, mat("#A9B8CA"), rumpf, 0, .3, .162); }
+  const kopf = G(0, .7, 0, rumpf);
+  const hk = new THREE.Mesh(new THREE.IcosahedronGeometry(.12, 1), skin); hk.scale.set(1, 1.12, 1); kopf.add(hk);
+  const kappe = new THREE.Mesh(new THREE.SphereGeometry(.128, 10, 8, 0, PI * 2, 0, PI * .52), hair); kappe.position.set(0, .018, -.012); kappe.rotation.x = -.25; kopf.add(kappe);
+  kasten(.21, .14, .08, hair, kopf, 0, -.02, -.08);
+  if (L.haar === "dutt") { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(.06, 0), hair); b.position.set(0, .1, -.1); kopf.add(b); }
+  if (L.haar === "lang") kasten(.23, .26, .07, hair, kopf, 0, -.1, -.1);
+  if (L.haar === "seite") kasten(.14, .04, .16, hair, kopf, .05, .115, .01).rotation.z = -.3;
+  if (L.haar === "locken") kappe.scale.setScalar(1.14);
+  if (L.acc === "brille") { [-1, 1].forEach(sx => kasten(.06, .035, .01, dunkel, kopf, sx * .047, .015, .12)); kasten(.04, .008, .008, dunkel, kopf, 0, .018, .12); }
+  if (L.acc === "headset") { const band = new THREE.Mesh(new THREE.TorusGeometry(.135, .012, 5, 12, PI), dunkel); band.rotation.y = PI / 2; band.position.y = .015; kopf.add(band);
+    [-1, 1].forEach(sx => { const e = new THREE.Mesh(new THREE.CylinderGeometry(.042, .042, .03, 8), dunkel); e.rotation.z = PI / 2; e.position.set(sx * .135, 0, 0); kopf.add(e); }); }
+  const arm = sx => { const sh = G(sx * .21, .47, 0, rumpf); zyl(.045, .04, .28, cloth, sh, -.14); const el = G(0, -.28, 0, sh); zyl(.038, .034, .26, skin, el, -.13); const hand = G(0, -.28, 0, el); kasten(.06, .07, .05, skin, hand, 0, 0, 0); return { sh, el, hand }; };
+  const la = arm(-1), ra = arm(1);
+  /* Status-Kristall, Leuchtring und Schein wie im Büro */
+  const orbMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true });
+  const orb = new THREE.Mesh(new THREE.OctahedronGeometry(.07, 0), orbMat); orb.position.y = 2.05; root.add(orb);
+  const ringMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true, opacity: .8, depthWrite: false, side: THREE.DoubleSide, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.42, .5, 40), ringMat); ring.rotation.x = -PI / 2; ring.position.y = .02; root.add(ring);
+  const scheinMat = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus), transparent: true, opacity: .18, depthWrite: false, blending: DUNKEL ? THREE.AdditiveBlending : THREE.NormalBlending, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+  const schein = new THREE.Mesh(new THREE.CircleGeometry(.62, 40), scheinMat); schein.rotation.x = -PI / 2; schein.position.y = .015; root.add(schein);
+  const P = { hy: .95, lean: 0, kx: 0, ky: 0, kz: 0, lob: 0, rob: 0, lkn: 0, rkn: 0, lsh: 0, rsh: 0, lshz: 0, rshz: 0, lel: 0, rel: 0 };
+  return { root, orb, orbMat, ringMat, scheinMat, L,
+    setze(z, k) { for (const n in P) if (z[n] !== undefined) P[n] += (z[n] - P[n]) * k;
+      huefte.position.y = P.hy; rumpf.rotation.x = P.lean; kopf.rotation.set(P.kx, P.ky, P.kz);
+      lb.ob.rotation.x = P.lob; rb.ob.rotation.x = P.rob; lb.kn.rotation.x = P.lkn; rb.kn.rotation.x = P.rkn;
+      la.sh.rotation.x = P.lsh; ra.sh.rotation.x = P.rsh; la.sh.rotation.z = -.06 + P.lshz; ra.sh.rotation.z = .06 + P.rshz; la.el.rotation.x = P.lel; ra.el.rotation.x = P.rel; } };
+}
+const SITZ = { hy: .52, lob: -PI / 2, rob: -PI / 2, lkn: PI / 2, rkn: PI / 2, lshz: 0, rshz: 0 };
+function haltung(name, t, L) { // Sitzhaltungen aus buero.html
+  const s = (f, a) => Math.sin(t * f) * a;
+  if (name === "arbeit") {
+    if (L.arbeit === "analyse") return Object.assign({}, SITZ, { lean: .2, kx: .15 + s(1.3, .05), ky: s(.9, .3), kz: 0, lsh: -1.0, rsh: -.9 + s(2.2, .1), lel: -.7, rel: -.8 });
+    if (L.arbeit === "pruefen") return Object.assign({}, SITZ, { lean: .05, kx: .4 + s(1.6, .05), ky: -.1, kz: 0, lsh: -1.2, rsh: -.8, lel: -1.2, rel: -.9 + Math.max(0, Math.sin(t * 6)) * -.25 });
+    return Object.assign({}, SITZ, { lean: .14, kx: .2 + s(3, .03), ky: s(.7, .08), kz: 0, lsh: -.95, rsh: -.95, lel: -.75 + s(15, .12), rel: -.75 + Math.cos(t * 15) * .12 });
+  }
+  if (name === "melden") return Object.assign({}, SITZ, { lean: -.1, kx: -.25, ky: s(.8, .15), kz: 0, lsh: -.6, rsh: -2.9, rshz: .2 + s(3.2, .15), lel: -.7, rel: -.15 });
+  if (name === "bereit") return Object.assign({}, SITZ, { lean: 0, kx: .1, ky: s(.5, .1), kz: 0, lsh: -.8, rsh: -.8, lel: -.7, rel: -.7 });
+  return Object.assign({}, SITZ, { lean: -.18, kx: -.05 + s(.4, .04), ky: s(.35, .4), kz: 0, lsh: -.4, rsh: -.4, lel: -.9, rel: -.9 }); // platz (zurückgelehnt)
+}
+/* ---------- Arbeitsplatz: Tisch, Bildschirm (leuchtet in der Lampenfarbe), Stuhl ---------- */
+function bauePlatz(parent) {
+  const g = G(0, 0, 0, parent), kasten = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); g.add(o); return o; };
+  kasten(1.1, .05, .62, mat(F.tisch), 0, .76, .62); kasten(.04, .74, .55, mat(F.rahmen), -.5, .37, .62); kasten(.04, .74, .55, mat(F.rahmen), .5, .37, .62);
+  kasten(.06, .2, .06, mat(F.rahmen), 0, .88, .82); kasten(.56, .34, .03, mat(F.rahmen), 0, 1.15, .84);
+  const schirm = new THREE.MeshBasicMaterial({ color: C(LAMPE.aus) }); kasten(.5, .28, .01, schirm, 0, 1.15, .82);
+  kasten(.4, .02, .14, mat(F.rahmen), 0, .79, .5);
+  kasten(.46, .07, .46, mat(F.stuhl), 0, .47, 0); kasten(.46, .5, .06, mat(F.stuhl), 0, .78, -.23); kasten(.06, .44, .06, mat(F.rahmen), 0, .22, 0);
+  return { g, schirm };
+}
+
+/* ---------- Szene ---------- */
+const STANDARD = [
+  { id: 'sekretariat', name: 'Lena Krüger', kleid: '#4F6785', look: { haar: 'dutt', acc: 'headset', haut: 2, haarF: 0, arbeit: 'tippen' } }, { id: 'termine', name: 'Jonas Weber', kleid: '#2E4468', look: { haar: 'kurz', acc: 'brille', haut: 0, haarF: 1, arbeit: 'tippen' } },
+  { id: 'finanzen', name: 'Miriam Hoffmann', kleid: '#7D90A8', look: { haar: 'lang', haut: 1, haarF: 2, arbeit: 'analyse' } }, { id: 'statistik', name: 'David Schulz', kleid: '#5F7591', look: { haar: 'locken', acc: 'brille', haut: 3, haarF: 3, arbeit: 'analyse' } },
+  { id: 'fristen', name: 'Anna Lorenz', kleid: '#3B5272', look: { haar: 'seite', haut: 2, haarF: 4, arbeit: 'pruefen' } }, { id: 'schreiben', name: 'Felix Wagner', kleid: '#A9B8CA', look: { haar: 'kurz', haut: 4, haarF: 1, arbeit: 'tippen' } },
+  { id: 'archiv', name: 'Clara Neumann', kleid: '#C5D0DC', look: { haar: 'dutt', acc: 'brille', haut: 0, haarF: 2, arbeit: 'pruefen' } }, { id: 'leitung', name: 'Martin Richter', kleid: '#1B2A44', look: { haar: 'kurz', acc: 'brille', haut: 1, haarF: 4, arbeit: 'pruefen' } }];
+const el = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); el.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x000000, 14, 26);
+const cam = new THREE.PerspectiveCamera(30, 1, .1, 80);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1); scene.add(hemi);
+const sonne = new THREE.DirectionalLight(0xffffff, 1); sonne.position.set(-4, 9, 7); scene.add(sonne);
+const boden = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), new THREE.MeshStandardMaterial({ roughness: .95 })); boden.rotation.x = -PI / 2; scene.add(boden);
+const welt = G(0, 0, 0, scene);
+let figs = [], T = 0, prev = performance.now(), letzte = null;
+const labels = document.createElement('div'); document.body.appendChild(labels);
+function raum() {
+  F = DUNKEL ? FARB.dunkel : FARB.hell; document.body.className = DUNKEL ? 'dunkel' : 'hell';
+  renderer.setClearColor(C(F.klar)); scene.fog.color.copy(C(F.klar)); boden.material.color.copy(C(F.boden));
+  hemi.intensity = DUNKEL ? .9 : 1.15; hemi.color.set(DUNKEL ? '#C9D3DE' : '#FFFFFF'); hemi.groundColor.set(DUNKEL ? '#16223A' : '#B9B2A6'); sonne.intensity = DUNKEL ? .8 : 1.1;
+}
+function bauen(leute) {
+  while (welt.children.length) welt.remove(welt.children[0]); matCache = {}; figs = []; labels.innerHTML = '';
+  const n = leute.length, proReihe = Math.ceil(n / 2), ab = 1.7;
+  leute.forEach((p, i) => {
+    const reihe = i < proReihe ? 0 : 1, sp = reihe ? i - proReihe : i;
+    const platz = G((sp - (proReihe - 1) / 2) * ab + (reihe ? .55 : -.35), 0, reihe ? -1.5 : .6, welt, 1.2); // seitlich: Tisch rechts, Gesicht zur Kamera
+    const pl = bauePlatz(platz), fig = baueFigur(p, platz); fig.root.position.set(0, 0, 0);
+    const d = document.createElement('div'); d.className = 'lbl'; d.innerHTML = '<i></i><span></span>'; labels.appendChild(d);
+    figs.push({ fig, pl, p, d });
+  });
+  passen();
+}
+function passen() {
+  const W = el.clientWidth || 300, H = el.clientHeight || 150; renderer.setSize(W, H); cam.aspect = W / H;
+  const proReihe = Math.ceil(Math.max(1, figs.length) / 2), breite = proReihe * 1.7 + 1.5;
+  const fovH = 2 * Math.atan(Math.tan(cam.fov * PI / 360) * cam.aspect), fovV = cam.fov * PI / 180;
+  const dist = Math.max(4, (breite / 2) / Math.tan(fovH / 2), 1.9 / Math.tan(fovV / 2));
+  cam.position.set(0, dist * .52, dist * .86); cam.lookAt(.1, .75, -.35); cam.updateProjectionMatrix();
+}
+addEventListener('resize', passen);
+const v = new THREE.Vector3();
+function loop(now) {
+  const dt = Math.min(.05, (now - prev) / 1000); prev = now; T += dt;
+  const W = el.clientWidth, H = el.clientHeight;
+  figs.forEach((f, i) => {
+    const lz = f.p.lampe || 'aus', farbe = C(LAMPE[lz] || LAMPE.aus), puls = .75 + .25 * Math.sin(T * 2.2 + i);
+    const pose = lz === 'arbeit' ? 'arbeit' : lz === 'pause' ? (/Frage|Antwort/i.test(f.p.text || '') ? 'melden' : 'bereit') : 'platz';
+    f.fig.setze(haltung(pose, T + i * .7, f.fig.L), Math.min(1, dt * 5));
+    f.fig.orbMat.color.copy(farbe); f.fig.orb.rotation.y += dt * (lz === 'arbeit' ? 3 : .8); f.fig.orb.position.y = 1.62 + Math.sin(T * 2 + i) * .03;
+    f.fig.ringMat.color.copy(farbe); f.fig.ringMat.opacity = (DUNKEL ? .95 : .85) * puls; f.fig.scheinMat.color.copy(farbe); f.fig.scheinMat.opacity = (DUNKEL ? .32 : .22) * puls;
+    f.pl.schirm.color.copy(farbe); if (lz === 'arbeit') f.pl.schirm.color.multiplyScalar(.82 + Math.sin(T * 9 + i) * .18); else f.pl.schirm.color.multiplyScalar(DUNKEL ? .55 : .75);
+    f.fig.orb.getWorldPosition(v); v.y += .22; v.project(cam);
+    f.d.style.transform = `translate(${Math.round((v.x + 1) / 2 * W)}px,${Math.round((1 - v.y) / 2 * H)}px) translate(-50%,-100%)`;
+  });
+  renderer.render(scene, cam); requestAnimationFrame(loop);
+}
+function stand(leute) {
+  leute = leute.map(p => Object.assign({}, STANDARD.find(s => s.id === p.id) || {}, p));
+  if (!figs.length || figs.length !== leute.length || figs.some((f, i) => f.p.id !== leute[i].id || f.p.kleid !== leute[i].kleid)) bauen(leute);
+  leute.forEach((p, i) => { const f = figs[i]; f.p = p; const c = LAMPE[p.lampe] || LAMPE.aus;
+    f.d.querySelector('i').style.background = c; f.d.querySelector('i').style.boxShadow = '0 0 6px ' + c; f.d.querySelector('span').textContent = String(p.name || '').split(' ')[0]; });
+  letzte = leute;
+  const arb = leute.filter(p => p.lampe === 'arbeit');
+  document.getElementById('tip').textContent = arb.length ? arb.slice(0, 2).map(p => String(p.name).split(' ')[0] + ': ' + (p.text || 'arbeitet')).join(' · ') : '';
+}
+addEventListener('message', e => { const d = e.data || {};
+  if (d.typ === 'farben' && d.f && typeof d.f.dunkel === 'boolean' && d.f.dunkel !== DUNKEL) { DUNKEL = d.f.dunkel; raum(); if (letzte) { figs = []; stand(letzte); } }
+  if (d.typ === 'team' && Array.isArray(d.leute)) stand(d.leute); });
+raum();
+stand(STANDARD.map(p => Object.assign({ lampe: 'aus', text: '' }, p)));
+requestAnimationFrame(loop);
+</script></body></html>

@@ -7,3 +7,6 @@ OfficeHome.original.html
 
 # Interne Plugin-Zustandsdateien
 .omc/
+
+# Aktivierung: private Schlüssel nie ins Repository
+*.pem

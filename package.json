@@ -1,7 +1,7 @@
 {
   "name": "office-home",
   "productName": "Office Home",
-  "version": "2.16.5",
+  "version": "2.17.0",
   "description": "Home Office – Familienbüro für Bevollmächtigte (offline)",
   "author": "Leon",
   "private": true,
@@ -35,7 +35,14 @@
       "scan-main.js",
       "kalender-main.js",
       "mail-main.js",
+      "ordner-main.js",
+      "einrichtung.js",
+      "farben.js",
+      "lizenz-main.js",
+      "system-main.js",
+      "system.js",
       "buero.html",
+      "team.html",
       "i18n.js",
       "buero-preload.js",
       "lib/**/*",
@@ -58,6 +65,13 @@
         "releaseType": "release"
       }
     ],
+    "electronFuses": {
+      "runAsNode": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    },
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
