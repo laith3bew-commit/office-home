@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Home Office – دليل التثبيت والإعداد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Leon Brandkit v1 – arabische Fassung (RTL) */
+  :root{--navy:#1B2A44;--stahl:#4F6785;--nebel:#A9B8CA;--papier:#F4F0E8;--weiss:#FFFFFF;--linie:#D9DFE7;--hell:#EEF1F5;}
+  @page{size:A4;margin:16mm 16mm 18mm 16mm;}
+  @page :first{margin:0;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'IBM Plex Sans Arabic','Manrope',sans-serif;font-size:10.4pt;line-height:1.7;color:var(--navy);background:var(--weiss);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  a{color:var(--stahl);font-weight:600;text-decoration:none;border-bottom:1px solid var(--nebel);direction:ltr;unicode-bidi:isolate}
+  h1,h2,h3{margin:0}
+  .ltr{direction:ltr;unicode-bidi:isolate;font-family:'Manrope',sans-serif}
+
+  .cover{height:297mm;width:210mm;background:var(--navy);color:var(--papier);position:relative;overflow:hidden;page-break-after:always;padding:30mm 22mm}
+  .cover .ring{position:absolute;border-radius:50%;border:1.5px solid rgba(169,184,202,.25)}
+  .cover .logo{width:30mm;height:30mm;border-radius:7mm;background:var(--papier);display:flex;align-items:center;justify-content:center;margin-bottom:16mm}
+  .cover .logo img{width:22mm;height:22mm}
+  .cover .ueber{font-size:11pt;color:var(--nebel);font-weight:600}
+  .cover h1{font-family:'Kalam',cursive;font-weight:400;font-size:54pt;line-height:1.05;margin:4mm 0 2mm;color:var(--papier);direction:ltr;text-align:right}
+  .cover .ar{font-family:'Noto Kufi Arabic',sans-serif;font-size:22pt;font-weight:700;color:var(--papier);margin-bottom:6mm}
+  .cover .unter{font-size:14pt;color:var(--nebel);max-width:150mm;font-weight:500}
+  .cover .fuss{position:absolute;left:22mm;right:22mm;bottom:22mm;display:flex;justify-content:space-between;font-size:9.5pt;color:var(--nebel);border-top:1px solid rgba(169,184,202,.35);padding-top:5mm}
+  .cover .inhalt{margin-top:18mm;display:grid;grid-template-columns:1fr 1fr;gap:2.2mm 10mm;max-width:155mm;font-size:10.5pt}
+  .cover .inhalt div{display:flex;gap:3mm;color:var(--papier)}
+  .cover .inhalt b{color:var(--nebel);font-weight:700;min-width:7mm;font-family:'Manrope'}
+
+  .kapitel{page-break-before:always}
+  .kapitel.erst{page-break-before:auto}
+  .kopf{display:flex;align-items:flex-end;gap:5mm;border-bottom:2px solid var(--navy);padding-bottom:3mm;margin-bottom:6mm}
+  .kopf .nr{font-family:'Kalam',cursive;font-size:34pt;line-height:.9;color:var(--stahl);font-weight:400}
+  .kopf h2{font-family:'Noto Kufi Arabic',sans-serif;font-size:17pt;font-weight:800}
+  .kopf .zeile{font-size:9.8pt;color:var(--stahl);font-weight:500}
+  h3{font-family:'Noto Kufi Arabic',sans-serif;font-size:11.5pt;font-weight:700;margin:6mm 0 2.5mm}
+  p{margin:0 0 3mm}
+  ul,ol{margin:0 0 3mm;padding-inline-start:6mm;padding-inline-end:0}
+  li{margin:0 0 1.4mm}
+  .lead{font-size:11.4pt;color:var(--stahl);font-weight:500;margin-bottom:5mm}
+
+  .schritte{counter-reset:s;list-style:none;padding:0;margin:0 0 4mm}
+  .schritte>li{counter-increment:s;position:relative;padding-block:2.4mm;padding-inline:13mm 3mm;margin:0 0 2.2mm;background:var(--papier);border-radius:3mm;break-inside:avoid}
+  .schritte>li::before{content:counter(s);position:absolute;inset-inline-start:3mm;top:2.6mm;width:7mm;height:7mm;border-radius:50%;background:var(--navy);color:var(--papier);font-weight:800;font-size:9pt;display:flex;align-items:center;justify-content:center;font-family:'Manrope'}
+  .schritte>li b.t{display:block;font-weight:700}
+
+  .box{border-radius:3mm;padding:3.5mm 4.5mm;margin:0 0 4mm;break-inside:avoid}
+  .box.info{background:var(--hell);border-inline-start:1.2mm solid var(--stahl)}
+  .box.wichtig{background:var(--navy);color:var(--papier)}
+  .box.wichtig a{color:var(--papier);border-color:var(--stahl)}
+  .box.papier{background:var(--papier)}
+  .box .titel{font-weight:700;font-size:10pt;margin-bottom:1.5mm;display:block}
+  .box.info .titel{color:var(--stahl)}
+  .box.wichtig .titel{color:var(--nebel)}
+
+  table{width:100%;border-collapse:collapse;margin:0 0 4mm;font-size:9.4pt}
+  th{background:var(--navy);color:var(--papier);text-align:start;font-weight:700;padding:2mm 2.5mm}
+  td{padding:2mm 2.5mm;border-bottom:1px solid var(--linie);vertical-align:top}
+  tr:nth-child(even) td{background:#FAF8F3}
+  tr{break-inside:avoid}
+  code{font-family:Consolas,monospace;background:var(--hell);padding:.2mm 1.4mm;border-radius:1mm;font-size:8.8pt;direction:ltr;unicode-bidi:isolate}
+  .knopf{display:inline-block;background:var(--navy);color:var(--papier);border-radius:5mm;padding:0 2.6mm;font-size:8.6pt;font-weight:700;line-height:1.8;font-family:'Manrope',sans-serif;direction:ltr;unicode-bidi:isolate}
+  .pfad{font-weight:700;color:var(--stahl)}
+  .de{font-family:'Manrope',sans-serif;font-weight:700;color:var(--stahl);direction:ltr;unicode-bidi:isolate}
+
+  .karten{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin:0 0 4mm}
+  .karte{background:var(--papier);border-radius:3mm;padding:3.2mm 4mm;break-inside:avoid}
+  .karte h4{margin:0 0 1mm;font-size:10.5pt;font-weight:700}
+  .karte p{margin:0;font-size:9.4pt}
+  .links td:first-child{font-weight:700;width:42mm}
+  .check{list-style:none;padding:0}
+  .check li{padding-inline-start:8mm;position:relative;margin-bottom:2mm}
+  .check li::before{content:"";position:absolute;inset-inline-start:0;top:1.6mm;width:4mm;height:4mm;border:1.5px solid var(--stahl);border-radius:1mm}
+  .zitat{font-size:13pt;color:var(--stahl);font-weight:600;display:block;margin:1mm 0 0}
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="ring" style="width:190mm;height:190mm;left:-70mm;top:-50mm"></div>
+  <div class="ring" style="width:130mm;height:130mm;left:-40mm;top:-20mm"></div>
+  <div class="ring" style="width:260mm;height:260mm;left:-120mm;bottom:-150mm"></div>
+  <div class="logo"><img src="../build/icon.svg" alt=""></div>
+  <div class="ueber">دليل الاستخدام · النسخة <span class="ltr">2.17</span> · النسخة العربية</div>
+  <h1>Home Office</h1>
+  <div class="ar">هوم أوفيس</div>
+  <div class="unter">التثبيت والتفعيل والإعداد خطوة بخطوة – مع كل الروابط والأدوات التي تحتاجها.</div>
+  <div class="inhalt">
+    <div><b>01</b>ما هو Home Office؟</div>
+    <div><b>08</b>تقويم Google و Drive</div>
+    <div><b>02</b>ماذا تحتاج</div>
+    <div><b>09</b>ربط البريد الإلكتروني</div>
+    <div><b>03</b>التثبيت</div>
+    <div><b>10</b>نظرة على الأقسام</div>
+    <div><b>04</b>فحص النظام</div>
+    <div><b>11</b>النسخ الاحتياطي والتحديثات</div>
+    <div><b>05</b>التفعيل</div>
+    <div><b>12</b>الخصوصية والتكاليف</div>
+    <div><b>06</b>معالج الإعداد</div>
+    <div><b>13</b>مشاكل وحلول</div>
+    <div><b>07</b>ربط Gemini (الذكاء الاصطناعي)</div>
+    <div><b>14</b>قائمة التحقق</div>
+  </div>
+  <div class="fuss"><span>Home Office – مكتب الأوراق الرسمية للعائلة</span><span class="ltr">Windows 10 / 11</span></div>
+</section>
+
+<section class="kapitel erst">
+  <div class="kopf"><div class="nr">01</div><div><h2>ما هو Home Office؟</h2><div class="zeile">برنامج لكل الأوراق والمعاملات الرسمية للعائلة</div></div></div>
+  <p class="lead">يساعدك Home Office على إنجاز المراسلات الرسمية لك ولعائلتك – مثلاً إذا كان معك توكيل (Vollmacht) عن والديك. كل شيء في مكان واحد: الأشخاص، المستندات، الرسائل، المهل، المواعيد، العقود، المال والبريد الإلكتروني.</p>
+  <div class="karten">
+    <div class="karte"><h4>الأشخاص والتوكيلات</h4><p>لكل شخص (الأب، الأم، الزوجة …) قسم خاص ولون خاص ومجلد خاص على الكمبيوتر.</p></div>
+    <div class="karte"><h4>قراءة المستندات</h4><p>الذكاء الاصطناعي Google Gemini يقرأ القرارات والرسائل ويقترح المهل والمواعيد والإدخالات.</p></div>
+    <div class="karte"><h4>رسائل حسب DIN 5008</h4><p>181 قالباً جاهزاً، تُملأ تلقائياً بالمرسل والمستلم ورقم الملف. طباعة أو PDF أو إرسال بالإيميل.</p></div>
+    <div class="karte"><h4>المهل والمواعيد</h4><p>تذكيرات من ويندوز، ومزامنة مع تقويم Google – المواعيد تظهر على الجوال أيضاً.</p></div>
+    <div class="karte"><h4>البريد الإلكتروني</h4><p>ربط صندوق البريد، قراءة وكتابة الرسائل. المكتب يتعرّف على البريد المهم ويسألك.</p></div>
+    <div class="karte"><h4>المكتب</h4><p>مكتب ثلاثي الأبعاد فيه 8 موظفين يُظهرون ما يحدث الآن ويطرحون الأسئلة.</p></div>
+    <div class="karte"><h4>العقود والمالية</h4><p>مدة العقود، مهل الإلغاء والتكاليف الشهرية تحت نظرك.</p></div>
+    <div class="karte"><h4>الخزنة</h4><p>كلمات السر والأرقام مشفّرة بكلمة سر رئيسية.</p></div>
+  </div>
+  <div class="box wichtig"><span class="titel">الأهم أولاً</span>
+    لا يُدخل Home Office أي شيء بدون تأكيدك. الذكاء الاصطناعي وموظفو المكتب يقدّمون <b>اقتراحات</b> فقط – القرار لك. لا يُحذف أي بريد إلكتروني أبداً. كل البيانات تبقى على جهازك.</div>
+  <h3>الوضع التجريبي والوضع الحقيقي</h3>
+  <p>في أعلى البرنامج يوجد مفتاح <span class="knopf">Live | Demo</span>. في <b>الوضع التجريبي (Demo)</b> ترى كل شيء ببيانات أمثلة وتجرّب بأمان. في <b>الوضع الحقيقي (Live)</b> تعمل ببياناتك الحقيقية. القسمان منفصلان تماماً.</p>
+  <h3>اللغة</h3>
+  <p>واجهة البرنامج متوفرة بـ<b>العربية</b> و<b>الألمانية</b>. الرسائل الموجّهة للدوائر الرسمية تُكتب دائماً بالألمانية.</p>
+  <div class="box info"><span class="titel">ملاحظة حول أسماء الأزرار</span>أسماء الأزرار في هذا الدليل مكتوبة كما تظهر في الواجهة الألمانية. إذا اخترت الواجهة العربية تظهر بنفس المكان مترجمة.</div>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">02</div><div><h2>ماذا تحتاج</h2><div class="zeile">الأدوات والحسابات – مع الروابط</div></div></div>
+  <table>
+    <tr><th style="width:38mm">ماذا</th><th>لماذا</th><th style="width:55mm">أين</th></tr>
+    <tr><td><b>ويندوز 10 أو 11</b></td><td>يعمل Home Office على ويندوز فقط.</td><td>–</td></tr>
+    <tr><td><b>ملف التثبيت</b></td><td>البرنامج نفسه (<code>OfficeHome-Setup-….exe</code>). موجود في الحزمة.</td><td><a href="https://github.com/laith3bew-commit/office-home/releases/latest">github.com/laith3bew-commit/office-home/releases/latest</a></td></tr>
+    <tr><td><b>مفتاح التفعيل</b></td><td>يفتح الوضع الحقيقي. صالح لجهاز واحد.</td><td>من البائع (الفصل 05)</td></tr>
+    <tr><td><b>حساب Google</b></td><td>لـ Gemini وتقويم Google و Drive.</td><td><a href="https://accounts.google.com/signup">accounts.google.com/signup</a></td></tr>
+    <tr><td><b>مفتاح Gemini</b></td><td>حتى يقرأ الذكاء الاصطناعي المستندات والرسائل.</td><td><a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a></td></tr>
+    <tr><td><b>Google Cloud Console</b></td><td>وصول خاص بك للتقويم و Drive.</td><td><a href="https://console.cloud.google.com">console.cloud.google.com</a></td></tr>
+    <tr><td><b>تقويم Google</b></td><td>إنشاء تقويم باسم «Home Office».</td><td><a href="https://calendar.google.com">calendar.google.com</a></td></tr>
+    <tr><td><b>بريد مع IMAP</b></td><td>mail.de، GMX، WEB.DE، Gmail، T-Online … مع كلمة سر تطبيق.</td><td>عند مزوّد بريدك (الفصل 09)</td></tr>
+    <tr><td><b>برنامج PDF</b></td><td>لفتح ملفات PDF (موصى به).</td><td><a href="https://get.adobe.com/reader/">get.adobe.com/reader</a></td></tr>
+    <tr><td><b>Claude Desktop</b> (اختياري)</td><td>Claude يثبّت ويجهّز كل شيء معك.</td><td><a href="https://claude.ai/download">claude.ai/download</a></td></tr>
+    <tr><td><b>App Installer / winget</b> (اختياري)</td><td>حتى يستطيع Claude تثبيت البرامج الإضافية.</td><td><a href="https://apps.microsoft.com/detail/9NBLGGH4NRV3">Microsoft Store: App Installer</a></td></tr>
+    <tr><td><b>Obsidian</b> (اختياري)</td><td>الملاحظات والذاكرة كملفات Markdown.</td><td><a href="https://obsidian.md">obsidian.md</a></td></tr>
+  </table>
+  <div class="box info"><span class="titel">الوقت المتوقع</span>
+    التثبيت والتفعيل: حوالي 10 دقائق. Gemini: حوالي 5 دقائق. تقويم Google: حوالي 15–20 دقيقة. البريد: حوالي 5 دقائق. تستطيع تأجيل أي جزء.</div>
+  <div class="box papier"><span class="titel">الأسرار تبقى سرّية</span>
+    كلمات السر ومفاتيح API و Client-Secret وكلمات سر التطبيقات تكتبها <b>فقط داخل البرنامج</b> – أبداً في أي محادثة، ولا حتى مع Claude. ويندوز يحفظها مشفّرة.</div>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">03</div><div><h2>التثبيت</h2><div class="zeile">مع Claude أو بنفسك</div></div></div>
+  <h3>الطريقة أ – Claude يثبّت ويشرح كل شيء</h3>
+  <ol class="schritte">
+    <li><b class="t">افتح Claude</b>برنامج Claude Desktop (<a href="https://claude.ai/download">claude.ai/download</a>) أو موقع claude.ai.</li>
+    <li><b class="t">أعطه الحزمة</b>المجلد المفكوك <code>HomeOffice-Paket-…</code> أو الملف <code>ANLEITUNG_FUER_CLAUDE.md</code>.</li>
+    <li><b class="t">اكتب الطلب</b><span class="zitat">«ثبّتلي برنامج Home Office وجهّزو معي خطوة خطوة.»</span></li>
+    <li><b class="t">تابع معه</b>يسألك Claude أولاً عن لغتك، ثم يعطيك خطوة واحدة في كل مرة. اكتب «خلصت» عندما تنهيها.</li>
+  </ol>
+  <h3>الطريقة ب – التثبيت بنفسك</h3>
+  <ol class="schritte">
+    <li><b class="t">فك الحزمة</b>زر الفأرة الأيمن على <code>HomeOffice-Paket-….zip</code> ← <span class="de">Alle extrahieren</span> (استخراج الكل).</li>
+    <li><b class="t">شغّل ملف التثبيت</b>انقر مرتين على <code>OfficeHome-Setup-….exe</code>.</li>
+    <li><b class="t">تحذير ويندوز</b>تظهر رسالة «Windows protected your PC» لأن البرنامج غير موقّع رقمياً. اضغط <span class="de">Weitere Informationen</span> (معلومات إضافية) ← <span class="de">Trotzdem ausführen</span> (تشغيل على أي حال).</li>
+    <li><b class="t">ثبّت</b>أكّد المجلد ← <span class="knopf">Installieren</span> ← <span class="knopf">Fertig stellen</span>.</li>
+    <li><b class="t">شغّل البرنامج</b>على سطح المكتب يظهر اختصار <b>«Home Office»</b>. انقر مرتين – يفتح البرنامج.</li>
+  </ol>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">04</div><div><h2>فحص النظام</h2><div class="zeile">هل ينقص شيء على جهازك؟</div></div></div>
+  <p>بعد التشغيل الأول بقليل يفحص Home Office إذا كان كل شيء موجوداً: نسخة ويندوز، PowerShell، خدمة الصور في ويندوز (للماسح الضوئي)، برنامج PDF، الإنترنت، Claude Desktop و winget. إذا نقص شيء مهم تفتح نافذة <b>«Systemprüfung»</b> (فحص النظام).</p>
+  <ul>
+    <li><span class="knopf">Selbst installieren</span> يفتح صفحة التحميل الرسمية.</li>
+    <li><span class="knopf">Claude installiert es</span> ينسخ طلباً جاهزاً. ألصقه عند Claude – يثبّت البرامج عبر <code>winget</code> ويسألك قبل كل خطوة.</li>
+    <li>بعدها في البرنامج <span class="knopf">Erneut prüfen</span> (افحص مجدداً).</li>
+  </ul>
+  <p>لاحقاً في أي وقت: <span class="pfad">الإعدادات ← عام ← فحص النظام ← افحص الآن</span>. تعريف الماسح الضوئي تجده على موقع الشركة المصنّعة لطابعتك.</p>
+
+  <div class="kopf" style="margin-top:10mm"><div class="nr">05</div><div><h2>التفعيل</h2><div class="zeile">مفتاح واحد لجهاز واحد</div></div></div>
+  <p>بدون تفعيل يعمل <b>الوضع التجريبي</b> فقط، ويظهر قفل على زر «Live».</p>
+  <ol class="schritte">
+    <li><b class="t">انسخ رقم الجهاز</b><span class="pfad">الإعدادات ← عام ← التفعيل</span>. هناك رقم جهازك (بالشكل <code>XXXXX-XXXXX-XXXXX-XXXXX</code>) مع زر <span class="knopf">Kopieren</span> (نسخ).</li>
+    <li><b class="t">أرسله للبائع</b>أرسل رقم الجهاز للبائع الذي اشتريت منه Home Office.</li>
+    <li><b class="t">أدخل المفتاح</b>يصلك مفتاح يبدأ بـ <code>HO1-</code>. ألصقه ← <span class="knopf">Aktivieren</span> (تفعيل).</li>
+    <li><b class="t">انطلق</b>ينتقل البرنامج للوضع الحقيقي ويبدأ معالج الإعداد.</li>
+  </ol>
+  <div class="box info"><span class="titel">كمبيوتر جديد؟</span>
+    المفتاح صالح لهذا الجهاز فقط. على جهاز آخر تظهر رسالة «هذا المفتاح تابع لجهاز آخر». للجهاز الجديد تحصل على مفتاح جديد من البائع.</div>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">06</div><div><h2>معالج الإعداد</h2><div class="zeile">عند أول تشغيل في الوضع الحقيقي</div></div></div>
+  <table>
+    <tr><th style="width:32mm">الخطوة</th><th>ماذا تفعل</th></tr>
+    <tr><td><b>اللغة</b></td><td>العربية أو الألمانية.</td></tr>
+    <tr><td><b>أهلاً بك</b></td><td>شرح قصير. «شوف الديمو أولاً» يفتح الوضع التجريبي، وزر «Live» يعيدك.</td></tr>
+    <tr><td><b>بياناتك</b></td><td>الاسم، العنوان، الهاتف، البريد – تظهر كمرسل في رسائلك.</td></tr>
+    <tr><td><b>الاسم والألوان</b></td><td>اسم خاص للبرنامج وأربعة ألوان مفضلة (مجموعة جاهزة، منتقي الألوان أو رمز لون مثل <code>#1B2A44</code>). الأغمق يصبح للشريط الجانبي والخط، والأفتح للخلفية. الرسائل تبقى على ورق أبيض.</td></tr>
+    <tr><td><b>الأشخاص</b></td><td>لمن تنجز المعاملات؟ الأب، الأم، الزوجة، الأخت … ويمكن أكثر من شخص.</td></tr>
+    <tr><td><b>لكل شخص</b></td><td>الاسم، تاريخ الميلاد، العنوان و<b>مجلد</b>: «اختر مجلداً موجوداً» أو «أنشئ مجلداً جديداً» (<code>Dokumente\Home Office\&lt;الاسم&gt;</code>).</td></tr>
+    <tr><td><b>المستندات</b></td><td>تعرض الملفات في المجلد وتختار منها. لا شيء يُنقل أو يُحذف؛ المستندات الجديدة تُحفظ كنسخة في <code>&lt;المجلد&gt;\Home Office\</code>.</td></tr>
+    <tr><td><b>الذاكرة</b></td><td>«ذاكرتي» أو «Obsidian» أو «بدون». للبداية يكفي «بدون».</td></tr>
+    <tr><td><b>الاتصالات</b></td><td>Gemini وتقويم Google (الفصل 07 و 08). «رجوع للإعداد» يعيدك إلى هنا.</td></tr>
+    <tr><td><b>البريد</b></td><td>ربط صندوق البريد، اختيار الفترة، ثم كل رسالة لوحدها «إضافة» أو «تخطي» (الفصل 09).</td></tr>
+    <tr><td><b>انتهى</b></td><td>جولة تعريفية على كل الأقسام.</td></tr>
+  </table>
+  <div class="box info"><span class="titel">بدون استعجال</span>
+    بزر «لاحقاً» تتوقف متى شئت. يظهر بالأسفل زر «متابعة الإعداد». الجولة والمعالج تجدهم مجدداً في <span class="pfad">الإعدادات ← عام ← مساعدة</span>. ولكل صفحة شرح عبر زر <span class="knopf">?</span> أعلى الشاشة.</div>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">07</div><div><h2>ربط Gemini (الذكاء الاصطناعي)</h2><div class="zeile">حتى يقرأ Home Office المستندات والرسائل</div></div></div>
+  <ol class="schritte">
+    <li><b class="t">افتح Google AI Studio</b><a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a> – سجّل الدخول بحساب Google.</li>
+    <li><b class="t">أنشئ مفتاحاً</b><span class="knopf">Create API key</span> (إنشاء مفتاح API). إذا لم يوجد مشروع، تنشئه Google تلقائياً.</li>
+    <li><b class="t">فعّل الفوترة (موصى به)</b>في قسم «Billing» اربط حساب دفع. عندها تعمل الخطة المدفوعة: حدود أعلى، و Google لا تستخدم محتواك للتدريب. الأسعار: <a href="https://ai.google.dev/gemini-api/docs/pricing">ai.google.dev/gemini-api/docs/pricing</a></li>
+    <li><b class="t">انسخ المفتاح</b>يبدأ بـ <code>AIza…</code>.</li>
+    <li><b class="t">ألصقه في Home Office</b><span class="pfad">الإعدادات ← التقويم و Google والذكاء الاصطناعي ← مفتاح Gemini</span>. اترك النموذج على «تلقائي» ← <span class="knopf">Speichern</span> (حفظ).</li>
+    <li><b class="t">جرّب</b>في <b>المستندات</b> ارفع ملف PDF. بعد قليل تظهر في زر <b>Command</b> الدائري (أسفل الشاشة) بطاقة فيها اقتراحات.</li>
+  </ol>
+  <h3>رسائل شائعة</h3>
+  <table>
+    <tr><th style="width:55mm">الرسالة</th><th>المعنى</th></tr>
+    <tr><td class="ltr"><b>high demand</b></td><td>خوادم Google مشغولة الآن. اضغط لاحقاً «اقرأ مرة أخرى».</td></tr>
+    <tr><td class="ltr"><b>model … no longer available</b></td><td>البرنامج يحلّها بنفسه: يختار نموذجاً أحدث تلقائياً.</td></tr>
+    <tr><td class="ltr"><b>API key not valid</b></td><td>المفتاح نُسخ خطأ – ألصقه من جديد واحفظ.</td></tr>
+  </table>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">08</div><div><h2>تقويم Google و Drive</h2><div class="zeile">المواعيد على الجوال – وروابط التوكيلات</div></div></div>
+  <p>تحتاج مشروعاً صغيراً خاصاً بك في Google Cloud، وهو مجاني لهذا الاستخدام. استخدم في كل مكان <b>نفس حساب Google</b>.</p>
+  <ol class="schritte">
+    <li><b class="t">أنشئ تقويم «Home Office»</b><a href="https://calendar.google.com">calendar.google.com</a> ← على اليسار عند «تقاويم أخرى» اضغط <b>+</b> ← «إنشاء تقويم جديد» ← الاسم <b>Home Office</b>.</li>
+    <li><b class="t">أنشئ مشروعاً</b><a href="https://console.cloud.google.com">console.cloud.google.com</a> ← اختيار المشروع بالأعلى ← <span class="knopf">New Project</span> ← الاسم «Home Office».</li>
+    <li><b class="t">فعّل الواجهات</b><span class="pfad">APIs &amp; Services ← Library</span>: فعّل <b>Google Calendar API</b> و <b>Google Drive API</b>.</li>
+    <li><b class="t">شاشة الموافقة</b><span class="pfad">Google Auth Platform ← Branding</span>: اسم التطبيق «Home Office»، بريدك كبريد للدعم وللمطوّر. الجمهور <b>External</b>. ثم في «Audience» اضغط <span class="knopf">Publish app</span> ← الحالة <b>In production</b> (وإلا ينتهي الدخول بعد 7 أيام). لا حاجة لمراجعة من Google.</li>
+    <li><b class="t">أنشئ بيانات الدخول</b><span class="pfad">Clients ← Create client ← OAuth client ID</span> ← النوع <b>Desktop app</b> ← الاسم «Home Office» ← إنشاء. انسخ <b>Client ID</b> و <b>Client secret</b>.</li>
+    <li><b class="t">أدخلها في Home Office</b><span class="pfad">الإعدادات ← التقويم و Google والذكاء الاصطناعي</span> ← ألصق Client ID و Client secret ← <span class="knopf">Zugang speichern</span> ← <span class="knopf">Mit Google verbinden</span>.</li>
+    <li><b class="t">أكّد في المتصفح</b>سجّل الدخول. عند «Google hasn't verified this app»: <span class="pfad">Advanced ← Go to Home Office</span> – هو تطبيقك أنت. ضع <b>كل علامات الصح</b> ← Continue. أغلق النافذة.</li>
+    <li><b class="t">اختر التقويم</b>تحت «تقويم Home Office» يجب أن يكون <b>Home Office</b> مختاراً.</li>
+    <li><b class="t">الجوال</b>تطبيق تقويم Google بنفس الحساب ← الإعدادات ← الحساب ← فعّل <b>Home Office</b>. ما تكتبه على الجوال يصل البرنامج خلال 10 دقائق كحد أقصى («زامن الآن» يجلبه فوراً).</li>
+  </ol>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">09</div><div><h2>ربط البريد الإلكتروني</h2><div class="zeile">IMAP/SMTP مع كلمة سر تطبيق</div></div></div>
+  <table>
+    <tr><th style="width:22mm">المزوّد</th><th style="width:40mm">خادم IMAP</th><th style="width:41mm">خادم SMTP</th><th>التحضير</th></tr>
+    <tr><td class="ltr"><b>mail.de</b></td><td><code>imap.mail.de</code></td><td><code>smtp.mail.de</code></td><td>الإعدادات ← تفعيل POP3/IMAP؛ مع التحقق الثنائي أنشئ كلمة سر تطبيق.</td></tr>
+    <tr><td class="ltr"><b>GMX</b></td><td><code>imap.gmx.net</code></td><td><code>mail.gmx.net</code></td><td>الإعدادات ← POP3/IMAP Abruf ← السماح بالوصول.</td></tr>
+    <tr><td class="ltr"><b>WEB.DE</b></td><td><code>imap.web.de</code></td><td><code>smtp.web.de</code></td><td>الإعدادات ← POP3/IMAP Abruf ← السماح بالوصول.</td></tr>
+    <tr><td class="ltr"><b>Gmail</b></td><td><code>imap.gmail.com</code></td><td><code>smtp.gmail.com</code></td><td>فعّل التحقق بخطوتين ثم كلمة سر تطبيق: <a href="https://myaccount.google.com/apppasswords">myaccount.google.com/apppasswords</a></td></tr>
+    <tr><td class="ltr"><b>T-Online</b></td><td><code>secureimap.t-online.de</code></td><td><code>securesmtp.t-online.de</code></td><td>أنشئ كلمة سر البريد في مركز العملاء.</td></tr>
+  </table>
+  <div class="box info"><span class="titel">Outlook / Hotmail</span>أوقفت Microsoft الدخول بكلمة السر – هذه الصناديق لا تعمل حالياً.</div>
+  <ol class="schritte">
+    <li><b class="t">أضف الحساب</b>قائمة <b>البريد</b> (أو في المعالج «ربط حساب بريد»). العنوان، كلمة سر التطبيق، اسم المرسل، «يخص» (غالباً «أنا») والخوادم ← <span class="knopf">Verbinden und testen</span>.</li>
+    <li><b class="t">اختر الفترة</b>آخر أسبوع، آخر شهر، آخر سنة، الكل (أحدث 1000) أو لا شيء ← «جلب الرسائل».</li>
+    <li><b class="t">رسالة رسالة</b>لكل رسالة: <span class="knopf">Hinzufügen</span> (إضافة – المكتب يقرأها ويقترح) أو <span class="knopf">Überspringen</span> (تخطي). بالكيبورد: → إضافة، ← تخطي.</li>
+    <li><b class="t">بعدها تلقائياً</b>السكرتيرة تفحص البريد كل ساعة وتسألك عند وصول بريد جديد.</li>
+  </ol>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">10</div><div><h2>نظرة على الأقسام</h2><div class="zeile">ماذا تجد وأين</div></div></div>
+  <table>
+    <tr><th style="width:34mm">القسم</th><th>ماذا تفعل فيه</th></tr>
+    <tr><td><b>نظرة عامة</b></td><td>المهم اليوم: المهل المتأخرة، المواعيد القادمة، فريق المكتب وحالته، آخر المستندات والرسائل.</td></tr>
+    <tr><td><b>Command</b><br><code>Ctrl+K</code></td><td>الزر الدائري بالأسفل. أسئلة («رقم تأمين الأم»)، أوامر («مهلة بكرا اتصال بالجوب سنتر»). هنا تظهر بطاقات الوارد – لا يُسجَّل شيء إلا بعد «تأكيد». «إضافة مهمة» تجعل Gemini يكتب مسودة رسالة.</td></tr>
+    <tr><td><b>كتابة رسالة</b></td><td>181 قالباً حسب DIN 5008، وتدعم عدة صفحات. الأماكن الصفراء ما زالت تحتاج تعبئة. طباعة، PDF أو «إرسال كإيميل» (PDF كمرفق).</td></tr>
+    <tr><td><b>المستندات</b></td><td>رفع، مسح ضوئي، تصوير بالجوال (رمز QR، نفس شبكة الواي فاي). Gemini يقرأ ويقترح.</td></tr>
+    <tr><td><b>المهل والمهام</b></td><td>كل ما له تاريخ، مع تذكير من ويندوز.</td></tr>
+    <tr><td><b>التقويم</b></td><td>المواعيد، مزامنة مع تقويم Google «Home Office».</td></tr>
+    <tr><td><b>الملفات (المعاملات)</b></td><td>الرسائل والمهل والمستندات التابعة لقضية واحدة.</td></tr>
+    <tr><td><b>الأشخاص</b></td><td>البيانات، التوكيلات (قابلة للمشاركة كرابط عبر Google Drive)، المجلدات على الكمبيوتر.</td></tr>
+    <tr><td><b>دفتر العناوين</b></td><td>الدوائر، صناديق التأمين، الأطباء، المؤجّرون – مع رقم الملف لكل شخص.</td></tr>
+    <tr><td><b>العقود والمالية</b></td><td>مدة العقود، مهل الإلغاء، الدفعات، التكاليف الشهرية.</td></tr>
+    <tr><td><b>البريد</b></td><td>الوارد، المرسل، الكتابة مع مرفقات.</td></tr>
+    <tr><td><b>المكتب</b></td><td>مكتب ثلاثي الأبعاد فيه 8 موظفين؛ أجب على أسئلتهم. لا أحد يقرر بدون موافقتك.</td></tr>
+    <tr><td><b>الخزنة</b></td><td>كلمات السر مشفّرة. <b>اكتب مفتاح الاستعادة واحتفظ به!</b></td></tr>
+    <tr><td><b>الإعدادات</b></td><td>بياناتك، الاسم والألوان، التفعيل، Google والذكاء الاصطناعي، النسخ الاحتياطي والتحديث، المساعدة.</td></tr>
+  </table>
+  <p>الإدخالات الجديدة تُظهر في القائمة رقماً مثل <span class="knopf">+2</span>. يختفي عندما تفتح القسم. الموظف المسؤول يذكّرك إذا لم تنظر إليه لفترة.</p>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">11</div><div><h2>النسخ الاحتياطي والتحديثات</h2><div class="zeile">بياناتك موجودة على هذا الكمبيوتر فقط</div></div></div>
+  <ul>
+    <li><b>النسخة الاحتياطية:</b> <span class="pfad">الإعدادات ← النسخ الاحتياطي والتحديث ← تنزيل نسخة احتياطية</span>. افعلها بانتظام واحفظ الملف على فلاشة أو في السحابة. البرنامج يذكّرك بعد 14 يوماً.</li>
+    <li><b>كمبيوتر جديد:</b> ثبّت Home Office، فعّله، ثم «استعادة النسخة الاحتياطية».</li>
+    <li><b>التحديثات:</b> يفحص Home Office كل 10 دقائق إذا وُجدت نسخة جديدة ويخبرك. التثبيت من <span class="pfad">الإعدادات ← النسخ الاحتياطي والتحديث</span>. ما الجديد تعرضه بعدها نافذة «الجديد في هذه النسخة».</li>
+  </ul>
+  <div class="box info"><span class="titel">إعادة التثبيت من الصفر</span>
+    أولاً احذف البرنامج من <span class="pfad">إعدادات ويندوز ← التطبيقات</span>، ثم احذف المجلد <code>%APPDATA%\Office Home</code> (خذ نسخة احتياطية قبلها!). وإلا يجد البرنامج بياناتك القديمة من جديد.</div>
+
+  <div class="kopf" style="margin-top:10mm"><div class="nr">12</div><div><h2>الخصوصية والتكاليف</h2><div class="zeile">بصراحة ووضوح</div></div></div>
+  <ul>
+    <li>كل البيانات تبقى على جهازك في <code>%APPDATA%\Office Home</code>. كلمات السر والمفاتيح يشفّرها ويندوز.</li>
+    <li>إلى <b>Google Gemini</b> يُرسل فقط ما يجب قراءته (مستند أو رسالة) – وفقط إذا جهّزت Gemini.</li>
+    <li>في الخطة <b>المجانية</b> لـ Gemini يحق لـ Google استخدام المحتوى للتحسين. للمستندات الشخصية ننصح بالخطة <b>المدفوعة</b>. الأسعار الحالية: <a href="https://ai.google.dev/gemini-api/docs/pricing">ai.google.dev/gemini-api/docs/pricing</a></li>
+    <li>تقويم Google و Drive مجانيان لهذا الاستخدام.</li>
+    <li>في Home Office تستطيع تغيير اسم البرنامج والألوان الأربعة فقط. كل شيء آخر مبني بشكل ثابت ويطوّره المصنّع. أي تعديل في مجلد التثبيت يمنع البرنامج من العمل.</li>
+  </ul>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">13</div><div><h2>مشاكل وحلول</h2><div class="zeile">إذا لم يعمل شيء</div></div></div>
+  <table>
+    <tr><th style="width:62mm">المشكلة</th><th>الحل</th></tr>
+    <tr><td>ويندوز يمنع ملف التثبيت</td><td>«Weitere Informationen» ← «Trotzdem ausführen».</td></tr>
+    <tr><td>على زر «Live» قفل</td><td>البرنامج غير مفعّل بعد – الفصل 05.</td></tr>
+    <tr><td>«المفتاح تابع لجهاز آخر»</td><td>أرسل رقم الجهاز الجديد للبائع.</td></tr>
+    <tr><td>لا اقتراحات بعد رفع مستند</td><td>تحقق من مفتاح Gemini (الفصل 07). عند «high demand» اقرأ مجدداً لاحقاً.</td></tr>
+    <tr><td>Google: «Access blocked» / access_denied</td><td>غيّر حالة التطبيق في «Audience» إلى «In production» أو أضف حسابك كمستخدم اختبار.</td></tr>
+    <tr><td>Google: «invalid_grant»</td><td>في Home Office «قطع الاتصال» ثم اتصل من جديد.</td></tr>
+    <tr><td>«Google Drive غير مفعّل بعد»</td><td>فعّل Drive API، ثم اقطع الاتصال واتصل من جديد.</td></tr>
+    <tr><td>المواعيد لا تظهر على الجوال</td><td>في تطبيق التقويم فعّل تقويم «Home Office»؛ وفي البرنامج «زامن الآن».</td></tr>
+    <tr><td>البريد: فشل تسجيل الدخول</td><td>فعّل IMAP عند المزوّد، استخدم كلمة سر تطبيق بدل كلمة السر العادية، وتحقق من الخوادم.</td></tr>
+    <tr><td>الجوال لا يجد الكمبيوتر للمسح</td><td>نفس شبكة الواي فاي؛ اسمح لجدار حماية ويندوز بـ «الشبكات الخاصة».</td></tr>
+    <tr><td>نسيت كلمة سر الخزنة</td><td>افتحها بمفتاح الاستعادة.</td></tr>
+  </table>
+  <div class="box wichtig"><span class="titel">المساعدة</span>زر <b>?</b> أعلى الشاشة يشرح كل صفحة. الجولة التعريفية تبدأ من الإعدادات ← عام ← مساعدة. و Claude يساعدك بملف <code>ANLEITUNG_FUER_CLAUDE.md</code> الموجود في الحزمة.</div>
+</section>
+
+<section class="kapitel">
+  <div class="kopf"><div class="nr">14</div><div><h2>قائمة التحقق</h2><div class="zeile">ضع علامة على كل خطوة</div></div></div>
+  <ul class="check">
+    <li>Home Office مثبّت، واختصار «Home Office» على سطح المكتب</li>
+    <li>فحص النظام بدون برامج ناقصة</li>
+    <li>مفعّل (الإعدادات ← عام ← التفعيل: «مفعّل»)</li>
+    <li>المعالج: بياناتك، الاسم والألوان، الأشخاص، المجلدات</li>
+    <li>مفتاح Gemini محفوظ – تجربة: رفع مستند، بطاقة في Command</li>
+    <li>Google متصل، تقويم «Home Office» مختار وظاهر على الجوال</li>
+    <li>البريد متصل، والرسائل القديمة تمت مراجعتها</li>
+    <li>الجولة التعريفية تمت، وزر المساعدة «?» معروف</li>
+    <li>الخزنة: مفتاح الاستعادة مكتوب ومحفوظ</li>
+    <li>أول نسخة احتياطية منزّلة ومحفوظة بمكان آمن</li>
+  </ul>
+  <div class="box papier" style="margin-top:8mm">
+    <span class="titel">كل الروابط في مكان واحد</span>
+    <table class="links" style="margin:0">
+      <tr><td>البرنامج</td><td><a href="https://github.com/laith3bew-commit/office-home/releases/latest">github.com/laith3bew-commit/office-home/releases/latest</a></td></tr>
+      <tr><td>Claude Desktop</td><td><a href="https://claude.ai/download">claude.ai/download</a></td></tr>
+      <tr><td>حساب Google</td><td><a href="https://accounts.google.com/signup">accounts.google.com/signup</a></td></tr>
+      <tr><td>مفتاح Gemini</td><td><a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a></td></tr>
+      <tr><td>أسعار Gemini</td><td><a href="https://ai.google.dev/gemini-api/docs/pricing">ai.google.dev/gemini-api/docs/pricing</a></td></tr>
+      <tr><td>Google Cloud Console</td><td><a href="https://console.cloud.google.com">console.cloud.google.com</a></td></tr>
+      <tr><td>تقويم Google</td><td><a href="https://calendar.google.com">calendar.google.com</a></td></tr>
+      <tr><td>كلمة سر تطبيق Gmail</td><td><a href="https://myaccount.google.com/apppasswords">myaccount.google.com/apppasswords</a></td></tr>
+      <tr><td>برنامج PDF</td><td><a href="https://get.adobe.com/reader/">get.adobe.com/reader</a></td></tr>
+      <tr><td>App Installer (winget)</td><td><a href="https://apps.microsoft.com/detail/9NBLGGH4NRV3">apps.microsoft.com/detail/9NBLGGH4NRV3</a></td></tr>
+      <tr><td>Obsidian</td><td><a href="https://obsidian.md">obsidian.md</a></td></tr>
+    </table>
+  </div>
+</section>
+
+</body>
+</html>
