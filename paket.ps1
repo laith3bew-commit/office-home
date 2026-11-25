@@ -5,7 +5,7 @@ $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
 $exe = "dist\OfficeHome-Setup-$version.exe"
-if (-not (Test-Path $exe)) { throw "$exe fehlt – zuerst die Setup.exe bauen." }
+if (-not (Test-Path $exe)) { throw "$exe fehlt - zuerst die Setup.exe bauen." }
 $ziel = "dist\HomeOffice-Paket-$version"
 if (Test-Path $ziel) { Remove-Item $ziel -Recurse -Force -Confirm:$false }
 New-Item -ItemType Directory $ziel | Out-Null
